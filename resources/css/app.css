@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.react-calendar {
+    @apply w-full border-none;
+}
+.react-calendar__tile {
+    @apply text-xs md:text-sm;
+}
+.react-calendar__navigation {
+    @apply mb-2;
+}
+.react-calendar__month-view__days__day--weekend {
+    @apply text-red-500;
+}
