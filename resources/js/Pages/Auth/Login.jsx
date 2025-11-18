@@ -1,97 +1,118 @@
-import { useEffect } from 'react';
-import Checkbox from '@/Components/Checkbox';
-import GuestLayout from '@/Layouts/GuestLayout';
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
-import { Head, Link, useForm } from '@inertiajs/react';
+// resources/js/Pages/Auth/Login.jsx
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Loader2 } from 'lucide-react';
+import api from '@/Services/Api';
 
-export default function Login({ status, canResetPassword }) {
-    const { data, setData, post, processing, errors, reset } = useForm({
-        email: '',
-        password: '',
-        remember: false,
-    });
+export default function Login() {
+    const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-    useEffect(() => {
-        return () => {
-            reset('password');
-        };
-    }, []);
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
 
-    const submit = (e) => {
-        e.preventDefault();
+    try {
+    const response = await api.post('/login', { email, password });
+    const { token, user } = response.data.data;
 
-        post(route('login'));
-    };
+    // Simpan ke localStorage
+    localStorage.setItem('token', token);
+    localStorage.setItem('user', JSON.stringify(user));
+
+    // LOGIKA ROLE — INI YANG PENTING!
+    if (user.role === 'superadmin') {
+        window.location.href = '/superadmin/dashboard';
+    } else if (user.role === 'umkm_admin' || user.role === 'user') {
+        window.location.href = '/umkm/dashboard';
+    } else {
+        setError('Role tidak dikenali');
+    }
+
+    } catch (err) {
+    setError(err.response?.data?.message || 'Email atau password salah!');
+    } finally {
+    setLoading(false);
+    }
+  };
 
     return (
-        <GuestLayout>
-            <Head title="Log in" />
-
-            {status && <div className="mb-4 font-medium text-sm text-green-600">{status}</div>}
-
-            <form onSubmit={submit}>
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
-
-                    <TextInput
-                        id="email"
-                        type="email"
-                        name="email"
-                        value={data.email}
-                        className="mt-1 block w-full"
-                        autoComplete="username"
-                        isFocused={true}
-                        onChange={(e) => setData('email', e.target.value)}
-                    />
-
-                    <InputError message={errors.email} className="mt-2" />
+        <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+            <div className="w-full max-w-md p-8 bg-white shadow-2xl rounded-3xl md:p-10">
+                {/* Logo & Judul */}
+                <div className="mb-10 text-center">
+                    <h1 className="text-4xl font-bold text-transparent md:text-5xl bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                        BookUMKM
+                    </h1>
+                    <p className="mt-3 text-lg text-gray-600">Login ke dashboard UMKM Anda</p>
                 </div>
 
-                <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                {/* Error Message */}
+                {error && (
+                    <div className="p-4 mb-6 font-medium text-center text-red-700 border border-red-300 bg-red-50 rounded-xl">
+                        {error}
+                    </div>
+                )}
 
-                    <TextInput
-                        id="password"
-                        type="password"
-                        name="password"
-                        value={data.password}
-                        className="mt-1 block w-full"
-                        autoComplete="current-password"
-                        onChange={(e) => setData('password', e.target.value)}
-                    />
-
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
-
-                <div className="block mt-4">
-                    <label className="flex items-center">
-                        <Checkbox
-                            name="remember"
-                            checked={data.remember}
-                            onChange={(e) => setData('remember', e.target.checked)}
+                {/* Form */}
+                <form onSubmit={handleLogin} className="space-y-6">
+                    <div>
+                        <label className="block mb-2 text-sm font-semibold text-gray-700">
+                            Email
+                        </label>
+                        <input
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            required
+                            className="w-full px-5 py-4 text-base transition border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            placeholder="owner@salonbudi.com"
                         />
-                        <span className="ms-2 text-sm text-gray-600">Remember me</span>
-                    </label>
-                </div>
+                    </div>
 
-                <div className="flex items-center justify-end mt-4">
-                    {canResetPassword && (
-                        <Link
-                            href={route('password.request')}
-                            className="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                        >
-                            Forgot your password?
-                        </Link>
-                    )}
+                    <div>
+                        <label className="block mb-2 text-sm font-semibold text-gray-700">
+                            Password
+                        </label>
+                        <input
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            required
+                            className="w-full px-5 py-4 text-base transition border-2 border-gray-200 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100"
+                            placeholder="••••••••"
+                        />
+                    </div>
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
-                    </PrimaryButton>
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="flex items-center justify-center w-full gap-3 py-5 text-lg font-bold text-white transition shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-700 hover:to-purple-700 disabled:opacity-70"
+                    >
+                        {loading ? (
+                            <>
+                                <Loader2 className="w-6 h-6 animate-spin" />
+                                Sedang masuk...
+                            </>
+                        ) : (
+                            'Masuk ke Dashboard'
+                        )}
+                    </button>
+                </form>
+
+                {/* Footer */}
+                <div className="mt-8 text-sm text-center text-gray-600">
+                    <p>
+                        Belum punya akun?{' '}
+                        <a href="/register" className="font-bold text-indigo-600 hover:underline">
+                            Daftar di sini
+                        </a>
+                    </p>
                 </div>
-            </form>
-        </GuestLayout>
+            </div>
+        </div>
     );
 }

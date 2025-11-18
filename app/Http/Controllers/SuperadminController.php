@@ -11,7 +11,7 @@ class SuperadminController extends Controller
     {
         $umkms = UMKM::all();
 
-        return Inertia::render('SuperadminDashboard', [
+        return Inertia::render('Admin/Dashboard', [
             'umkms' => $umkms,
         ]);
     }
