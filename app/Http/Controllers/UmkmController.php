@@ -19,13 +19,40 @@ class UmkmController extends Controller
 
     public function dashboard()
     {
-        $stats = [
-            'dailyBookings' => 10, // Contoh data
-            'revenue' => 500000, // Contoh data
-        ];
+        return Inertia::render('Umkm/Dashboard', [
+            'stats' => [
+                'todayBookings' => 14,
+                'monthlyRevenue' => 2125000,
+                'newCustomers' => 8,
+                'noShowRate' => 5,
 
-        return Inertia::render('UmkmDashboard', [
-            'stats' => $stats,
+                'dailyBookings' => [
+                    'labels' => ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+                    'data' => [5, 8, 12, 10, 15, 18, 14],
+                ],
+
+                'revenue' => [
+                    'online' => 1250000,
+                    'onSite' => 875000,
+                ],
+
+                'status' => [
+                    'confirmed' => 45,
+                    'pending' => 12,
+                    'cancelled' => 3,
+                ],
+            ],
         ]);
+    }
+
+
+    public function formbuilder()
+    {
+        return Inertia::render('Umkm/FormBuilder');
+    }
+
+    public function settings()
+    {
+        return Inertia::render('Umkm/Settings');
     }
 }

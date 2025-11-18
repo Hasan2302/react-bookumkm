@@ -37,6 +37,8 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
 // === UMKM ADMIN ROUTES ===
 Route::middleware(['auth', 'role:umkm_admin'])->prefix('umkm')->name('umkm.')->group(function () {
     Route::get('/dashboard', [UmkmController::class, 'dashboard'])->name('dashboard');
+    Route::get('/formbuilder', [UmkmController::class, 'formbuilder'])->name('formbuilder');
+    Route::get('/settings', [UmkmController::class, 'settings'])->name('settings');
 });
 
 // === USER ROUTES (opsional) ===

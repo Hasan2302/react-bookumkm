@@ -336,34 +336,26 @@ export default function Welcome() {
                                         </span>
                                         <span className="text-gray-600"> /malam</span>
                                     </div>
-                                    <button
-                                        onClick={() => setShowModal(true)}
-                                        className="flex items-center px-6 py-3 font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700"
-                                    >
-                                        <CalendarIcon className="w-5 h-5 mr-2" />
-                                        Cek Ketersediaan
-                                    </button>
+                                    <div>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="flex items-center px-6 py-3 mx-2 font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700 float-end"
+                                        >
+                                            <MapPin className="w-5 h-5 mr-2" />
+                                            Map
+                                        </button>
+                                        <button
+                                            onClick={() => setShowModal(true)}
+                                            className="flex items-center px-6 py-3 font-medium text-white bg-indigo-600 rounded-xl hover:bg-indigo-700"
+                                        >
+                                            <CalendarIcon className="w-5 h-5 mr-2" />
+                                            Cek Ketersediaan
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        {/* Peta */}
-                        <div className="p-4 bg-white shadow-lg rounded-2xl h-96">
-                            <div className="flex items-center justify-between mb-3">
-                                <h3 className="font-semibold text-gray-900">Lokasi</h3>
-                                <div className="flex gap-2 text-sm">
-                                    <span className="px-3 py-1 bg-gray-100 rounded-full">{selectedUmkm.spots} Slot</span>
-                                    <span className="px-3 py-1 text-indigo-700 bg-indigo-100 rounded-full">
-                                        ${selectedUmkm.pricePerNight.toFixed(0)}
-                                    </span>
-                                    <span className="px-3 py-1 bg-gray-100 rounded-full">{selectedUmkm.used} Digunakan</span>
-                                </div>
-                            </div>
-                            <div className="flex items-center justify-center w-full h-full text-gray-600 bg-gradient-to-br from-green-100 to-blue-100 rounded-xl">
-                                <MapPin className="w-10 h-10" />
-                                <span className="ml-2 text-lg">Peta Interaktif (Leaflet)</span>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -461,35 +453,6 @@ export default function Welcome() {
                     </div>
                 </div>
             )}
-
-            {/* Features & Footer */}
-            <div className="py-16 mt-16 bg-white">
-                <div className="px-4 mx-auto max-w-7xl">
-                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                        <div className="text-center">
-                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-indigo-100 rounded-full">
-                                <span className="text-2xl">Form</span>
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">Form Custom</h3>
-                            <p className="text-gray-600">Buat form seperti Google Form.</p>
-                        </div>
-                        <div className="text-center">
-                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-indigo-100 rounded-full">
-                                <span className="text-2xl">Calendar</span>
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">Kalender Booking</h3>
-                            <p className="text-gray-600">Pilih jam kosong dari HP.</p>
-                        </div>
-                        <div className="text-center">
-                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-indigo-100 rounded-full">
-                                <span className="text-2xl">WhatsApp</span>
-                            </div>
-                            <h3 className="mb-2 text-xl font-semibold">Notif WA Otomatis</h3>
-                            <p className="text-gray-600">Konfirmasi via WhatsApp.</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <footer className="py-8 text-white bg-gray-800">
                 <div className="px-4 mx-auto text-center max-w-7xl">
