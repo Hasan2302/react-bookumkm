@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { useState, useEffect, useMemo } from 'react';
 import {
     MapPin, Star, Home, Calendar as CalendarIcon, Wifi, Car,
@@ -185,11 +185,11 @@ export default function Welcome() {
                             <h1 className="text-2xl font-bold text-indigo-600">BookUMKM</h1>
                         </div>
                         <div className="flex items-center space-x-4">
-                            <Link href="/login" className="font-medium text-gray-700 hover:text-indigo-600">
+                            <Link to="/login" className="font-medium text-gray-700 hover:text-indigo-600">
                                 Login
                             </Link>
-                            <Link href="/register" className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
-                                Daftar UMKM
+                            <Link to="/register-umkm" className="px-4 py-2 text-white bg-indigo-600 rounded-lg hover:bg-indigo-700">
+                                Daftar sebagai UMKM
                             </Link>
                         </div>
                     </div>

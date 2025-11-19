@@ -10,7 +10,10 @@ class UMKM extends Model
     use HasFactory;
 
     protected $table = 'umkms';
-    protected $fillable = ['name', 'subdomain', 'status', 'description'];
+    protected $fillable = [
+        'user_id', 'name', 'phone', 'address', 'category',
+        'subdomain', 'slug', 'status'
+    ];
 
     public function bookings()
     {
