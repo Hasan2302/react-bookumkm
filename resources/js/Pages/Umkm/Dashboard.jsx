@@ -48,7 +48,7 @@ export default function UmkmDashboard() {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('user');
-        window.location.href = '/login'; // baru sekali reload, aman
+        window.location.href = '/'; // baru sekali reload, aman
     };
 
     if (loading) {
