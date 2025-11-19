@@ -10,6 +10,8 @@ import UmkmDashboard from '@/Pages/Umkm/Dashboard';
 import FormBuilder from '@/Pages/Umkm/FormBuilder';
 import AdminDashboard from '@/Pages/Admin/Dashboard';
 import Welcome from '@/Pages/Welcome';
+import Register from '@/Pages/Auth/Register';
+import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
 
 function App() {
     const token = localStorage.getItem('token');
@@ -24,6 +26,8 @@ function App() {
               <Route path="/login" element={<Login />} />
               <Route path="/" element={<Welcome />} />           {/* ← Landing Page */}
               <Route path="*" element={<Navigate to="/" replace />} />
+              <Route path="/register" element={<Register />} />
+              <Route path="/register-umkm" element={<RegisterUmkm />} />
             </Routes>
           </BrowserRouter>
         );
@@ -34,6 +38,8 @@ function App() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Navigate to="/" replace />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/register-umkm" element={<RegisterUmkm />} />
 
           {/* UMKM USER */}
           {['umkm_admin', 'user'].includes(parsedUser.role) && (
