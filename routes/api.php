@@ -32,13 +32,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/form-fields/reorder', [FormFieldController::class, 'reorder']);
 
     // === BOOKING MANAGEMENT ===
-    Route::apiResource('/bookings', BookingController::class)->except(['store']);
-    Route::put('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
-    Route::post('/bookings/{id}/complete', [BookingController::class, 'complete']);
+    // Route::apiResource('/bookings', BookingController::class)->except(['store']);
+    // Route::put('/bookings/{id}/status', [BookingController::class, 'updateStatus']);
+    // Route::post('/bookings/{id}/complete', [BookingController::class, 'complete']);
 
     // === PUBLIC BOOKING (tanpa auth) ===
     Route::prefix('public')->group(function () {
         Route::get('/umkm/{slug}', [UmkmController::class, 'publicShow']);           // Ambil form + pengaturan
-        Route::post('/umkm/{slug}/booking', [BookingController::class, 'publicStore']); // Submit dari pelanggan
+        // Route::post('/umkm/{slug}/booking', [BookingController::class, 'publicStore']); // Submit dari pelanggan
     });
 });
