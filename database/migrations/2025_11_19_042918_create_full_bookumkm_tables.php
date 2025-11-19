@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up()
     {
-        // 1. Tabel users (dengan role)
+        // 1. Users + role
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
@@ -20,7 +20,7 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 2. Tabel umkms
+        // 2. UMKM — PASTIKAN ADA SEMUA KOLOM INI!
         Schema::create('umkms', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
@@ -28,25 +28,25 @@ return new class extends Migration
             $table->string('phone')->nullable();
             $table->text('address')->nullable();
             $table->string('category')->nullable();
-            $table->string('subdomain')->unique();
-            $table->string('slug')->unique();
+            $table->string('subdomain')->unique();     // HARUS ADA!
+            $table->string('slug')->unique();          // HARUS ADA!
             $table->enum('status', ['active', 'inactive', 'pending'])->default('pending');
             $table->timestamps();
         });
 
-        // 3. Tabel form_fields (untuk Form Builder UMKM)
+        // 3. Form Fields (Form Builder)
         Schema::create('form_fields', function (Blueprint $table) {
             $table->id();
             $table->foreignId('umkm_id')->constrained('umkms')->onDelete('cascade');
             $table->string('label');
             $table->enum('type', ['text', 'email', 'phone', 'select', 'radio', 'checkbox', 'textarea']);
             $table->boolean('required')->default(false);
-            $table->json('options')->nullable(); // untuk select/radio/checkbox
+            $table->json('options')->nullable();
             $table->integer('sort_order')->default(0);
             $table->timestamps();
         });
 
-        // 4. Tabel bookings
+        // 4. Bookings
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('umkm_id')->constrained('umkms')->onDelete('cascade');
@@ -58,15 +58,15 @@ return new class extends Migration
             $table->timestamps();
         });
 
-        // 5. Tabel booking_responses (jawaban dari form custom)
+        // 5. Booking Responses
         Schema::create('booking_responses', function (Blueprint $table) {
             $table->id();
             $table->foreignId('booking_id')->constrained('bookings')->onDelete('cascade');
-            $table->json('responses'); // simpan semua jawaban dalam format JSON
+            $table->json('responses');
             $table->timestamps();
         });
 
-        // 6. Tabel umkm_settings (opsional, untuk tema, jam buka, dll)
+        // 6. UMKM Settings
         Schema::create('umkm_settings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('umkm_id')->unique()->constrained('umkms')->onDelete('cascade');
@@ -74,18 +74,6 @@ return new class extends Migration
             $table->string('whatsapp_number')->nullable();
             $table->text('welcome_message')->nullable();
             $table->string('primary_color')->default('#6366f1');
-            $table->timestamps();
-        });
-
-        // 7. Personal Access Tokens (Sanctum)
-        Schema::create('personal_access_tokens', function (Blueprint $table) {
-            $table->id();
-            $table->morphs('tokenable');
-            $table->string('name');
-            $table->string('token', 64)->unique();
-            $table->text('abilities')->nullable();
-            $table->timestamp('last_used_at')->nullable();
-            $table->timestamp('expires_at')->nullable();
             $table->timestamps();
         });
     }
@@ -97,7 +85,6 @@ return new class extends Migration
         Schema::dropIfExists('form_fields');
         Schema::dropIfExists('umkm_settings');
         Schema::dropIfExists('umkms');
-        Schema::dropIfExists('personal_access_tokens');
         Schema::dropIfExists('users');
     }
 };
