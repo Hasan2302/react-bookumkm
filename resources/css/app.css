@@ -14,3 +14,9 @@
 .react-calendar__month-view__days__day--weekend {
     @apply text-red-500;
 }
+
+@keyframes pulse-slow {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.9; }
+  }
+  .animate-pulse-slow { animation: pulse-slow 4s ease-in-out infinite; }

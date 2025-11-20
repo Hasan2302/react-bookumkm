@@ -6,38 +6,45 @@ import api from '@/Services/Api';
 
 export default function Login() {
     const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+    const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState('');
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+    const navigate = useNavigate(); // ← PENTING! Pakai React Router
 
-    try {
-    const response = await api.post('/login', { email, password });
-    const { token, user } = response.data.data;
+    const handleLogin = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
 
-    // Simpan ke localStorage
-    localStorage.setItem('token', token);
-    localStorage.setItem('user', JSON.stringify(user));
+        try {
+            const response = await api.post('/login', {
+                email,
+                password,
+            });
 
-    // LOGIKA ROLE — INI YANG PENTING!
-    if (user.role === 'superadmin') {
-        window.location.href = '/superadmin/dashboard';
-    } else if (user.role === 'umkm_admin' || user.role === 'user') {
-        window.location.href = '/umkm/dashboard';
-    } else {
-        setError('Role tidak dikenali');
-    }
+            const { token, user } = response.data.data;
 
-    } catch (err) {
-    setError(err.response?.data?.message || 'Email atau password salah!');
-    } finally {
-    setLoading(false);
-    }
-  };
+            // Simpan token & user ke localStorage
+            localStorage.setItem('token', token);
+            localStorage.setItem('user', JSON.stringify(user));
+
+            // REDIRECT SESUAI ROLE
+            if (user.role === 'umkm_admin') {
+                navigate('/umkm/dashboard');
+            } else if (user.role === 'superadmin') {
+                navigate('/admin/dashboard');
+            } else {
+                navigate('/');
+            }
+
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Email atau password salah!';
+            setError(msg);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     return (
         <div className="flex items-center justify-center min-h-screen px-4 bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
