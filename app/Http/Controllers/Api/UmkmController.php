@@ -49,4 +49,23 @@ class UmkmController extends Controller
             'data' => $stats
         ], 200);
     }
+
+    /**
+     * GET /api/umkms
+     * Mengambil daftar UMKM
+     */
+    public function index()
+    {
+        $umkms = UMKM::where('status', 'active')->get()->map(function ($umkm) {
+            $umkm->services = json_decode($umkm->services, true);
+            $umkm->opening_hours = json_decode($umkm->opening_hours, true);
+            return $umkm;
+        });
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Daftar UMKM berhasil diambil',
+            'data' => $umkms
+        ], 200);
+    }
 }
