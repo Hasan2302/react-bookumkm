@@ -165,7 +165,7 @@ export default function UmkmDashboard() {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/');
+        window.location.href = '/';
     };
 
     const navItems = [

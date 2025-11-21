@@ -29,13 +29,15 @@ export default function Login() {
             localStorage.setItem('token', token);
             localStorage.setItem('user', JSON.stringify(user));
 
-            // REDIRECT SESUAI ROLE
-            if (user.role === 'umkm_admin') {
+            if (user.role === 'superadmin') {
+                navigate('/superadmin/dashboard');
+                window.location.reload();
+            } else if (user.role === 'umkm_admin') {
                 navigate('/umkm/dashboard');
-            } else if (user.role === 'superadmin') {
-                navigate('/admin/dashboard');
+                window.location.reload();
             } else {
                 navigate('/');
+                window.location.reload();
             }
 
         } catch (err) {

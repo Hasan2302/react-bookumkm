@@ -55,8 +55,8 @@ function App() {
           {/* SUPERADMIN */}
           {parsedUser.role === 'superadmin' && (
             <>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/superadmin/dashboard" element={<AdminDashboard />} />
+              <Route path="*" element={<Navigate to="/superadmin/dashboard" replace />} />
             </>
           )}
         </Routes>
