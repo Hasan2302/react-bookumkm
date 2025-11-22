@@ -59,22 +59,62 @@ export default function Welcome() {
   };
 
   const handleSubmit = () => {
-    const data = {
-      umkm_id: selectedUmkm.id,
-      date: format(selectedDate, 'yyyy-MM-dd'),
-      time: selectedTime,
-      payment_method: paymentMethod,
-      customer_data: formData
-    };
-    axios.post('http://127.0.0.1:8000/api/bookings', data)
-      .then(() => { alert('Booking berhasil! Kami akan hubungi via WhatsApp'); setShowModal(false); })
-      .catch(() => alert('Gagal booking'));
-  };
+    // Ambil data dari formFields (yang pasti ada label-nya)
+    const customerDataRaw = {};
+    formFields.forEach(field => {
+        const value = formData[field.label] || '';
+        customerDataRaw[field.label] = value;
+    });
 
-  if (loading) return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-50">
-      <div className="text-2xl font-bold text-emerald-600">Memuat UMKM...</div>
-    </div>
+    // Ekstrak data penting secara akurat
+    let customerName = 'Pelanggan';
+    let customerPhone = '';
+    let serviceName = 'Layanan UMKM';
+
+    formFields.forEach(field => {
+        const labelLower = field.label.toLowerCase();
+        const value = formData[field.label] || '';
+
+        if (labelLower.includes('nama')) {
+            customerName = value || customerName;
+        }
+        if (labelLower.includes('wa') || labelLower.includes('hp') || labelLower.includes('telepon') || labelLower.includes('phone')) {
+            customerPhone = value;
+        }
+        if (labelLower.includes('layanan') || labelLower.includes('service') || labelLower.includes('jenis')) {
+            serviceName = value || serviceName;
+        }
+    });
+
+    const payload = {
+        umkm_id: selectedUmkm.id,
+        date: format(selectedDate, 'yyyy-MM-dd'),
+        time: selectedTime,
+        payment_method: paymentMethod,
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        service_name: serviceName,
+        total_price: 0, // nanti bisa dihitung otomatis
+        customer_data: customerDataRaw // tetap simpan semua data asli
+    };
+
+    console.log('Payload dikirim:', payload); // DEBUG — bisa dihapus nanti
+
+    axios.post('http://127.0.0.1:8000/api/bookings', payload)
+        .then(res => {
+            alert('Booking berhasil! Kami akan hubungi via WhatsApp');
+            setShowModal(false);
+        })
+        .catch(err => {
+            console.error(err.response?.data);
+            alert('Gagal booking: ' + (err.response?.data?.message || 'Coba lagi'));
+        });
+    };
+
+    if (loading) return (
+        <div className="flex items-center justify-center min-h-screen bg-gray-50">
+        <div className="text-2xl font-bold text-emerald-600">Memuat UMKM...</div>
+        </div>
   );
 
   return (
@@ -157,7 +197,7 @@ export default function Welcome() {
               >
                 <div className="relative aspect-[4/3]">
                   <img
-                    src={`http://127.0.0.1:8000/storage/${umkm.banner}`}
+                    src={umkm.banner}
                     alt={umkm.name}
                     className="object-cover w-full h-full transition duration-500 group-hover:scale-110"
                   />

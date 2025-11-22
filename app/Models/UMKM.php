@@ -10,10 +10,16 @@ class Umkm extends Model
     use HasFactory;
 
     protected $table = 'umkms';
+
     protected $fillable = [
         'user_id', 'name', 'phone', 'address', 'category',
         'logo', 'banner', 'description', 'services', 'opening_hours',
         'subdomain', 'slug', 'status'
+    ];
+
+    protected $casts = [
+        'services' => 'array',
+        'opening_hours' => 'array',
     ];
 
     public function user()
@@ -28,6 +34,6 @@ class Umkm extends Model
 
     public function formFields()
     {
-        return $this->hasMany(FormField::class, 'umkm_id'); // tambahkan 'umkm_id'
-    }   
+        return $this->hasMany(FormField::class, 'umkm_id');
+    }
 }

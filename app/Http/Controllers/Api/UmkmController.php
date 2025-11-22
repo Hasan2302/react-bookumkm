@@ -5,17 +5,54 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Umkm;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Validator;
 
 class UmkmController extends Controller
 {
-    // GET /api/umkms → Daftar semua UMKM (untuk superadmin)
+    /**
+     * GET /api/umkm/dashboard
+     * Dashboard UMKM Admin (contoh data)
+     */
+    public function dashboard(Request $request)
+    {
+        // Bisa diganti dengan query booking & revenue asli
+        $stats = [
+            'dailyBookings' => 10,
+            'monthlyBookings' => 240,
+            'revenue' => 500000,
+        ];
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Dashboard UMKM berhasil diambil',
+            'data' => $stats
+        ], 200);
+    }
+
+    /**
+     * GET /api/umkms
+     * Mengambil daftar UMKM
+     */
     public function index()
     {
-        $umkms = Umkm::with('user')->latest()->get();
-
+        $umkms = Umkm::where('status', 'active')
+            ->select('id', 'name', 'category', 'address', 'phone', 'logo', 'banner', 'subdomain', 'slug', 'services', 'opening_hours')
+            ->get()
+            ->map(function ($umkm) {
+                return [
+                    'id'            => $umkm->id,
+                    'name'          => $umkm->name,
+                    'category'      => $umkm->category,
+                    'address'       => $umkm->address,
+                    'phone'         => $umkm->phone,
+                    'logo'          => $umkm->logo ? asset('storage/' . $umkm->logo) : null,
+                    'banner'        => $umkm->banner ? asset('storage/' . $umkm->banner) : null,
+                    'subdomain'     => $umkm->subdomain,
+                    'slug'          => $umkm->slug,
+                    'services'      => $umkm->services ?? [],        // sudah array otomatis!
+                    'opening_hours' => $umkm->opening_hours ?? [],   // sudah array otomatis!
+                ];
+            });
+    
         return response()->json([
             'status'  => 'success',
             'message' => 'Daftar UMKM berhasil diambil',
@@ -23,7 +60,6 @@ class UmkmController extends Controller
         ], 200);
     }
 
-    // POST /api/umkms → Tambah UMKM baru
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
