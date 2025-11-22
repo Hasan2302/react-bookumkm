@@ -7,9 +7,68 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Booking;
 use Carbon\Carbon;
+use Illuminate\Support\Str;
 
 class BookingController extends Controller
 {
+
+    public function store(Request $request)
+    {
+        // Validasi dasar
+        $request->validate([
+            'umkm_id'        => 'required|exists:umkms,id',
+            'date'           => 'required|date|after_or_equal:today',
+            'time'           => 'required|string',
+            'payment_method' => 'required|in:offline,qris,transfer',
+            'customer_data'  => 'required|array',
+            'customer_data.*' => 'nullable|string', // semua field boleh string/kosong
+        ]);
+
+        // Ambil data dari customer_data (tanpa peduli label persis apa)
+        $customerData = $request->customer_data;
+
+        // Cari nama (fleksibel, tidak peduli labelnya apa)
+        $customerName = null;
+        foreach ($customerData as $key => $value) {
+            if (str_contains(strtolower($key), 'nama')) {
+                $customerName = $value;
+                break;
+            }
+        }
+        $customerName = $customerName ??= 'Pelanggan';
+
+        // Cari nomor HP/WhatsApp
+        $customerPhone = null;
+        foreach ($customerData as $key => $value) {
+            if (str_contains(strtolower($key), 'wa') || str_contains(strtolower($key), 'hp') || str_contains(strtolower($key), 'phone')) {
+                $customerPhone = $value;
+                break;
+            }
+        }
+
+        // Buat booking
+        $booking = Booking::create([
+            'umkm_id'        => $request->umkm_id,
+            'user_id'        => null, // sekarang boleh null!
+            'date'           => $request->date,
+            'time'           => $request->time . ':00',
+            'payment_method' => $request->payment_method,
+            'status'         => 'pending',
+            'customer_name'  => $customerName,
+            'customer_phone' => $customerPhone ?? null,
+            'service_name'   => $customerData['Jenis Layanan'] ?? 'Layanan UMKM',
+            'total_price'    => 0,
+            'customer_data'  => json_encode($customerData),
+            'booked_at'      => now(),
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Booking berhasil! Kami akan hubungi Anda via WhatsApp dalam 1x24 jam',
+            'data' => $booking
+        ], 201);
+    }
+
     public function confirm(Request $request, $id)
     {
         $booking = Booking::where('id', $id)

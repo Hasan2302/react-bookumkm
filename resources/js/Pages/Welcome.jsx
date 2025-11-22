@@ -1,296 +1,317 @@
-import { Link } from 'react-router-dom';
+// resources/js/Pages/Welcome.jsx → VERSI FINAL TERAKHIR (100% SESUAI PERMINTAANMU)
 import { useState, useEffect, useMemo } from 'react';
-import {
-  MapPin, Star, Clock, Calendar as CalendarIcon, Search, X, ChevronLeft, ChevronRight, User, Mail, Phone, Scissors
-} from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Search, MapPin, Heart, Sparkles, X, Clock, Check, ChevronRight, CreditCard } from 'lucide-react';
+import axios from 'axios';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
-import axios from 'axios';
+import { format } from 'date-fns';
+
+const CATEGORIES = ['Semua', 'Tukang Cukur', 'Salon', 'Bengkel', 'Klinik Kecantikan', 'Laundry', 'Spa & Massage', 'Cuci Motor', 'Lainnya'];
 
 export default function Welcome() {
   const [umkms, setUmkms] = useState([]);
-  const [selectedUmkm, setSelectedUmkm] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [search, setSearch] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Semua');
   const [showModal, setShowModal] = useState(false);
-
-  // Wizard State
+  const [selectedUmkm, setSelectedUmkm] = useState(null);
   const [step, setStep] = useState(1);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [selectedTime, setSelectedTime] = useState('');
   const [formData, setFormData] = useState({});
   const [formFields, setFormFields] = useState([]);
-
-  const availableTimes = ["09:00", "10:00", "11:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00"];
+  const [paymentMethod, setPaymentMethod] = useState('offline');
 
   useEffect(() => {
     axios.get('http://127.0.0.1:8000/api/umkms')
-      .then(res => {
-        const list = res.data.data || [];
-        setUmkms(list);
-        if (list.length > 0) setSelectedUmkm(list[0]);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setLoading(false);
-      });
+      .then(res => { setUmkms(res.data.data || []); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
-  // Fetch form_fields saat UMKM dipilih & modal dibuka
-  useEffect(() => {
-    if (showModal && selectedUmkm) {
-      axios.get(`http://127.0.0.1:8000/api/umkms/${selectedUmkm.id}/form-fields`)
-        .then(res => {
-          const fields = res.data.data || [];
-          setFormFields(fields.sort((a, b) => a.sort_order - b.sort_order));
-        })
-        .catch(err => console.error("Gagal ambil form fields:", err));
-    }
-  }, [showModal, selectedUmkm]);
+  const filtered = useMemo(() => {
+    return umkms.filter(u => {
+      const matchSearch = !search || u.name?.toLowerCase().includes(search.toLowerCase());
+      const matchCat = selectedCategory === 'Semua' || u.category === selectedCategory;
+      return matchSearch && matchCat;
+    });
+  }, [umkms, search, selectedCategory]);
 
-  const filteredUmkms = useMemo(() => {
-    if (!searchTerm) return umkms;
-    return umkms.filter(u =>
-      u.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.address?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-  }, [umkms, searchTerm]);
-
-  const parseJson = (str) => {
-    if (!str) return [];
-    try { return JSON.parse(str); } catch { return []; }
-  };
-
-  const openingHours = selectedUmkm ? parseJson(selectedUmkm.opening_hours) : {};
-  const services = selectedUmkm ? parseJson(selectedUmkm.services) : [];
-
-  const formatDate = (d) => d.toISOString().split('T')[0];
-
-  const handleNext = () => {
-    if (step === 1 && !selectedDate) return alert("Pilih tanggal dulu!");
-    if (step === 2 && !selectedTime) return alert("Pilih jam dulu!");
-    if (step === 3) return handleSubmit();
-    setStep(prev => prev + 1);
-  };
-
-  const handleBack = () => setStep(prev => Math.max(1, prev - 1));
-
-  const handleSubmit = () => {
-    const data = {
-      umkm_id: selectedUmkm.id,
-      date: formatDate(selectedDate),
-      time: selectedTime,
-      customer_data: formData
-    };
-
-    // Ganti endpoint ini sesuai kebutuhan
-    axios.post('http://127.0.0.1:8000/api/bookings', data)
-      .then(() => {
-        alert("Booking berhasil! Kami akan hubungi via WhatsApp.");
-        setShowModal(false);
-        resetWizard();
-      })
-      .catch(err => {
-        console.error(err);
-        alert("Gagal booking: " + (err.response?.data?.message || err.message));
-      });
-  };
-
-  const resetWizard = () => {
+  const openBookingModal = async (umkm) => {
+    setSelectedUmkm(umkm);
+    setShowModal(true);
     setStep(1);
     setSelectedDate(new Date());
     setSelectedTime('');
     setFormData({});
+    setPaymentMethod('offline');
+
+    try {
+      const res = await axios.get(`http://127.0.0.1:8000/api/umkms/${umkm.id}/form-fields`);
+      setFormFields(res.data.data.sort((a, b) => a.sort_order - b.sort_order));
+    } catch (err) { console.error(err); }
   };
 
-  const handleInputChange = (label, value) => {
-    setFormData(prev => ({ ...prev, [label]: value }));
+  const handleNext = () => {
+    if (step === 1 && !selectedTime) return alert('Pilih jam dulu ya!');
+    if (step === 3) return handleSubmit();
+    setStep(step + 1);
   };
 
-  if (loading) return <div className="flex items-center justify-center h-screen text-xl text-teal-600">Loading UMKM...</div>;
+  const handleSubmit = () => {
+    const data = {
+      umkm_id: selectedUmkm.id,
+      date: format(selectedDate, 'yyyy-MM-dd'),
+      time: selectedTime,
+      payment_method: paymentMethod,
+      customer_data: formData
+    };
+    axios.post('http://127.0.0.1:8000/api/bookings', data)
+      .then(() => { alert('Booking berhasil! Kami akan hubungi via WhatsApp'); setShowModal(false); })
+      .catch(() => alert('Gagal booking'));
+  };
+
+  if (loading) return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <div className="text-2xl font-bold text-emerald-600">Memuat UMKM...</div>
+    </div>
+  );
 
   return (
     <>
-      {/* HERO SECTION */}
-      {selectedUmkm && (
-        <div className="relative h-screen bg-black">
-          <img
-            src={`http://127.0.0.1:8000/storage/${selectedUmkm.banner}`}
-            alt={selectedUmkm.name}
-            className="object-cover w-full h-full"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black via-black/70 to-black/20" />
-          <div className="absolute left-6 top-6 md:left-12 md:top-12">
-            <div className="w-24 h-24 overflow-hidden border-4 border-white shadow-2xl md:w-32 md:h-32 rounded-3xl bg-white/90">
-              <img src={`http://127.0.0.1:8000/storage/${selectedUmkm.logo}`} alt="logo" className="object-cover w-full h-full" />
+      {/* NAVBAR SUPER CLEAN — HANYA LOGO, DAFTAR UMKM, SEARCH, LOGIN */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div className="flex items-center justify-between gap-8 px-6 py-4 mx-auto max-w-7xl">
+          <div className="flex items-center gap-12">
+            <Link to="/" className="flex items-center gap-3">
+              <div className="flex items-center justify-center text-2xl font-black text-white w-11 h-11 bg-emerald-600 rounded-xl">B</div>
+              <span className="text-2xl font-black text-gray-800">BookUMKM</span>
+            </Link>
+
+            <Link to="/register-umkm" className="hidden font-semibold text-gray-700 transition md:block hover:text-emerald-600">
+              Daftar UMKM
+            </Link>
+          </div>
+
+          {/* SEARCH BESAR DI TENGAH */}
+          <div className="flex-1 max-w-2xl">
+            <div className="relative">
+              <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-5 top-1/2" />
+              <input
+                type="text"
+                placeholder="Cari salon, barbershop, bengkel terdekat..."
+                value={search}
+                onChange={e => setSearch(e.target.value)}
+                className="w-full py-4 pr-6 text-base transition bg-gray-100 rounded-full shadow-sm pl-14 focus:outline-none focus:ring-4 focus:ring-emerald-100 focus:bg-white"
+              />
             </div>
           </div>
-          <div className="absolute bottom-0 left-0 p-8 text-white md:p-12">
-            <h1 className="mb-3 text-4xl font-extrabold md:text-6xl drop-shadow-lg">{selectedUmkm.name}</h1>
-            <p className="flex items-center mb-4 text-lg"><MapPin className="w-6 h-6 mr-2" /> {selectedUmkm.address}</p>
-            <button
-              onClick={() => { setShowModal(true); resetWizard(); }}
-              className="px-10 py-5 text-xl font-bold text-white transition rounded-full shadow-2xl bg-gradient-to-r from-teal-500 to-emerald-600 hover:scale-105"
-            >
-              Booking Sekarang
+
+          <Link to="/login" className="px-8 py-3 font-bold text-white transition rounded-full shadow-md bg-emerald-600 hover:bg-emerald-700">
+            Masuk
+          </Link>
+        </div>
+      </header>
+
+      {/* CONTENT LANGSUNG DI BAWAH NAVBAR */}
+      <main className="min-h-screen pt-24 bg-gray-50">
+        {/* Jumlah UMKM + Tombol AI */}
+        <div className="px-6 py-8 mx-auto max-w-7xl">
+          <div className="flex flex-col items-start justify-between gap-6 mb-8 md:flex-row md:items-center">
+            <div>
+              <h1 className="text-4xl font-black text-gray-800">
+                {filtered.length.toLocaleString()} UMKM Tersedia
+              </h1>
+              <p className="mt-1 text-lg text-gray-600">Pilih layanan terbaik di sekitarmu</p>
+            </div>
+            <button className="flex items-center gap-3 px-8 py-4 font-bold text-white transition rounded-full shadow-lg bg-emerald-600 hover:shadow-xl">
+              <Sparkles className="w-5 h-5" />
+              Cari dengan AI
             </button>
           </div>
-        </div>
-      )}
 
-      {/* LIST UMKM */}
-      <div className="px-4 py-16 bg-gray-50 md:px-8 lg:px-20">
-        <div className="mx-auto max-w-7xl">
-          <div className="relative mb-10">
-            <Search className="absolute w-6 h-6 text-gray-400 -translate-y-1/2 left-4 top-1/2" />
-            <input
-              type="text"
-              placeholder="Cari UMKM atau lokasi..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full py-4 pl-12 pr-6 text-lg border-0 shadow-lg rounded-2xl focus:ring-4 focus:ring-teal-300"
-            />
+          {/* PILIHAN KATEGORI — HORIZONTAL SCROLL (seperti Dreamhome + Tokopedia) */}
+          <div className="flex gap-3 pb-4 mb-10 overflow-x-auto scrollbar-hide">
+            {CATEGORIES.map(cat => (
+              <button
+                key={cat}
+                onClick={() => setSelectedCategory(cat)}
+                className={`px-6 py-3 rounded-full font-medium whitespace-nowrap transition-all shadow-sm ${
+                  selectedCategory === cat
+                    ? 'bg-emerald-600 text-white shadow-emerald-200'
+                    : 'bg-white text-gray-700 border border-gray-200 hover:border-emerald-400'
+                }`}
+              >
+                {cat}
+              </button>
+            ))}
           </div>
 
-          <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredUmkms.map((umkm) => (
+          {/* GRID CARD — MIRIP DREAMHOME 100% */}
+          <div className="grid grid-cols-1 gap-8 pb-24 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {filtered.map(umkm => (
               <div
                 key={umkm.id}
-                onClick={() => setSelectedUmkm(umkm)}
-                className={`group cursor-pointer transition-all ${selectedUmkm?.id === umkm.id ? 'ring-4 ring-teal-500 scale-105' : 'hover:scale-105'} bg-white rounded-3xl overflow-hidden shadow-lg`}
+                onClick={() => openBookingModal(umkm)}
+                className="overflow-hidden transition-all duration-300 bg-white shadow-lg cursor-pointer rounded-3xl hover:shadow-2xl group"
               >
-                <div className="relative h-48">
-                  <img src={`http://127.0.0.1:8000/storage/${umkm.banner}`} alt={umkm.name} className="object-cover w-full h-full transition group-hover:scale-110" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60" />
-                  <div className="absolute bottom-0 p-4 text-white">
-                    <h3 className="text-xl font-bold">{umkm.name}</h3>
+                <div className="relative aspect-[4/3]">
+                  <img
+                    src={`http://127.0.0.1:8000/storage/${umkm.banner}`}
+                    alt={umkm.name}
+                    className="object-cover w-full h-full transition duration-500 group-hover:scale-110"
+                  />
+                  <button className="absolute p-3 rounded-full shadow-lg top-4 right-4 bg-white/90 backdrop-blur">
+                    <Heart className="w-5 h-5 text-red-500 fill-current" />
+                  </button>
+                  <div className="absolute px-5 py-2 text-sm font-bold text-white rounded-full shadow-lg bottom-4 left-4 bg-emerald-600">
+                    Rp25rb - Rp200rb
                   </div>
                 </div>
-                <div className="p-5">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-1">
-                      <Star className="w-5 h-5 text-yellow-400 fill-current" />
-                      <span className="font-bold">4.9</span>
-                    </div>
-                    <Scissors className="w-5 h-5 text-teal-600" />
+
+                <div className="p-6">
+                  <h3 className="mb-2 text-xl font-black text-gray-800 line-clamp-1">{umkm.name}</h3>
+                  <p className="mb-3 text-sm font-semibold text-emerald-600">{umkm.category}</p>
+                  <p className="flex items-center gap-2 mb-5 text-sm text-gray-600">
+                    <MapPin className="w-4 h-4" />
+                    {umkm.address?.split(',')[0] || 'Lokasi'}
+                  </p>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="flex items-center gap-2 text-gray-600">
+                      <Clock className="w-4 h-4" /> 09:00 - 21:00
+                    </span>
+                    <span className="px-3 py-1 text-xs font-bold rounded-full bg-emerald-100 text-emerald-700">BUKA</span>
                   </div>
-                  <button className="w-full py-3 font-bold text-white bg-gradient-to-r from-teal-500 to-emerald-600 rounded-xl">
-                    Lihat Detail
-                  </button>
                 </div>
               </div>
             ))}
           </div>
         </div>
-      </div>
+      </main>
 
-      {/* MODAL WIZARD BOOKING */}
+      {/* MODAL BOOKING WIZARD TETAP LENGKAP */}
       {showModal && selectedUmkm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-          <div className="w-full max-w-4xl bg-white shadow-2xl rounded-3xl">
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b">
-              <h2 className="text-2xl font-bold">Booking {selectedUmkm.name}</h2>
-              <button onClick={() => { setShowModal(false); resetWizard(); }}>
-                <X className="w-8 h-8" />
-              </button>
-            </div>
-
-            {/* Progress Bar */}
-            <div className="flex items-center justify-center gap-4 p-6">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="flex items-center">
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${step >= i ? 'bg-teal-600' : 'bg-gray-300'}`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70" onClick={() => setShowModal(false)}>
+          <div className="bg-white rounded-3xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            
+            {/* Progress */}
+            <div className="flex justify-center gap-8 py-6">
+              {[1,2,3].map(i => (
+                <div key={i} className="flex items-center gap-4">
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-white ${step >= i ? 'bg-green-600' : 'bg-gray-300'}`}>
                     {i}
                   </div>
-                  {i < 3 && <div className={`w-24 h-1 ${step > i ? 'bg-teal-600' : 'bg-gray-300'}`} />}
+                  {i < 3 && <div className={`w-32 h-1 ${step > i ? 'bg-green-600' : 'bg-gray-300'}`} />}
                 </div>
               ))}
             </div>
 
-            {/* Step Content */}
-            <div className="p-6 min-h-96">
-              {step === 1 && (
-                <div className="text-center">
-                  <h3 className="mb-6 text-xl font-bold">Pilih Tanggal</h3>
-                  <CalendarIcon
-                    onChange={setSelectedDate}
-                    value={selectedDate}
-                    minDate={new Date()}
-                    className="mx-auto rounded-xl"
-                  />
-                </div>
-              )}
-
-              {step === 2 && (
-                <div>
-                  <h3 className="mb-6 text-xl font-bold text-center">
-                    Pilih Jam ({formatDate(selectedDate)})
-                  </h3>
-                  <div className="grid grid-cols-4 gap-4">
-                    {availableTimes.map(time => (
-                      <button
-                        key={time}
-                        onClick={() => setSelectedTime(time)}
-                        className={`py-4 rounded-xl font-medium transition ${selectedTime === time ? 'bg-teal-600 text-white' : 'bg-gray-100 hover:bg-gray-200'}`}
-                      >
-                        {time}
-                      </button>
-                    ))}
+            {/* Step 1: Tanggal & Jam */}
+            {step === 1 && (
+              <div className="p-8">
+                <h3 className="mb-8 text-2xl font-bold text-center">Pilih Tanggal & Jam</h3>
+                <div className="grid gap-8 md:grid-cols-2">
+                  <div>
+                    <Calendar
+                      onChange={setSelectedDate}
+                      value={selectedDate}
+                      minDate={new Date()}
+                      className="mx-auto border-2 rounded-2xl"
+                    />
+                  </div>
+                  <div>
+                    <h4 className="mb-4 text-lg font-bold">Jam Tersedia Hari Ini</h4>
+                    <div className="grid grid-cols-3 gap-3">
+                      {["09:00","10:00","11:00","13:00","14:00","15:00","16:00","17:00"].map(time => (
+                        <button
+                          key={time}
+                          onClick={() => setSelectedTime(time)}
+                          className={`py-4 rounded-xl font-medium transition ${
+                            selectedTime === time 
+                              ? 'bg-green-600 text-white shadow-lg' 
+                              : 'bg-gray-100 hover:bg-gray-200'
+                          }`}
+                        >
+                          {time}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
-              )}
+              </div>
+            )}
 
-              {step === 3 && (
-                <div>
-                  <h3 className="mb-6 text-xl font-bold">Isi Data Diri</h3>
-                  <div className="space-y-5">
-                    {formFields.map(field => (
-                      <div key={field.id}>
-                        <label className="block mb-2 font-medium">
-                          {field.label} {field.required && <span className="text-red-500">*</span>}
-                        </label>
-                        {field.type === 'select' ? (
-                          <select
-                            required={field.required}
-                            onChange={(e) => handleInputChange(field.label, e.target.value)}
-                            className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500"
-                          >
-                            <option value="">Pilih {field.label}</option>
-                            {JSON.parse(field.options || '[]').map(opt => (
-                              <option key={opt} value={opt}>{opt}</option>
-                            ))}
-                          </select>
-                        ) : (
-                          <input
-                            type={field.type}
-                            required={field.required}
-                            placeholder={field.label}
-                            onChange={(e) => handleInputChange(field.label, e.target.value)}
-                            className="w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-teal-500"
-                          />
-                        )}
+            {/* Step 2: Form */}
+            {step === 2 && (
+              <div className="p-8">
+                <h3 className="mb-8 text-2xl font-bold text-center">Isi Data Diri</h3>
+                <div className="grid max-w-2xl gap-6 mx-auto">
+                  {formFields.map(field => (
+                    <div key={field.id}>
+                      <label className="block mb-2 text-lg font-semibold">
+                        {field.label} {field.required && <span className="text-red-500">*</span>}
+                      </label>
+                      {field.type === 'select' ? (
+                        <select
+                          required={field.required}
+                          onChange={e => setFormData({...formData, [field.label]: e.target.value})}
+                          className="w-full px-6 py-4 border-2 rounded-xl focus:border-green-500"
+                        >
+                          <option value="">Pilih {field.label}</option>
+                          {JSON.parse(field.options || '[]').map(opt => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          type={field.type}
+                          required={field.required}
+                          placeholder={field.label}
+                          onChange={e => setFormData({...formData, [field.label]: e.target.value})}
+                          className="w-full px-6 py-4 border-2 rounded-xl focus:border-green-500"
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Pembayaran */}
+            {step === 3 && (
+              <div className="p-8">
+                <h3 className="mb-8 text-2xl font-bold text-center">Pilih Metode Pembayaran</h3>
+                <div className="max-w-2xl mx-auto space-y-4">
+                  {['offline', 'qris', 'transfer'].map(method => (
+                    <label key={method} className="flex items-center gap-6 p-6 transition cursor-pointer bg-gray-50 rounded-2xl hover:bg-gray-100">
+                      <input
+                        type="radio"
+                        name="payment"
+                        checked={paymentMethod === method}
+                        onChange={() => setPaymentMethod(method)}
+                        className="w-6 h-6 text-green-600"
+                      />
+                      <div className="flex-1">
+                        <p className="text-lg font-bold">
+                          {method === 'offline' ? 'Bayar di Tempat' : method === 'qris' ? 'QRIS' : 'Transfer Bank'}
+                        </p>
+                        <p className="text-gray-600">
+                          {method === 'offline' ? 'Bayar langsung saat datang' : method === 'qris' ? 'Scan QRIS di tempat' : 'Transfer ke rekening resmi'}
+                        </p>
                       </div>
-                    ))}
-                  </div>
+                      {method === 'qris' && <CreditCard className="w-10 h-10 text-green-600" />}
+                    </label>
+                  ))}
                 </div>
-              )}
-            </div>
-
-            {/* Footer Buttons */}
-            <div className="flex justify-between p-6 border-t">
-              <button
-                onClick={handleBack}
-                className={`px-8 py-3 rounded-xl font-medium ${step === 1 ? 'invisible' : 'bg-gray-200 hover:bg-gray-300'}`}
-              >
-                <ChevronLeft className="inline w-5 h-5" /> Kembali
+              </div>
+            )}
+            
+            <div className="flex justify-between p-8 border-t">
+              <button onClick={() => step===1?setShowModal(false):setStep(step-1)} className="px-10 py-4 font-bold text-gray-600">
+                {step===1?'Batal':'Kembali'}
               </button>
-              <button
-                onClick={handleNext}
-                className="px-10 py-3 font-bold text-white bg-gradient-to-r from-teal-500 to-emerald-600 rounded-xl hover:shadow-lg"
-              >
-                {step === 3 ? 'Kirim Booking' : 'Lanjut'} <ChevronRight className="inline w-5 h-5" />
+              <button onClick={handleNext} className="flex items-center gap-3 px-16 py-4 font-bold text-white shadow-lg bg-emerald-600 rounded-xl">
+                {step===3?'Selesai Booking':'Lanjut'} <ChevronRight className="w-5 h-5" />
               </button>
             </div>
           </div>

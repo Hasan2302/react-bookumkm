@@ -28,6 +28,6 @@ class User extends Authenticatable
 
     public function umkm()
     {
-        return $this->hasOne(Umkm::class);
+        return $this->hasOne(Umkm::class, 'user_id');
     }
 }

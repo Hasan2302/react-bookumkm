@@ -12,15 +12,26 @@ class UmkmSettingsController extends Controller
     public function me(Request $request)
     {
         $user = $request->user();
-        $umkm = $user->umkm;
 
-        if (!$umkm) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
+        // LOG INI WAJIB! Kita cek apa yang sebenarnya terjadi
+        \Log::info('UMKM ME - User ID: ' . $user->id);
+        \Log::info('UMKM ME - User Role: ' . $user->role);
+        \Log::info('UMKM ME - Umkm Relation: ', [$user->umkm]); // ini yang penting!
+        \Log::info('UMKM ME - Umkm ID from users table: ' . $user->umkm_id);
+
+        if (!$user->umkm) {
+            \Log::warning('UMKM NOT FOUND untuk user ID: ' . $user->id);
+            return response()->json([
+                'success' => false,
+                'message' => 'Kamu belum memiliki UMKM.',
+                'debug_user_id' => $user->id,
+                'debug_umkm_id' => $user->umkm_id,
+            ], 404);
         }
 
         return response()->json([
             'success' => true,
-            'data' => $umkm
+            'data'    => $user->umkm
         ]);
     }
 

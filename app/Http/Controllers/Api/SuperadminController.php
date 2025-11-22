@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UMKM;
+use App\Models\Umkm;
 use Illuminate\Http\Request;
 
 class SuperadminController extends Controller
@@ -14,7 +14,7 @@ class SuperadminController extends Controller
      */
     public function index()
     {
-        $umkms = UMKM::latest()->get();
+        $umkms = Umkm::latest()->get();
 
         return response()->json([
             'status' => 'success',
@@ -29,7 +29,7 @@ class SuperadminController extends Controller
      */
     public function show($id)
     {
-        $umkm = UMKM::find($id);
+        $umkm = Umkm::find($id);
 
         if (!$umkm) {
             return response()->json([
@@ -51,7 +51,7 @@ class SuperadminController extends Controller
      */
     public function destroy($id)
     {
-        $umkm = UMKM::find($id);
+        $umkm = Umkm::find($id);
 
         if (!$umkm) {
             return response()->json([

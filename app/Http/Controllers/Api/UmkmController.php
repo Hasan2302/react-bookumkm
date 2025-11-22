@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\UMKM;
+use App\Models\Umkm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -11,21 +11,10 @@ use Illuminate\Support\Facades\Validator;
 
 class UmkmController extends Controller
 {
-    // Hanya superadmin yang boleh CRUD
-    public function __construct()
-    {
-        $this->middleware(function ($request, $next) {
-            if (auth('sanctum')->user()?->role !== 'superadmin') {
-                return response()->json(['message' => 'Akses ditolak. Hanya Superadmin!'], 403);
-            }
-            return $next($request);
-        })->except(['index', 'show']);
-    }
-
     // GET /api/umkms → Daftar semua UMKM (untuk superadmin)
     public function index()
     {
-        $umkms = UMKM::with('user')->latest()->get();
+        $umkms = Umkm::with('user')->latest()->get();
 
         return response()->json([
             'status'  => 'success',
@@ -72,7 +61,7 @@ class UmkmController extends Controller
         // Auto-generate slug
         $data['slug'] = Str::slug($request->name);
 
-        $umkm = UMKM::create($data);
+        $umkm = Umkm::create($data);
 
         return response()->json([
             'status'  => 'success',
@@ -84,7 +73,7 @@ class UmkmController extends Controller
     // GET /api/umkms/{id} → Detail UMKM (untuk edit)
     public function show($id)
     {
-        $umkm = UMKM::find($id);
+        $umkm = Umkm::find($id);
 
         if (!$umkm) {
             return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
@@ -100,7 +89,7 @@ class UmkmController extends Controller
     // atau bisa pakai PUT/PATCH kalau mau
     public function update(Request $request, $id)
     {
-        $umkm = UMKM::find($id);
+        $umkm = Umkm::find($id);
         if (!$umkm) {
             return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
         }
@@ -153,7 +142,7 @@ class UmkmController extends Controller
     // DELETE /api/umkms/{id}
     public function destroy($id)
     {
-        $umkm = UMKM::find($id);
+        $umkm = Umkm::find($id);
         if (!$umkm) {
             return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
         }
@@ -173,7 +162,7 @@ class UmkmController extends Controller
     // Tetap ada untuk publik (frontend)
     public function showBySubdomain($subdomain)
     {
-        $umkm = UMKM::where('subdomain', $subdomain)->where('status', 'active')->firstOrFail();
+        $umkm = Umkm::where('subdomain', $subdomain)->where('status', 'active')->firstOrFail();
 
         $umkm->services = $umkm->services ? json_decode($umkm->services, true) : [];
         $umkm->opening_hours = $umkm->opening_hours ? json_decode($umkm->opening_hours, true) : [];

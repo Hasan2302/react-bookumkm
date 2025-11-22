@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\FormBuilderController;
 use App\Http\Controllers\Api\BookingController;
 use App\Http\Controllers\Api\DashboardController;
 use App\Http\Controllers\Api\UmkmSettingsController;
+use App\Http\Controllers\Api\RegisterUmkmController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,20 +17,32 @@ use App\Http\Controllers\Api\UmkmSettingsController;
 |--------------------------------------------------------------------------
 */
 
-// ==================== GUEST / PUBLIC ROUTES ====================
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/register', [AuthController::class, 'register']);
-Route::post('/register-umkm', [AuthController::class, 'registerUmkm']);
-
-// Daftar UMKM untuk landing page (hanya yang aktif)
+// ==================== GUEST / PUBLIC ROUTES (HARUS DI ATAS auth!) ====================
 Route::get('/umkms', [UmkmController::class, 'index']);
-
-// Detail UMKM publik berdasarkan subdomain (contoh: api/umkm/barbershop-fellas)
 Route::get('/umkm/{subdomain}', [UmkmController::class, 'showBySubdomain']);
 
+// FORM FIELDS UNTUK BOOKING (guest)
+Route::get('/umkms/{id}/form-fields', [FormFieldController::class, 'publicShowById']);
+
+// BOOKING DARI GUEST — INI YANG WAJIB ADA!
+Route::post('/bookings', [BookingController::class, 'store']);
+
+Route::post('/login', [AuthController::class, 'login']);
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register-umkm', [RegisterUmkmController::class, 'registerUmkm']);
 
 // ==================== AUTHENTICATED ROUTES (semua role) ====================
 Route::middleware('auth:sanctum')->group(function () {
+
+    Route::get('/umkm/me', [UmkmSettingsController::class, 'me']);
+    Route::post('/umkm/settings', [UmkmSettingsController::class, 'update']);
+
+    // SUPERADMIN ONLY
+    Route::middleware('role:superadmin')->group(function () {
+        Route::prefix('admin')->group(function () {
+            Route::apiResource('umkms', UmkmController::class);
+        });
+    });
 
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
@@ -45,10 +58,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
     Route::post('/bookings/{id}/served', [BookingController::class, 'markAsServed']);
 
-    // UMKM Settings (UMKM Admin only — nanti bisa ditambah middleware role)
-    Route::get('/umkm/me', [UmkmSettingsController::class, 'me']);
-    Route::post('/umkm/settings', [UmkmSettingsController::class, 'update']);
-
     // Form Builder (UMKM Admin)
     Route::get('/formbuilder', [FormBuilderController::class, 'index']);
     Route::post('/formbuilder', [FormBuilderController::class, 'store']);
@@ -59,12 +68,9 @@ Route::middleware('auth:sanctum')->group(function () {
 // ==================== SUPERADMIN ONLY — CRUD UMKM ====================
 Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
     // Full CRUD UMKM untuk Superadmin
-    Route::get('/admin/umkms', [UmkmController::class, 'index']);           // semua UMKM (termasuk suspended)
+    Route::get('/admin/umkms', [UmkmController::class, 'index']);
     Route::post('/admin/umkms', [UmkmController::class, 'store']);
     Route::get('/admin/umkms/{id}', [UmkmController::class, 'show']);
-    Route::post('/admin/umkms/{id}', [UmkmController::class, 'update']);    // POST karena React pakai FormData
+    Route::post('/admin/umkms/{id}', [UmkmController::class, 'update']);
     Route::delete('/admin/umkms/{id}', [UmkmController::class, 'destroy']);
-
-    // Kalau mau pakai route standar Laravel (PUT/PATCH), bisa diganti jadi:
-    // Route::apiResource('/admin/umkms', UmkmController::class)->except(['index']);
 });
