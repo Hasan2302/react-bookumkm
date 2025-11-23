@@ -54,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/formbuilder', [FormBuilderController::class, 'index']);
     Route::post('/formbuilder', [FormBuilderController::class, 'store']);
+    Route::get('/umkm-services', [FormBuilderController::class, 'getServices']);
 });
 
 // ==================== SUPERADMIN ONLY — CRUD UMKM ====================

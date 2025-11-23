@@ -43,6 +43,8 @@ class FormBuilderController extends Controller
             'fields.*.label' => 'required|string',
             'fields.*.required' => 'boolean',
             'fields.*.options' => 'array',
+            'fields.*.price' => 'nullable|numeric|min:0',
+            'fields.*.sort_order' => 'integer',
         ]);
 
         // Hapus semua field lama
@@ -55,6 +57,7 @@ class FormBuilderController extends Controller
                 'type' => $field['type'],
                 'required' => $field['required'] ?? false,
                 'options' => !empty($field['options']) ? json_encode($field['options']) : null,
+                'price' => $field['type'] === 'service' ? ($field['price'] ?? null) : null,
                 'sort_order' => $index,
             ]);
         }

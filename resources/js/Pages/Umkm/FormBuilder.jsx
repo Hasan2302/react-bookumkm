@@ -13,6 +13,7 @@ import {
   Scissors, WashingMachine, Wrench, Stethoscope, MessageSquare, Truck, CreditCard, DollarSign
 } from 'lucide-react';
 import api from '@/Services/Api';
+import useUmkmStore from '@/Stores/useUmkmStore';
 
 function SortableField({ field, onUpdate, onDelete }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: field.id });
@@ -89,6 +90,8 @@ export default function FormBuilder() {
   const navigate = useNavigate();
   const location = useLocation();
   const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const { services: umkmServices, loading: umkmLoading } = useUmkmStore();
+  const [openServices, setOpenServices] = useState(true);
 
   const navItems = [
     { name: 'Dashboard', to: '/umkm/dashboard', icon: Home },
@@ -147,6 +150,15 @@ export default function FormBuilder() {
     },
   ];
 
+  const serviceFields = [
+    {
+      type: 'service',
+      label: 'Layanan & Harga',
+      icon: <DollarSign className="w-6 h-6" />,
+      description: 'Tambahkan daftar layanan beserta harga'
+    }
+  ];
+
   const standardFields = [
     { type: 'text', label: 'Teks', icon: <Type className="w-5 h-5" /> },
     { type: 'email', label: 'Email', icon: <Mail className="w-5 h-5" /> },
@@ -169,13 +181,20 @@ export default function FormBuilder() {
 
   useEffect(() => {
     const load = async () => {
+      setLoading(true);
       try {
         const res = await api.get('/formbuilder');
-        if (res.data.data?.length > 0) {
-          setFields(res.data.data.map(f => ({ ...f, id: f.id.toString() })));
-        }
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
+        const data = res.data.data || [];
+        setFields(data.map(f => ({
+          ...f,
+          id: f.id.toString(),
+          options: f.options ? JSON.parse(f.options) : []
+        })).sort((a, b) => a.sort_order - b.sort_order));
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
     };
     load();
   }, []);
@@ -214,6 +233,7 @@ export default function FormBuilder() {
 
   if (loading) return <div className="flex items-center justify-center min-h-screen text-3xl font-bold text-indigo-600">Memuat...</div>;
 
+//   return JSON.stringify(umkmServices.data);
   return (
     <>
       {/* NAVBAR ATAS — SAMA DENGAN DASHBOARD */}
@@ -269,7 +289,7 @@ export default function FormBuilder() {
                         }));
                         setFields(newFields);
                     }}
-                    className={`group relative p-10 bg-white rounded-3xl shadow-xl transition-all duration-300 border-4 
+                    className={`group relative p-10 bg-white rounded-3xl shadow-xl transition-all duration-300 border-4
                         ${tmpl.fields.length === 0 ? 'border-gray-200 opacity-60 cursor-not-allowed' : 'border-transparent hover:border-indigo-500 hover:scale-110 hover:shadow-2xl place-items-center'}
                     `}
                     disabled={tmpl.fields.length === 0}
@@ -306,41 +326,114 @@ export default function FormBuilder() {
               <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
                 {/* TOOLBOX KIRI — LEBIH KECIL & CANTIK */}
                 <div className="space-y-6">
-                  <div className="overflow-hidden bg-white shadow-xl rounded-2xl">
-                    <button onClick={() => setOpenStandard(!openStandard)}
-                      className="flex items-center justify-between w-full px-6 py-4 transition bg-gray-50 hover:bg-gray-100">
-                      <h3 className="font-bold text-gray-800">Field Standar</h3>
-                      <ChevronDown className={`w-5 h-5 transition ${openStandard ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openStandard && (
-                      <div className="p-4 space-y-3">
-                        {standardFields.map((f, i) => (
-                          <button key={i} onClick={() => addField(f.type)}
-                            className="flex items-center w-full gap-3 p-4 transition border-2 border-transparent rounded-xl bg-gray-50 hover:bg-indigo-50 hover:border-indigo-500">
-                            {f.icon} <span className="font-medium">{f.label}</span>
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
 
-                  <div className="overflow-hidden shadow-xl bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl">
-                    <button onClick={() => setOpenAdvanced(!openAdvanced)}
-                      className="flex items-center justify-between w-full px-6 py-4 transition bg-emerald-100 hover:bg-emerald-200">
-                      <h3 className="font-bold text-emerald-800">Field Tambahan</h3>
-                      <ChevronDown className={`w-5 h-5 transition ${openAdvanced ? 'rotate-180' : ''}`} />
-                    </button>
-                    {openAdvanced && (
-                      <div className="p-4 space-y-3">
-                        {advancedFields.map((f, i) => (
-                          <button key={i} onClick={() => addField(f.type)}
-                            className="flex items-center w-full gap-3 p-4 transition bg-white border-2 rounded-xl border-emerald-200 hover:border-emerald-500">
-                            {f.icon} <span className="font-medium">{f.label}</span>
-                          </button>
-                        ))}
-                      </div>
+                    {/* LAYANAN & HARGA — STYLE SAMA PERSIS DENGAN FIELD TAMBAHAN */}
+                    {!umkmLoading && umkmServices.length > 0 && (
+                    <div className="overflow-hidden shadow-xl bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl">
+                        <button
+                        onClick={() => setOpenServices(!openServices)}
+                        className="flex items-center justify-between w-full px-6 py-5 transition bg-emerald-100 hover:bg-emerald-200"
+                        >
+                        <div className="flex items-center gap-3">
+                            <DollarSign className="w-6 h-6 text-emerald-700" />
+                            <h3 className="text-lg font-bold text-emerald-800">
+                            Layanan & Harga ({umkmServices.length})
+                            </h3>
+                        </div>
+                        <div className="flex items-center gap-4">
+                            <Link
+                            to="/umkm/settings"
+                            onClick={(e) => e.stopPropagation()}
+                            className="flex items-center gap-1 text-sm font-medium text-emerald-600 hover:text-emerald-700"
+                            >
+                            <Plus className="w-4 h-4" /> Edit
+                            </Link>
+                            <ChevronDown className={`w-5 h-5 text-emerald-700 transition-transform ${openServices ? 'rotate-180' : ''}`} />
+                        </div>
+                        </button>
+
+                        {openServices && (
+                        <div className="p-4 space-y-3">
+                            {umkmServices.map((service, i) => (
+                            <div
+                                key={i}
+                                className="flex items-center justify-between p-4 transition-all bg-white border-2 rounded-xl border-emerald-200 hover:border-emerald-500 hover:shadow-md group"
+                            >
+                                <div className="flex items-center gap-3">
+                                <div className="p-2 transition-colors rounded-lg bg-emerald-100 group-hover:bg-emerald-200">
+                                    <CreditCard className="w-5 h-5 text-emerald-700" />
+                                </div>
+                                <span className="font-medium text-gray-800">{service.name}</span>
+                                </div>
+
+                                {/* BADGE HARGA — CANTIK & RINGKAS */}
+                                <div className="px-1 py-1 text-[0.50rem] font-bold text-white rounded-full shadow-md bg-gradient-to-r from-emerald-600 to-teal-600">
+                                Rp {Number(service.price).toLocaleString('id-ID')}
+                                </div>
+                            </div>
+                            ))}
+                        </div>
+                        )}
+                    </div>
                     )}
-                  </div>
+
+                    {/* BELUM ADA LAYANAN — CARD RINGKAS & KONSISTEN */}
+                    {!umkmLoading && umkmServices.length === 0 && (
+                    <div className="overflow-hidden shadow-xl bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl">
+                        <div className="p-8 text-center">
+                        <div className="inline-flex p-4 mb-4 bg-emerald-100 rounded-2xl">
+                            <DollarSign className="w-10 h-10 text-emerald-700" />
+                        </div>
+                        <h3 className="mb-2 text-lg font-bold text-emerald-800">Belum Ada Layanan</h3>
+                        <p className="mb-5 text-sm text-emerald-700">Tambahkan layanan di pengaturan</p>
+                        <Link
+                            to="/umkm/settings"
+                            className="inline-flex items-center gap-2 px-6 py-3 text-sm font-bold text-white transition-shadow bg-emerald-600 rounded-xl hover:bg-emerald-700 hover:shadow-lg"
+                        >
+                            <Plus className="w-5 h-5" />
+                            Tambah Layanan
+                        </Link>
+                        </div>
+                    </div>
+                    )}
+
+                    {/* 2. FIELD STANDAR */}
+                    <div className="overflow-hidden bg-white shadow-xl rounded-2xl">
+                        <button onClick={() => setOpenStandard(!openStandard)}
+                        className="flex items-center justify-between w-full px-6 py-4 transition bg-gray-50 hover:bg-gray-100">
+                        <h3 className="font-bold text-gray-800">Field Standar</h3>
+                        <ChevronDown className={`w-5 h-5 transition ${openStandard ? 'rotate-180' : ''}`} />
+                        </button>
+                        {openStandard && (
+                        <div className="p-4 space-y-3">
+                            {standardFields.map((f, i) => (
+                            <button key={i} onClick={() => addField(f.type)}
+                                className="flex items-center w-full gap-3 p-4 transition border-2 border-transparent rounded-xl bg-gray-50 hover:bg-indigo-50 hover:border-indigo-500">
+                                {f.icon} <span className="font-medium">{f.label}</span>
+                            </button>
+                            ))}
+                        </div>
+                        )}
+                    </div>
+
+                    {/* 3. FIELD TAMBAHAN */}
+                    <div className="overflow-hidden shadow-xl bg-gradient-to-br from-emerald-50 to-teal-50 rounded-2xl">
+                        <button onClick={() => setOpenAdvanced(!openAdvanced)}
+                        className="flex items-center justify-between w-full px-6 py-4 transition bg-emerald-100 hover:bg-emerald-200">
+                        <h3 className="font-bold text-emerald-800">Field Tambahan</h3>
+                        <ChevronDown className={`w-5 h-5 transition ${openAdvanced ? 'rotate-180' : ''}`} />
+                        </button>
+                        {openAdvanced && (
+                        <div className="p-4 space-y-3">
+                            {advancedFields.map((f, i) => (
+                            <button key={i} onClick={() => addField(f.type)}
+                                className="flex items-center w-full gap-3 p-4 transition bg-white border-2 rounded-xl border-emerald-200 hover:border-emerald-500">
+                                {f.icon} <span className="font-medium">{f.label}</span>
+                            </button>
+                            ))}
+                        </div>
+                        )}
+                    </div>
                 </div>
 
                 {/* CANVAS — LEBIH BERSIH */}
