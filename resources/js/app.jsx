@@ -16,6 +16,27 @@ import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
 import UmkmSettings from '@/Pages/Umkm/Settings';
 import useUmkmStore from '@/Stores/useUmkmStore';
 
+import { createInertiaApp } from '@inertiajs/react';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
+
+const appName = import.meta.env.VITE_APP_NAME || 'BookUMKM';
+
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.jsx`,
+            import.meta.glob('./Pages/**/*.jsx')
+        ),
+    setup({ el, App, props }) {
+        const root = createRoot(el);
+        root.render(<App {...props} />);
+    },
+    progress: {
+        color: '#2563eb',
+    },
+});
+
 function App() {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');

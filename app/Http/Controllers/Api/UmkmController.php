@@ -52,7 +52,7 @@ class UmkmController extends Controller
                     'opening_hours' => $umkm->opening_hours ?? [],   // sudah array otomatis!
                 ];
             });
-    
+
         return response()->json([
             'status'  => 'success',
             'message' => 'Daftar UMKM berhasil diambil',
@@ -207,5 +207,26 @@ class UmkmController extends Controller
             'status'  => 'success',
             'data'    => $umkm
         ]);
+    }
+
+    public function getFormFields($id)
+    {
+        $umkm = Umkm::find($id);
+
+        if (!$umkm) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'UMKM tidak ditemukan',
+                'data' => []
+            ], 404);
+        }
+
+        $formFields = $umkm->formFields()->orderBy('sort_order')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Form fields berhasil diambil',
+            'data' => $formFields
+        ], 200);
     }
 }
