@@ -68,4 +68,29 @@ class UmkmController extends Controller
             'data' => $umkms
         ], 200);
     }
+
+    /**
+     * GET /api/umkms/{id}/form-fields
+     * Mengambil form fields untuk UMKM tertentu
+     */
+    public function getFormFields($id)
+    {
+        $umkm = UMKM::find($id);
+
+        if (!$umkm) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'UMKM tidak ditemukan',
+                'data' => []
+            ], 404);
+        }
+
+        $formFields = $umkm->formFields()->orderBy('sort_order')->get();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Form fields berhasil diambil',
+            'data' => $formFields
+        ], 200);
+    }
 }

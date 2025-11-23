@@ -1,6 +1,6 @@
-// resources/js/Pages/Umkm/UmkmDashboard.jsx
+// resources/js/Pages/Umkm/Dashboard.jsx
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Head, Link, router } from '@inertiajs/react';
 import { Line, Bar } from 'react-chartjs-2';
 import {
     Chart as ChartJS,
@@ -24,7 +24,7 @@ dayjs.locale('id');
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, BarElement, Title, Tooltip, Legend);
 
-export default function UmkmDashboard() {
+export default function UmkmDashboard({ auth }) {
     const [stats, setStats] = useState({
         todayBookings: 0,
         monthlyRevenue: 0,
@@ -39,37 +39,38 @@ export default function UmkmDashboard() {
     const [bookings, setBookings] = useState({ diterima: [], pending: [], cancelled: [] });
     const [activeTab, setActiveTab] = useState('diterima');
     const [loading, setLoading] = useState(true);
-    const [selectedDate, setSelectedDate] = useState(dayjs()); // untuk kalender
+    const [selectedDate, setSelectedDate] = useState(dayjs());
     const [showCalendar, setShowCalendar] = useState(false);
-    const navigate = useNavigate();
-    const location = useLocation();
-
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    
+    const user = auth?.user || {};
 
     useEffect(() => {
-        const loadData = async () => {
-            try {
-                const [statsRes, bookingsRes] = await Promise.all([
-                    api.get('/dashboard/stats'),
-                    api.get('/bookings/recent')
-                ]);
+        // Sementara comment API calls untuk testing
+        setLoading(false);
+        
+        // const loadData = async () => {
+        //     try {
+        //         const [statsRes, bookingsRes] = await Promise.all([
+        //             api.get('/dashboard/stats'),
+        //             api.get('/bookings/recent')
+        //         ]);
 
-                setStats(prev => ({
-                    ...statsRes.data.data || statsRes.data,
-                    todayServed: statsRes.data.todayServed || 0
-                }));
-                setBookings({
-                    diterima: bookingsRes.data.diterima || [],
-                    pending: bookingsRes.data.pending || [],
-                    cancelled: bookingsRes.data.cancelled || []
-                });
-            } catch (err) {
-                console.log('API gagal');
-            } finally {
-                setLoading(false);
-            }
-        };
-        loadData();
+        //         setStats(prev => ({
+        //             ...statsRes.data.data || statsRes.data,
+        //             todayServed: statsRes.data.todayServed || 0
+        //         }));
+        //         setBookings({
+        //             diterima: bookingsRes.data.diterima || [],
+        //             pending: bookingsRes.data.pending || [],
+        //             cancelled: bookingsRes.data.cancelled || []
+        //         });
+        //     } catch (err) {
+        //         console.log('API gagal');
+        //     } finally {
+        //         setLoading(false);
+        //     }
+        // };
+        // loadData();
     }, []);
 
     // Fungsi antrian berdasarkan tanggal yang dipilih
@@ -164,8 +165,7 @@ export default function UmkmDashboard() {
     };
 
     const handleLogout = () => {
-        localStorage.clear();
-        navigate('/');
+        router.post('/logout');
     };
 
     const navItems = [
@@ -209,17 +209,21 @@ export default function UmkmDashboard() {
         );
     }
 
+    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+
     return (
         <>
+            <Head title="Dashboard UMKM" />
+            
             {/* NAVBAR ATAS */}
             <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
                 <div className="px-4 py-3 mx-auto max-w-7xl md:px-6">
                     <div className="flex items-center justify-between">
                         <div className="flex items-center gap-4 md:gap-8">
                             {navItems.map((item) => (
-                                <Link key={item.name} to={item.href}
+                                <Link key={item.name} href={item.href}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                                        location.pathname === item.href 
+                                        currentPath === item.href 
                                             ? 'bg-indigo-100 text-indigo-700' 
                                             : 'text-gray-600 hover:bg-gray-100'
                                     }`}>
@@ -246,7 +250,7 @@ export default function UmkmDashboard() {
                             <h1 className="text-2xl font-bold text-gray-900 md:text-3xl">Halo, {user.name || 'UMKM'}!</h1>
                             <p className="text-sm text-gray-600 md:text-base">Pantau bisnis kamu hari ini</p>
                         </div>
-                        <Link to="/umkm/formbuilder" className="flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition transform bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:shadow-lg hover:scale-105">
+                        <Link href="/umkm/formbuilder" className="flex items-center gap-2 px-5 py-3 text-sm font-semibold text-white transition transform bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:shadow-lg hover:scale-105">
                             <FileText className="w-5 h-5" /> Edit Form Booking
                         </Link>
                     </div>
@@ -523,8 +527,8 @@ export default function UmkmDashboard() {
             <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg md:hidden">
                 <div className="grid grid-cols-3 py-3">
                     {navItems.map((item) => (
-                        <Link key={item.name} to={item.href}
-                            className={`flex flex-col items-center text-xs font-medium py-2 ${location.pathname === item.href ? 'text-indigo-600' : 'text-gray-500'}`}>
+                        <Link key={item.name} href={item.href}
+                            className={`flex flex-col items-center text-xs font-medium py-2 ${currentPath === item.href ? 'text-indigo-600' : 'text-gray-500'}`}>
                             <item.icon className="w-6 h-6 mb-1" />
                             {item.name}
                         </Link>

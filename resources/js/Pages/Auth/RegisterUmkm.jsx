@@ -1,12 +1,11 @@
 // resources/js/Pages/Auth/RegisterUmkm.jsx
 
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Head, Link, router } from '@inertiajs/react';
 import { Store, CheckCircle, Loader2, ArrowLeft } from 'lucide-react';
 import api from '@/Services/Api';
 
 export default function RegisterUmkm() {
-    const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
     const [form, setForm] = useState({
@@ -22,11 +21,9 @@ export default function RegisterUmkm() {
 
         try {
             const res = await api.post('/register-umkm', form);
-            localStorage.setItem('token', res.data.data.token);
-            localStorage.setItem('user', JSON.stringify(res.data.data.user));
-            localStorage.setItem('umkm', JSON.stringify(res.data.data.umkm));
+            // Token akan dihandle oleh Laravel Session
             setSuccess(true);
-            setTimeout(() => navigate('/umkm/dashboard'), 3000);
+            setTimeout(() => router.visit('/umkm/dashboard'), 3000);
         } catch (err) {
             alert(err.response?.data?.message || 'Gagal mendaftar');
         } finally {
@@ -36,7 +33,9 @@ export default function RegisterUmkm() {
 
     if (success) {
         return (
-            <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-green-50 to-emerald-100">
+            <>
+                <Head title="Pendaftaran Berhasil" />
+                <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-green-50 to-emerald-100">
                 <div className="max-w-lg p-12 text-center bg-white shadow-2xl rounded-3xl">
                     <div className="flex items-center justify-center mx-auto mb-6 bg-green-100 rounded-full w-28 h-28">
                         <CheckCircle className="w-16 h-16 text-green-600" />
@@ -49,15 +48,18 @@ export default function RegisterUmkm() {
                         Mengarahkan ke dashboard...
                     </div>
                 </div>
-            </div>
+                </div>
+            </>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
+        <>
+            <Head title="Daftar UMKM" />
+            <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
             <div className="px-6 py-12">
                 <div className="max-w-4xl mx-auto">
-                    <Link to="/" className="inline-flex items-center gap-2 mb-8 text-indigo-600 hover:text-indigo-800">
+                    <Link href="/" className="inline-flex items-center gap-2 mb-8 text-indigo-600 hover:text-indigo-800">
                         <ArrowLeft size={20} /> Kembali ke Beranda
                     </Link>
 
@@ -118,12 +120,13 @@ export default function RegisterUmkm() {
 
                         <div className="p-8 text-center bg-gray-50">
                             <p className="text-gray-600">
-                                Sudah punya akun? <Link to="/login" className="font-bold text-indigo-600 hover:underline">Login di sini</Link>
+                                Sudah punya akun? <Link href="/login" className="font-bold text-indigo-600 hover:underline">Login di sini</Link>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+            </div>
+        </>
     );
 }

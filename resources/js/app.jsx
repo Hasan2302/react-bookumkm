@@ -1,67 +1,24 @@
-// resources/js/app.jsx
 import './bootstrap';
 import '../css/app.css';
-import React from 'react';
+
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { Navigate } from 'react-router-dom';
-import Login from '@/Pages/Auth/Login';
-import UmkmDashboard from '@/Pages/Umkm/Dashboard';
-import FormBuilder from '@/Pages/Umkm/FormBuilder';
-import AdminDashboard from '@/Pages/Admin/Dashboard';
-import Welcome from '@/Pages/Welcome';
-import Register from '@/Pages/Auth/Register';
-import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
-import UmkmSettings from '@/Pages/Umkm/Settings';
+import { createInertiaApp } from '@inertiajs/react';
+import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 
-function App() {
-    const token = localStorage.getItem('token');
-    const user = localStorage.getItem('user');
-    const parsedUser = user ? JSON.parse(user) : null;
+const appName = import.meta.env.VITE_APP_NAME || 'BookUMKM';
 
-    // Kalau belum login
-    if (!token || !parsedUser) {
-        return (
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Welcome />} />           {/* ← Landing Page */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/register-umkm" element={<RegisterUmkm />} />
-            </Routes>
-          </BrowserRouter>
-        );
-      }
-
-    // Kalau sudah login → arahkan sesuai role
-    return (
-      <BrowserRouter>
-        <Routes>
-          <Route path="/login" element={<Navigate to="/" replace />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/register-umkm" element={<RegisterUmkm />} />
-
-          {/* UMKM USER */}
-          {['umkm_admin', 'user'].includes(parsedUser.role) && (
-            <>
-              <Route path="/umkm/dashboard" element={<UmkmDashboard />} />
-              <Route path="/umkm/formbuilder" element={<FormBuilder />} />
-              <Route path="/umkm/settings" element={<UmkmSettings />} />
-              <Route path="*" element={<Navigate to="/umkm/dashboard" replace />} />
-            </>
-          )}
-
-          {/* SUPERADMIN */}
-          {parsedUser.role === 'superadmin' && (
-            <>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
-            </>
-          )}
-        </Routes>
-      </BrowserRouter>
-    );
-  }
-
-  createRoot(document.getElementById('app')).render(<App />);
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) =>
+        resolvePageComponent(
+            `./Pages/${name}.jsx`,
+            import.meta.glob('./Pages/**/*.jsx')
+        ),
+    setup({ el, App, props }) {
+        const root = createRoot(el);
+        root.render(<App {...props} />);
+    },
+    progress: {
+        color: '#2563eb',
+    },
+});

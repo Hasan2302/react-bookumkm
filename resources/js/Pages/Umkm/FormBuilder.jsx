@@ -1,6 +1,6 @@
 // resources/js/Pages/Umkm/FormBuilder.jsx
 import { useState, useEffect } from 'react';
-import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Head, Link, router } from '@inertiajs/react';
 import {
   DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors,
 } from '@dnd-kit/core';
@@ -80,15 +80,14 @@ function SortableField({ field, onUpdate, onDelete }) {
   );
 }
 
-export default function FormBuilder() {
+export default function FormBuilder({ auth }) {
   const [fields, setFields] = useState([]);
   const [previewMode, setPreviewMode] = useState(false);
   const [loading, setLoading] = useState(true);
   const [openStandard, setOpenStandard] = useState(true);
   const [openAdvanced, setOpenAdvanced] = useState(false);
-  const navigate = useNavigate();
-  const location = useLocation();
-  const user = JSON.parse(localStorage.getItem('user') || '{}');
+  const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+  const user = auth?.user || {};
 
   const navItems = [
     { name: 'Dashboard', to: '/umkm/dashboard', icon: Home },
@@ -168,16 +167,19 @@ export default function FormBuilder() {
   const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
 
   useEffect(() => {
-    const load = async () => {
-      try {
-        const res = await api.get('/formbuilder');
-        if (res.data.data?.length > 0) {
-          setFields(res.data.data.map(f => ({ ...f, id: f.id.toString() })));
-        }
-      } catch (err) { console.error(err); }
-      finally { setLoading(false); }
-    };
-    load();
+    // Sementara comment API call untuk testing
+    setLoading(false);
+    
+    // const load = async () => {
+    //   try {
+    //     const res = await api.get('/formbuilder');
+    //     if (res.data.data?.length > 0) {
+    //       setFields(res.data.data.map(f => ({ ...f, id: f.id.toString() })));
+    //     }
+    //   } catch (err) { console.error(err); }
+    //   finally { setLoading(false); }
+    // };
+    // load();
   }, []);
 
   const handleSave = async () => {
@@ -216,14 +218,16 @@ export default function FormBuilder() {
 
   return (
     <>
+      <Head title="Form Builder - UMKM" />
+      
       {/* NAVBAR ATAS — SAMA DENGAN DASHBOARD */}
       <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
         <div className="px-4 py-3 mx-auto max-w-7xl md:px-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 md:gap-8">
               {navItems.map((item) => (
-                <Link key={item.name} to={item.to}
-                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname === item.to ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}>
+                <Link key={item.name} href={item.to}
+                  className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${currentPath === item.to ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}>
                   <item.icon className="w-5 h-5" />
                   <span className="hidden sm:block">{item.name}</span>
                 </Link>
@@ -231,7 +235,7 @@ export default function FormBuilder() {
             </div>
             <div className="flex items-center gap-3">
               <span className="hidden text-sm font-medium md:block">Hi, {user.name}!</span>
-              <button onClick={() => { localStorage.clear(); navigate('/'); }}
+              <button onClick={() => router.post('/logout')}
                 className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg bg-red-50 hover:bg-red-100">
                 <LogOut className="w-4 h-4" /> <span className="hidden md:inline">Logout</span>
               </button>
@@ -408,8 +412,8 @@ export default function FormBuilder() {
       <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg md:hidden">
         <div className="grid grid-cols-3 py-3">
           {navItems.map((item) => (
-            <Link key={item.name} to={item.to}
-              className={`flex flex-col items-center text-xs font-medium py-2 ${location.pathname === item.to ? 'text-indigo-600' : 'text-gray-500'}`}>
+            <Link key={item.name} href={item.to}
+              className={`flex flex-col items-center text-xs font-medium py-2 ${currentPath === item.to ? 'text-indigo-600' : 'text-gray-500'}`}>
               <item.icon className="w-6 h-6 mb-1" />
               {item.name}
             </Link>

@@ -1,0 +1,270 @@
+import { useState, useMemo } from 'react';
+import { Head } from '@inertiajs/react';
+import PublicLayout from '@/Layouts/PublicLayout';
+import UmkmCard from '@/Components/UmkmCard';
+import BookingModal from '@/Components/BookingModal';
+import { Search, Sparkles, TrendingUp, Shield, Clock } from 'lucide-react';
+
+export default function Welcome({ umkms = [], featured = null, canLogin, canRegister }) {
+    const [searchTerm, setSearchTerm] = useState('');
+    const [selectedUmkm, setSelectedUmkm] = useState(null);
+    const [showModal, setShowModal] = useState(false);
+
+    const filteredUmkms = useMemo(() => {
+        if (!searchTerm) return umkms;
+        const term = searchTerm.toLowerCase();
+        return umkms.filter(
+            (u) =>
+                u.name?.toLowerCase().includes(term) ||
+                u.address?.toLowerCase().includes(term) ||
+                u.category?.toLowerCase().includes(term)
+        );
+    }, [umkms, searchTerm]);
+
+    const handleOpenBooking = (umkm) => {
+        setSelectedUmkm(umkm);
+        setShowModal(true);
+    };
+
+    return (
+        <PublicLayout canLogin={canLogin} canRegister={canRegister}>
+            <Head title="Home - BookUMKM" />
+
+            {/* Hero Section */}
+            <section className="relative flex items-center justify-center min-h-screen overflow-hidden bg-gradient-hero">
+                {/* Animated Background */}
+                <div className="absolute inset-0 overflow-hidden">
+                    {/* Gradient Orbs */}
+                    <div className="absolute rounded-full opacity-20 -top-24 -left-24 w-96 h-96 bg-sky-400 blur-3xl animate-float-slow" />
+                    <div className="absolute rounded-full opacity-20 -bottom-24 -right-24 w-96 h-96 bg-blue-500 blur-3xl animate-float-slow" style={{ animationDelay: '3s' }} />
+                    <div className="absolute rounded-full opacity-15 top-1/2 left-1/2 w-80 h-80 bg-primary-300 blur-3xl animate-pulse" style={{ animationDelay: '1.5s' }} />
+                </div>
+
+                <div className="relative z-10 px-4 py-32 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
+                    <div className="space-y-8">
+                        {/* Badge */}
+                        <div className="inline-flex items-center px-5 py-2.5 space-x-2 border rounded-full bg-white/10 backdrop-blur-xl border-white/20 shadow-glass animate-fade-in-down">
+                            <Sparkles className="w-5 h-5 text-yellow-300 animate-pulse" />
+                            <span className="text-sm font-semibold tracking-wide text-white drop-shadow-lg">
+                                Platform Booking UMKM Terpercaya
+                            </span>
+                        </div>
+
+                        {/* Main Heading */}
+                        <h1 className="text-5xl font-extrabold leading-tight text-white md:text-7xl drop-shadow-2xl animate-fade-in">
+                            Booking UMKM
+                            <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-orange-300 to-orange-400 animate-gradient">
+                                Jadi Lebih Mudah
+                            </span>
+                        </h1>
+
+                        {/* Subtitle */}
+                        <p className="max-w-3xl mx-auto text-xl leading-relaxed text-blue-50 md:text-2xl animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                            Reservasi online untuk layanan salon, barbershop, klinik, spa, dan UMKM lainnya.<br />
+                            <span className="font-semibold text-yellow-300">Sekali klik, langsung terjadwal!</span>
+                        </p>
+
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col items-center justify-center gap-4 sm:flex-row animate-fade-in" style={{ animationDelay: '0.4s' }}>
+                            <a
+                                href="#umkm-list"
+                                className="relative px-10 py-4 overflow-hidden text-lg font-bold transition-all duration-300 shadow-glass-lg group text-primary-900 bg-gradient-to-r from-yellow-300 to-orange-400 rounded-2xl hover:scale-105 hover:shadow-2xl"
+                            >
+                                <span className="relative z-10 flex items-center gap-2">
+                                    <Search className="w-5 h-5" />
+                                    Cari UMKM
+                                </span>
+                                <div className="absolute inset-0 transition-transform duration-300 scale-x-0 origin-left bg-gradient-to-r from-orange-400 to-orange-500 group-hover:scale-x-100" />
+                            </a>
+                            <a
+                                href="/register"
+                                className="relative px-10 py-4 overflow-hidden text-lg font-semibold text-white transition-all duration-300 border-2 shadow-glass group rounded-2xl backdrop-blur-xl bg-white/10 border-white/30 hover:bg-white/20 hover:scale-105"
+                            >
+                                <span className="relative z-10">Daftarkan UMKM Anda</span>
+                                <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-white/10 group-hover:opacity-100" />
+                            </a>
+                        </div>
+
+                        {/* Stats Cards */}
+                        <div className="grid grid-cols-1 gap-6 pt-16 mt-16 border-t sm:grid-cols-3 border-white/20 animate-fade-in" style={{ animationDelay: '0.6s' }}>
+                            <div className="p-6 transition-all duration-300 border group rounded-2xl bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 hover:scale-105 shadow-glass hover:shadow-glass-lg">
+                                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-orange-400 drop-shadow-lg">150+</div>
+                                <div className="mt-2 text-sm font-medium text-blue-50">UMKM Mitra</div>
+                            </div>
+                            <div className="p-6 transition-all duration-300 border group rounded-2xl bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 hover:scale-105 shadow-glass hover:shadow-glass-lg">
+                                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-orange-400 drop-shadow-lg">5K+</div>
+                                <div className="mt-2 text-sm font-medium text-blue-50">Booking Berhasil</div>
+                            </div>
+                            <div className="p-6 transition-all duration-300 border group rounded-2xl bg-white/5 backdrop-blur-md border-white/10 hover:bg-white/10 hover:scale-105 shadow-glass hover:shadow-glass-lg">
+                                <div className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-br from-yellow-300 to-orange-400 drop-shadow-lg">24/7</div>
+                                <div className="mt-2 text-sm font-medium text-blue-50">Layanan Aktif</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Scroll Indicator */}
+                <div className="absolute bottom-8 left-1/2 -translate-x-1/2 animate-bounce">
+                    <div className="w-6 h-10 border-2 border-white/60 rounded-full">
+                        <div className="w-1.5 h-2 mx-auto mt-2 bg-white rounded-full animate-pulse" />
+                    </div>
+                </div>
+            </section>
+
+            {/* Features Section */}
+            <section className="py-20 bg-white">
+                <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="mb-16 text-center">
+                        <h2 className="mb-4 text-4xl font-bold text-gray-900">
+                            Kenapa Pilih BookUMKM?
+                        </h2>
+                        <p className="text-xl text-gray-600">
+                            Platform terbaik untuk mengelola reservasi bisnis Anda
+                        </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+                        <div className="relative p-8 overflow-hidden transition-all duration-300 border shadow-glass group bg-gradient-to-br from-primary-50/80 to-blue-50/80 backdrop-blur-lg border-white/20 rounded-3xl hover:shadow-glass-xl hover:scale-105">
+                            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-glass group-hover:opacity-100" />
+                            <div className="relative flex items-center justify-center w-16 h-16 mb-6 transition-transform duration-300 shadow-glass rounded-2xl bg-gradient-primary group-hover:scale-110 group-hover:rotate-6">
+                                <Clock className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-gray-900">
+                                Booking 24/7
+                            </h3>
+                            <p className="text-gray-600">
+                                Reservasi kapan saja, di mana saja tanpa harus menelepon
+                            </p>
+                        </div>
+
+                        <div className="relative p-8 overflow-hidden transition-all duration-300 border shadow-glass group bg-gradient-to-br from-green-50/80 to-emerald-50/80 backdrop-blur-lg border-white/20 rounded-3xl hover:shadow-glass-xl hover:scale-105">
+                            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-glass group-hover:opacity-100" />
+                            <div className="relative flex items-center justify-center w-16 h-16 mb-6 transition-transform duration-300 bg-green-600 shadow-glass rounded-2xl group-hover:scale-110 group-hover:rotate-6">
+                                <Shield className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-gray-900">
+                                Aman & Terpercaya
+                            </h3>
+                            <p className="text-gray-600">
+                                Data Anda dilindungi dengan enkripsi tingkat enterprise
+                            </p>
+                        </div>
+
+                        <div className="relative p-8 overflow-hidden transition-all duration-300 border shadow-glass group bg-gradient-to-br from-orange-50/80 to-amber-50/80 backdrop-blur-lg border-white/20 rounded-3xl hover:shadow-glass-xl hover:scale-105">
+                            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-gradient-glass group-hover:opacity-100" />
+                            <div className="relative flex items-center justify-center w-16 h-16 mb-6 transition-transform duration-300 bg-orange-600 shadow-glass rounded-2xl group-hover:scale-110 group-hover:rotate-6">
+                                <TrendingUp className="w-8 h-8 text-white" />
+                            </div>
+                            <h3 className="mb-3 text-xl font-bold text-gray-900">
+                                Mudah Digunakan
+                            </h3>
+                            <p className="text-gray-600">
+                                Interface intuitif, proses booking hanya 3 langkah
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            {/* Featured UMKM */}
+            {featured && (
+                <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
+                    <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                        <div className="mb-12 text-center">
+                            <h2 className="mb-4 text-4xl font-bold text-gray-900">
+                                UMKM Unggulan
+                            </h2>
+                            <p className="text-xl text-gray-600">
+                                Pilihan terbaik dengan rating tertinggi
+                            </p>
+                        </div>
+
+                        <UmkmCard
+                            umkm={featured}
+                            onClick={handleOpenBooking}
+                            featured={true}
+                        />
+                    </div>
+                </section>
+            )}
+
+            {/* Search & UMKM List */}
+            <section id="umkm-list" className="py-20 bg-white">
+                <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                    <div className="mb-12 text-center">
+                        <h2 className="mb-4 text-4xl font-bold text-gray-900">
+                            Jelajahi Semua UMKM
+                        </h2>
+                        <p className="text-xl text-gray-600">
+                            Temukan layanan yang Anda butuhkan
+                        </p>
+                    </div>
+
+                    {/* Search Bar */}
+                    <div className="relative max-w-2xl mx-auto mb-12">
+                        <Search className="absolute w-6 h-6 transition-colors duration-300 -translate-y-1/2 text-primary-400 left-5 top-1/2" />
+                        <input
+                            type="text"
+                            placeholder="Cari UMKM, kategori, atau lokasi..."
+                            value={searchTerm}
+                            onChange={(e) => setSearchTerm(e.target.value)}
+                            className="w-full py-5 pl-16 pr-6 text-lg transition-all duration-300 border shadow-glass bg-white/80 backdrop-blur-xl border-white/20 rounded-2xl focus:ring-4 focus:ring-primary-300 focus:shadow-glass-lg focus:scale-105 hover:shadow-glass-lg"
+                        />
+                    </div>
+
+                    {/* UMKM Grid */}
+                    {filteredUmkms.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {filteredUmkms.map((umkm) => (
+                                <UmkmCard
+                                    key={umkm.id}
+                                    umkm={umkm}
+                                    onClick={handleOpenBooking}
+                                />
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="py-20 text-center">
+                            <div className="mb-4 text-6xl">🔍</div>
+                            <h3 className="mb-2 text-2xl font-bold text-gray-900">
+                                UMKM tidak ditemukan
+                            </h3>
+                            <p className="text-gray-600">
+                                Coba kata kunci lain atau browse semua UMKM
+                            </p>
+                        </div>
+                    )}
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="py-20 text-white bg-gradient-hero">
+                <div className="px-4 mx-auto text-center max-w-7xl sm:px-6 lg:px-8">
+                    <h2 className="mb-6 text-4xl font-bold md:text-5xl">
+                        Punya Usaha UMKM?
+                    </h2>
+                    <p className="max-w-2xl mx-auto mb-8 text-xl text-blue-100">
+                        Bergabunglah dengan ratusan UMKM lainnya dan tingkatkan penjualan Anda dengan sistem booking online
+                    </p>
+                    <a
+                        href="/register"
+                        className="inline-block px-10 py-4 text-lg font-bold transition shadow-2xl text-primary-900 bg-gradient-to-r from-yellow-300 to-yellow-400 rounded-2xl hover:scale-105"
+                    >
+                        Daftar Sekarang - GRATIS
+                    </a>
+                </div>
+            </section>
+
+            {/* Booking Modal */}
+            <BookingModal
+                umkm={selectedUmkm}
+                isOpen={showModal}
+                onClose={() => {
+                    setShowModal(false);
+                    setSelectedUmkm(null);
+                }}
+            />
+        </PublicLayout>
+    );
+}
