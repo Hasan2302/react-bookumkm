@@ -2,22 +2,32 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Booking extends Model
 {
-    use HasFactory;
+    protected $table = 'bookings';
 
-    protected $fillable = ['umkm_id', 'user_id', 'date', 'time', 'payment_method', 'status'];
+    protected $fillable = [
+        'umkm_id',
+        'user_id',
+        'customer_name',
+        'customer_phone',
+        'service_name',
+        'date',
+        'time',
+        'total_price',
+        'payment_method',
+        'status',
+    ];
+
+    protected $casts = [
+        'date' => 'date',
+        'total_price' => 'integer',
+    ];
 
     public function umkm()
     {
-        return $this->belongsTo(UMKM::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(Umkm::class);
     }
 }

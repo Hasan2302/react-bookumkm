@@ -12,6 +12,7 @@ import AdminDashboard from '@/Pages/Admin/Dashboard';
 import Welcome from '@/Pages/Welcome';
 import Register from '@/Pages/Auth/Register';
 import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
+import UmkmSettings from '@/Pages/Umkm/Settings';
 
 function App() {
     const token = localStorage.getItem('token');
@@ -46,6 +47,7 @@ function App() {
             <>
               <Route path="/umkm/dashboard" element={<UmkmDashboard />} />
               <Route path="/umkm/formbuilder" element={<FormBuilder />} />
+              <Route path="/umkm/settings" element={<UmkmSettings />} />
               <Route path="*" element={<Navigate to="/umkm/dashboard" replace />} />
             </>
           )}
