@@ -18,7 +18,7 @@ class BookingController extends Controller
             'umkm_id'        => 'required|exists:umkms,id',
             'date'           => 'required|date|after_or_equal:today',
             'time'           => 'required',
-            'payment_method' => 'required|in:offline,qris,transfer',
+            'payment_method' => 'required|string|in:offline,online,on_site,qris,transfer',
             'customer_name'  => 'required|string',
             'customer_phone' => 'nullable|string',
             'service_name'   => 'nullable|string',

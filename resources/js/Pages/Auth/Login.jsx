@@ -60,11 +60,11 @@ export default function Login() {
                     {/* Logo & Brand */}
                     <div className="mb-8 text-center">
                         <div className="flex items-center justify-center mb-3">
-                            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-xl">
+                            <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl">
                                 <Store className="w-6 h-6 text-white" />
                             </div>
                         </div>
-                        <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-emerald-600 to-emerald-700">
+                        <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-700">
                             BookUMKM
                         </h1>
                         <p className="mt-2 text-sm text-gray-600">Masuk ke dashboard Anda</p>
@@ -81,7 +81,7 @@ export default function Login() {
                                 onClick={() => setForm({ ...form, role: 'umkm_admin', email: '' })}
                                 className={`p-3 text-center border rounded-lg transition-all ${
                                     form.role === 'umkm_admin'
-                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
                                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                                 }`}
                             >
@@ -93,7 +93,7 @@ export default function Login() {
                                 onClick={() => setForm({ ...form, role: 'superadmin', email: 'admin@example.com' })}
                                 className={`p-3 text-center border rounded-lg transition-all ${
                                     form.role === 'superadmin'
-                                        ? 'border-emerald-500 bg-emerald-50 text-emerald-700'
+                                        ? 'border-primary-500 bg-primary-50 text-primary-700'
                                         : 'border-gray-200 text-gray-600 hover:border-gray-300'
                                 }`}
                             >
@@ -122,7 +122,7 @@ export default function Login() {
                                 value={form.email}
                                 onChange={(e) => setForm({ ...form, email: e.target.value })}
                                 required={form.role !== 'superadmin'}
-                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
                                 placeholder="owner@salon.com"
                             />
                         </div>
@@ -138,7 +138,7 @@ export default function Login() {
                                     value={form.password}
                                     onChange={(e) => setForm({ ...form, password: e.target.value })}
                                     required
-                                    className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-emerald-500 focus:ring-2 focus:ring-emerald-100"
+                                    className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100"
                                     placeholder={
                                         form.role === 'superadmin'
                                             ? "Masukkan password super admin"
@@ -160,11 +160,11 @@ export default function Login() {
                             <label className="flex items-center">
                                 <input
                                     type="checkbox"
-                                    className="w-4 h-4 border-gray-300 rounded text-emerald-600 focus:ring-emerald-500"
+                                    className="w-4 h-4 border-gray-300 rounded text-primary-600 focus:ring-primary-500"
                                 />
                                 <span className="ml-2 text-gray-600">Ingat saya</span>
                             </label>
-                            <Link to="/forgot-password" className="font-medium text-emerald-600 hover:text-emerald-500">
+                            <Link to="/forgot-password" className="font-medium text-primary-600 hover:text-primary-500">
                                 Lupa password?
                             </Link>
                         </div>
@@ -173,7 +173,7 @@ export default function Login() {
                         <button
                             type="submit"
                             disabled={loading}
-                            className="flex items-center justify-center w-full gap-2 py-3 text-sm font-bold text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 disabled:opacity-70"
+                            className="flex items-center justify-center w-full gap-2 py-3 text-sm font-bold text-white transition-all duration-200 rounded-lg bg-gradient-to-r from-primary-600 to-primary-700 hover:from-primary-700 hover:to-primary-800 disabled:opacity-70"
                         >
                             {loading ? (
                                 <>
@@ -190,7 +190,7 @@ export default function Login() {
                     <div className={`mt-6 text-center ${form.role === 'superadmin' ? 'hidden' : 'block'}`}>
                         <p className="text-sm text-gray-600">
                             Belum punya akun UMKM?{' '}
-                            <Link to="/register-umkm" className="font-bold text-emerald-600 hover:underline">
+                            <Link to="/register-umkm" className="font-bold text-primary-600 hover:underline">
                                 Daftar di sini
                             </Link>
                         </p>
@@ -199,12 +199,12 @@ export default function Login() {
             </div>
 
             {/* Right Side - Hero Image */}
-            <div className="flex-1 hidden bg-gradient-to-br from-emerald-600 to-emerald-700 lg:flex lg:items-center lg:justify-center">
+            <div className="flex-1 hidden bg-gradient-to-br from-primary-600 to-primary-700 lg:flex lg:items-center lg:justify-center">
                 <div className="max-w-md p-6 text-white">
                     <h2 className="mb-4 text-2xl font-bold">
                         {form.role === 'superadmin' ? 'Admin System' : 'Tingkatkan Bisnis UMKM'}
                     </h2>
-                    <p className="mb-6 text-sm text-emerald-100">
+                    <p className="mb-6 text-sm text-primary-100">
                         {form.role === 'superadmin'
                             ? 'Kelola sistem dan pantau semua UMKM dalam satu dashboard terpusat.'
                             : 'Kelola booking pelanggan dengan mudah dan tumbuhkan bisnis dengan tools modern.'

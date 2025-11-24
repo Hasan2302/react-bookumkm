@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
 import {
-    X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, FileText,
-    CreditCard, CheckCircle, QrCode, Building2, Wallet, Upload, Loader2,
-    MapPin, Phone, User
+    MapPin, X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, FileText,
+    CreditCard, CheckCircle, QrCode, Building2, Wallet, Upload, Loader2, AlertCircle, User
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -31,6 +30,13 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
     // Payment Methods
     const paymentMethods = [
         {
+            id: 'offline' ?? 'bayar di tempat',
+            name: 'Bayar di Tempat',
+            icon: MapPin,
+            description: 'Bayar langsung saat datang',
+            details: 'Tidak perlu upload bukti'
+        },
+        {
             id: 'qris',
             name: 'QRIS',
             icon: QrCode,
@@ -38,7 +44,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             details: 'Pembayaran akan langsung terverifikasi'
         },
         {
-            id: 'bank',
+            id: 'transfer',
             name: 'Transfer Bank',
             icon: Building2,
             description: 'Transfer ke rekening UMKM',
@@ -46,7 +52,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
         },
         {
             id: 'ewallet',
-            name: 'E-Wallet',
+            name: 'E-Wallet (GoPay/OVO/Dana)',
             icon: Wallet,
             description: 'GoPay, OVO, Dana, ShopeePay',
             details: 'Transfer langsung ke nomor'
@@ -148,35 +154,49 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
 
     const handleSubmit = async () => {
         setSubmitting(true);
-        setErrors({});
 
         try {
             const formData = new FormData();
+
             formData.append('umkm_id', umkm.id);
             formData.append('date', formatDate(selectedDate));
             formData.append('time', selectedTime);
-            formData.append('customer_data', JSON.stringify(customerData));
             formData.append('payment_method', paymentMethod);
 
-            if (paymentProof) {
+            const nama = customerData['Nama Lengkap'] || customerData['Nama'] || 'Pengunjung';
+            const phone = customerData['No. WhatsApp'] || customerData['WhatsApp'] || customerData['Nomor HP'] || '';
+
+            formData.append('customer_name', nama);
+            formData.append('customer_phone', phone);
+
+            // KIRIM SEBAGAI OBJECT, BUKAN JSON.STRINGIFY!
+            Object.keys(customerData).forEach(key => {
+                const value = customerData[key];
+                if (Array.isArray(value)) {
+                    formData.append(`customer_data[${key}]`, JSON.stringify(value));
+                } else {
+                    formData.append(`customer_data[${key}]`, value);
+                }
+            });
+
+            if (paymentMethod !== 'offline' && paymentProof) {
                 formData.append('payment_proof', paymentProof);
             }
 
-            const response = await axios.post('http://127.0.0.1:8000/api/bookings', formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                },
+            const response = await axios.post('/api/bookings', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
             });
 
-            if (response.data.status === 'success') {
-                setBookingId(response.data.data?.id || null);
-                setStep(6); // Go to success screen
-            }
+            setBookingId(response.data.data.id);
+            setStep(6);
+
         } catch (err) {
-            console.error('Booking error:', err);
-            const errorMsg = err.response?.data?.message || 'Gagal melakukan booking. Silakan coba lagi.';
-            alert('❌ ' + errorMsg);
-            setErrors(err.response?.data?.errors || {});
+            console.error('Booking error:', err.response?.data);
+            let msg = err.response?.data?.message || 'Gagal booking';
+            if (err.response?.data?.errors) {
+                msg += '\n\n' + Object.values(err.response.data.errors).flat().join('\n');
+            }
+            alert(msg);
         } finally {
             setSubmitting(false);
         }
@@ -206,6 +226,20 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
         { number: 5, icon: Upload, label: 'Bukti' },
         { number: 6, icon: CheckCircle, label: 'Selesai' }
     ];
+
+    const parseOptions = (options) => {
+        if (!options) return [];
+        if (Array.isArray(options)) return options;
+        if (typeof options === 'string') {
+            try {
+                return JSON.parse(options);
+            } catch (e) {
+                console.error('Gagal parse options:', options);
+                return [];
+            }
+        }
+        return [];
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-md sm:p-4">
@@ -338,7 +372,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                         </div>
                     )}
 
-                    {/* Step 3: Isi Form Data Customer - Mobile Optimized */}
+                    {/* Step 3: Isi Form Data Customer */}
                     {step === 3 && (
                         <div className="space-y-4 sm:space-y-6">
                             <div className="text-center">
@@ -356,56 +390,102 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                                     <Loader2 className="w-8 h-8 animate-spin text-primary-600" />
                                 </div>
                             ) : formFields.length > 0 ? (
-                                <div className="max-w-2xl mx-auto space-y-3 sm:space-y-4">
+                                <div className="max-w-2xl mx-auto space-y-6">
                                     {formFields.map((field, index) => (
-                                        <div key={index}>
-                                            <label className="block mb-1.5 sm:mb-2 text-xs sm:text-sm font-semibold text-gray-700">
+                                        <div key={index} className="space-y-2">
+                                            <label className="block text-sm font-semibold text-gray-700">
                                                 {field.label}
-                                                {field.required && <span className="text-red-500">*</span>}
+                                                {field.required && <span className="ml-1 text-red-500">*</span>}
                                             </label>
 
-                                            {field.type === 'text' && (
+                                            {/* TEXT, EMAIL, PHONE */}
+                                            {(field.type === 'text' || field.type === 'email' || field.type === 'phone') && (
                                                 <input
-                                                    type="text"
+                                                    type={field.type === 'phone' ? 'tel' : field.type}
                                                     value={customerData[field.label] || ''}
                                                     onChange={(e) => handleInputChange(field.label, e.target.value)}
-                                                    placeholder={field.placeholder || field.label}
+                                                    placeholder={field.placeholder || `Masukkan ${field.label.toLowerCase()}`}
                                                     required={field.required}
-                                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base transition-all border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500"
+                                                    className="w-full px-4 py-3 text-base transition-all border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 focus:outline-none"
                                                 />
                                             )}
 
+                                            {/* TEXTAREA */}
                                             {field.type === 'textarea' && (
                                                 <textarea
                                                     value={customerData[field.label] || ''}
                                                     onChange={(e) => handleInputChange(field.label, e.target.value)}
-                                                    placeholder={field.placeholder || field.label}
+                                                    placeholder={field.placeholder || `Tulis ${field.label.toLowerCase()}`}
                                                     required={field.required}
-                                                    rows={3}
-                                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base transition-all border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500"
+                                                    rows={4}
+                                                    className="w-full px-4 py-3 text-base transition-all border-2 border-gray-200 resize-none rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 focus:outline-none"
                                                 />
                                             )}
 
-                                            {field.type === 'select' && field.options && (
+                                            {/* SELECT */}
+                                            {field.type === 'select' && (
                                                 <select
                                                     value={customerData[field.label] || ''}
                                                     onChange={(e) => handleInputChange(field.label, e.target.value)}
                                                     required={field.required}
-                                                    className="w-full px-3 py-2.5 sm:px-4 sm:py-3 text-sm sm:text-base transition-all border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500"
+                                                    className="w-full px-4 py-3 text-base transition-all border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-100 focus:border-primary-500 focus:outline-none"
                                                 >
                                                     <option value="">Pilih {field.label}</option>
-                                                    {field.options.map((opt, i) => (
+                                                    {parseOptions(field.options).map((opt, i) => (
                                                         <option key={i} value={opt}>{opt}</option>
                                                     ))}
                                                 </select>
+                                            )}
+
+                                            {/* RADIO */}
+                                            {field.type === 'radio' && (
+                                                <div className="space-y-3">
+                                                    {parseOptions(field.options).map((opt, i) => (
+                                                        <label key={i} className="flex items-center gap-3 cursor-pointer select-none">
+                                                            <input
+                                                                type="radio"
+                                                                name={`radio-${field.label}-${field.id}`} // unik per field
+                                                                value={opt}
+                                                                checked={customerData[field.label] === opt}
+                                                                onChange={(e) => handleInputChange(field.label, e.target.value)}
+                                                                required={field.required}
+                                                                className="w-5 h-5 text-primary-600 focus:ring-primary-500"
+                                                            />
+                                                            <span className="text-base text-gray-700">{opt}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
+
+                                            {/* CHECKBOX */}
+                                            {field.type === 'checkbox' && (
+                                                <div className="space-y-3">
+                                                    {parseOptions(field.options).map((opt, i) => (
+                                                        <label key={i} className="flex items-center gap-3 cursor-pointer select-none">
+                                                            <input
+                                                                type="checkbox"
+                                                                checked={customerData[field.label]?.includes(opt) || false}
+                                                                onChange={(e) => {
+                                                                    const current = customerData[field.label] || [];
+                                                                    const updated = e.target.checked
+                                                                        ? [...current, opt]
+                                                                        : current.filter(item => item !== opt);
+                                                                    handleInputChange(field.label, updated);
+                                                                }}
+                                                                className="w-5 h-5 rounded text-primary-600 focus:ring-primary-500"
+                                                            />
+                                                            <span className="text-base text-gray-700">{opt}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
                                             )}
                                         </div>
                                     ))}
                                 </div>
                             ) : (
-                                <div className="py-8 text-center sm:py-12">
-                                    <p className="text-sm text-gray-500 sm:text-base">Tidak ada form khusus dari UMKM</p>
-                                    <p className="mt-2 text-xs text-gray-400 sm:text-sm">Silakan lanjut ke step berikutnya</p>
+                                <div className="py-12 text-center">
+                                    <p className="text-gray-500">Tidak ada form khusus dari UMKM</p>
+                                    <p className="mt-2 text-sm text-gray-400">Lanjut ke pembayaran</p>
                                 </div>
                             )}
                         </div>
@@ -456,6 +536,14 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                             {paymentMethod && (
                                 <div className="max-w-2xl p-6 mx-auto border-2 border-gray-300 border-dashed rounded-2xl bg-gray-50">
                                     <h4 className="mb-3 font-bold text-gray-900">Detail Pembayaran</h4>
+
+                                    {paymentMethod === 'offline' ? 'Bayar di Tempat' && (
+                                        <div className="space-y-2 text-sm text-gray-700">
+                                            <p>• Scan QR Code yang akan muncul di step berikutnya</p>
+                                            <p>• Pembayaran dapat dilakukan melalui aplikasi e-wallet apapun</p>
+                                            <p>• Setelah berhasil, upload screenshot bukti pembayaran</p>
+                                        </div>
+                                    ) : null}
 
                                     {paymentMethod === 'qris' && (
                                         <div className="space-y-2 text-sm text-gray-700">

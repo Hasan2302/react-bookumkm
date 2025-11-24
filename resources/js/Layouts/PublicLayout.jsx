@@ -59,32 +59,32 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                         </div>
 
                         {/* Right Menu - Desktop */}
-                        {canLogin && (
-                            <div className="items-center hidden space-x-3 md:flex">
+
+                        <div className="items-center hidden space-x-3 md:flex">
+                            <Link
+                                href="/login"
+                                className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                                    scrolled
+                                        ? 'text-gray-700 hover:bg-gray-700/20 hover:text-primary-700'
+                                        : 'text-white hover:bg-white/20 hover:text-white'
+                                }`}
+                            >
+                                Login
+                            </Link>
+                            {canRegister && (
                                 <Link
-                                    href="/login"
-                                    className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
+                                    href="/register"
+                                    className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 overflow-hidden group rounded-lg ${
                                         scrolled
-                                            ? 'text-gray-700 hover:bg-gray-700/20 hover:text-primary-700'
-                                            : 'text-white hover:bg-white/20 hover:text-white'
+                                            ? 'bg-white text-primary-700 border-2 border-primary-200 hover:bg-white/80 hover:border-primary-300 shadow-sm'
+                                            : 'bg-white text-primary-700 hover:bg-white/80 shadow-lg'
                                     }`}
                                 >
-                                    Login
+                                    <span className="relative z-10">Daftar</span>
                                 </Link>
-                                {canRegister && (
-                                    <Link
-                                        href="/register"
-                                        className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 overflow-hidden group rounded-lg ${
-                                            scrolled
-                                                ? 'bg-white text-primary-700 border-2 border-primary-200 hover:bg-white/80 hover:border-primary-300 shadow-sm'
-                                                : 'bg-white text-primary-700 hover:bg-white/80 shadow-lg'
-                                        }`}
-                                    >
-                                        <span className="relative z-10">Daftar</span>
-                                    </Link>
-                                )}
-                            </div>
-                        )}
+                            )}
+                        </div>
+
 
                         {/* Mobile Menu Button */}
                         <button
