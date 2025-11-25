@@ -24,7 +24,7 @@ class BookingController extends Controller
             'service_name'   => 'nullable|string',
             'total_price'    => 'required|numeric|min:0',
             'customer_data'  => 'required|array',
-            'payment_proof'  => 'required_if:payment_method,!=,offline|image|mimes:jpeg,png,jpg|max:5120',
+            'payment_proof'  => 'nullable|image|mimes:jpeg,png,jpg|max:5120|required_if:payment_method,qris,transfer,ewallet',
         ]);
 
         $paymentProofPath = null;

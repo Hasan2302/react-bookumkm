@@ -14,8 +14,10 @@ class Umkm extends Model
     protected $fillable = [
         'user_id', 'name', 'phone', 'address', 'category',
         'logo', 'banner', 'qris_image', 'description', 'services', 'opening_hours',
-        'subdomain', 'slug', 'status'
+        'subdomain', 'slug', 'status', 'latitude', 'longitude'
     ];
+
+    protected $appends = ['distance'];
 
     protected $casts = [
         'services' => 'array',
@@ -35,5 +37,30 @@ class Umkm extends Model
     public function formFields()
     {
         return $this->hasMany(FormField::class, 'umkm_id');
+    }
+
+    public function scopeNearby($query, $latitude, $longitude, $radius = 10)
+    {
+        $haversine = "(6371 * acos(cos(radians($latitude))
+                      * cos(radians(latitude))
+                      * cos(radians(longitude) - radians($longitude))
+                      + sin(radians($latitude))
+                      * sin(radians(latitude))))";
+
+        return $query
+            ->select('*')
+            ->selectRaw("{$haversine} AS distance")
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->whereRaw("{$haversine} <= ?", [$radius])
+            ->orderBy('distance', 'asc');
+    }
+
+    /**
+     * Accessor untuk distance (untuk append)
+     */
+    public function getDistanceAttribute()
+    {
+        return $this->attributes['distance'] ?? null;
     }
 }

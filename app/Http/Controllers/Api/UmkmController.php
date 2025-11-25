@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Umkm;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class UmkmController extends Controller
 {
@@ -32,33 +33,73 @@ class UmkmController extends Controller
      * GET /api/umkms
      * Mengambil daftar UMKM
      */
-    public function index()
+    public function index(Request $request)
     {
-        $umkms = Umkm::where('status', 'active')
-            ->select('id', 'name', 'category', 'address', 'phone', 'logo', 'banner', 'qris_image', 'subdomain', 'slug', 'services', 'opening_hours')
-            ->get()
-            ->map(function ($umkm) {
-                return [
-                    'id'            => $umkm->id,
-                    'name'          => $umkm->name,
-                    'category'      => $umkm->category,
-                    'address'       => $umkm->address,
-                    'phone'         => $umkm->phone,
-                    'logo'          => $umkm->logo ? asset('storage/' . $umkm->logo) : null,
-                    'banner'        => $umkm->banner ? asset('storage/' . $umkm->banner) : null,
-                    'qris_image'    => $umkm->qris_image ? $umkm->qris_image : null,
-                    'subdomain'     => $umkm->subdomain,
-                    'slug'          => $umkm->slug,
-                    'services'      => $umkm->services ?? [],        // sudah array otomatis!
-                    'opening_hours' => $umkm->opening_hours ?? [],   // sudah array otomatis!
-                ];
-            });
+        $query = Umkm::where('status', 'active');
+
+        // Geo search
+        if ($request->filled('lat') && $request->filled('lng')) {
+            $lat = $request->input('lat');
+            $lng = $request->input('lng');
+            $radius = $request->input('radius', 10); // km
+
+            $query = $query->selectRaw("
+                *,
+                (6371 * acos(
+                    cos(radians(?)) * cos(radians(latitude)) *
+                    cos(radians(longitude) - radians(?)) +
+                    sin(radians(?)) * sin(radians(latitude))
+                )) AS distance
+            ", [$lat, $lng, $lat])
+            ->having('distance', '<=', $radius)
+            ->orderBy('distance', 'asc');
+        } else {
+            // Kalau tidak ada lokasi, ambil kolom biasa
+            $query = $query->select([
+                'id', 'name', 'category', 'address', 'phone',
+                'logo', 'banner', 'qris_image',
+                'subdomain', 'slug', 'services', 'opening_hours',
+                'latitude', 'longitude'
+            ]);
+        }
+
+        $umkms = $query->get()->map(function ($umkm) {
+            $services = $umkm->services;
+            $openingHours = $umkm->opening_hours;
+
+            if (is_string($services)) {
+                $services = json_decode($services, true) ?? [];
+            }
+            if (is_string($openingHours)) {
+                $openingHours = json_decode($openingHours, true) ?? [];
+            }
+
+            return [
+                'id'            => $umkm->id,
+                'name'          => $umkm->name,
+                'category'      => $umkm->category,
+                'address'       => $umkm->address,
+                'phone'         => $umkm->phone,
+                'distance'      => $umkm->distance ?? null, // ini baru muncul kalau ada lokasi
+                'logo'          => $umkm->logo ? asset('storage/' . $umkm->logo) : null,
+                'banner'        => $umkm->banner ? asset('storage/' . $umkm->banner) : null,
+                'qris_image'    => $umkm->qris_image ? $umkm->qris_image : null,
+                'subdomain'     => $umkm->subdomain,
+                'slug'          => $umkm->slug,
+                'services'      => $services ?? [],
+                'opening_hours' => $openingHours ?? [],
+            ];
+        });
 
         return response()->json([
-            'status'  => 'success',
-            'message' => 'Daftar UMKM berhasil diambil',
-            'data'    => $umkms
-        ], 200);
+            'status'       => 'success',
+            'message'      => 'Daftar UMKM berhasil diambil',
+            'data'         => $umkms,
+            'userLocation' => [
+                'lat' => $request->input('lat'),
+                'lng' => $request->input('lng')
+            ]
+        ]);
     }
 
     public function store(Request $request)
