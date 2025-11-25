@@ -28,6 +28,8 @@ class User extends Authenticatable
 
     public function umkm()
     {
-        return $this->hasOne(Umkm::class);
+        // return $this->hasOne(\App\Models\Umkm::class, 'user_id');
+        // atau cukup:
+        return $this->hasOne(Umkm::class, 'user_id');
     }
 }

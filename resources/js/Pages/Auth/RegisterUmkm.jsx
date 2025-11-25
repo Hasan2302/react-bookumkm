@@ -1,126 +1,234 @@
 // resources/js/Pages/Auth/RegisterUmkm.jsx
-
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Store, CheckCircle, Loader2, ArrowLeft } from 'lucide-react';
+import { Eye, EyeOff, Loader2, CheckCircle2, Store, BadgeCheck, ArrowLeft } from 'lucide-react';
 import api from '@/Services/Api';
 
 export default function RegisterUmkm() {
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [errors, setErrors] = useState({});
+
+    const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
     const [form, setForm] = useState({
-        name: '', email: '', password: '', password_confirmation: '',
-        umkm_name: '', phone: '', address: '', category: ''
+        name: '',
+        email: '',
+        password: '',
+        password_confirmation: '',
+        umkm_name: '',
+        phone: '',
+        address: '',
+        category: ''
     });
 
-    const categories = ['Salon', 'Laundry', 'Bengkel', 'Klinik Kecantikan', 'Tukang Cukur', 'Spa', 'Lainnya'];
+    const categories = [
+        'Salon', 'Laundry', 'Bengkel', 'Klinik Kecantikan',
+        'Tukang Cukur', 'Spa', 'Lainnya'
+    ];
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+        setErrors({});
 
         try {
             const res = await api.post('/register-umkm', form);
+
             localStorage.setItem('token', res.data.data.token);
             localStorage.setItem('user', JSON.stringify(res.data.data.user));
             localStorage.setItem('umkm', JSON.stringify(res.data.data.umkm));
+
             setSuccess(true);
-            setTimeout(() => navigate('/umkm/dashboard'), 3000);
+            setTimeout(() => navigate('/umkm/dashboard'), 2000);
+            window.location.reload();
         } catch (err) {
-            alert(err.response?.data?.message || 'Gagal mendaftar');
+            if (err.response?.data?.errors) {
+                setErrors(err.response.data.errors);
+            } else {
+                setErrors({ general: [err.response?.data?.message || 'Gagal mendaftar!'] });
+            }
         } finally {
             setLoading(false);
         }
     };
 
+    // SUCCESS SCREEN — SAMA DENGAN REGISTER BIASA
     if (success) {
         return (
-            <div className="flex items-center justify-center min-h-screen p-6 bg-gradient-to-br from-green-50 to-emerald-100">
-                <div className="max-w-lg p-12 text-center bg-white shadow-2xl rounded-3xl">
-                    <div className="flex items-center justify-center mx-auto mb-6 bg-green-100 rounded-full w-28 h-28">
-                        <CheckCircle className="w-16 h-16 text-green-600" />
+            <div className="flex items-center justify-center min-h-screen p-6 bg-white">
+                <div className="w-full max-w-sm p-8 text-center bg-white shadow-xl rounded-2xl">
+                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-5 bg-green-100 rounded-full">
+                        <CheckCircle2 className="w-10 h-10 text-green-600" />
                     </div>
-                    <h1 className="mb-4 text-4xl font-bold text-gray-800">Selamat Datang!</h1>
-                    <p className="mb-8 text-xl text-gray-600">
-                        Akun UMKM <strong>{form.umkm_name}</strong> berhasil dibuat!
+                    <h2 className="mb-3 text-2xl font-bold text-gray-900">Pendaftaran Berhasil!</h2>
+                    <p className="text-lg text-gray-600">
+                        Selamat datang, <strong>{form.umkm_name}</strong>!
                     </p>
-                    <div className="text-2xl font-bold text-indigo-600">
-                        Mengarahkan ke dashboard...
-                    </div>
+                    <p className="mt-4 text-sm text-gray-500">Mengarahkan ke dashboard...</p>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50">
-            <div className="px-6 py-12">
-                <div className="max-w-4xl mx-auto">
-                    <Link to="/" className="inline-flex items-center gap-2 mb-8 text-indigo-600 hover:text-indigo-800">
-                        <ArrowLeft size={20} /> Kembali ke Beranda
+        <div className="flex min-h-screen">
+            {/* LEFT SIDE — FORM */}
+            <div className="flex items-center justify-center flex-1 p-6 bg-white lg:p-12">
+                <div className="w-full max-w-md">
+                    {/* Back Button */}
+                    <Link to="/" className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-indigo-600 hover:text-indigo-800">
+                        <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
                     </Link>
 
-                    <div className="overflow-hidden bg-white shadow-2xl rounded-3xl">
-                        <div className="p-10 text-center bg-gradient-to-r from-indigo-600 to-purple-600">
-                            <Store className="w-20 h-20 mx-auto mb-4 text-white" />
-                            <h1 className="text-4xl font-bold text-white">Daftar sebagai UMKM</h1>
-                            <p className="mt-3 text-xl text-indigo-100">Gratis selamanya • Tanpa biaya bulanan</p>
+                    {/* Logo & Title */}
+                    <div className="mb-8 text-center">
+                        <div className="flex items-center justify-center mb-4">
+                            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-indigo-500 to-purple-600 rounded-xl">
+                                <Store className="w-8 h-8 text-white" />
+                            </div>
+                        </div>
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-indigo-600 to-purple-600">
+                            Daftar UMKM
+                        </h1>
+                        <p className="mt-2 text-sm text-gray-600">Gratis selamanya • Tanpa biaya</p>
+                    </div>
+
+                    {/* General Error */}
+                    {errors.general && (
+                        <div className="p-4 mb-6 text-sm text-center text-red-700 border border-red-200 rounded-lg bg-red-50">
+                            {errors.general[0]}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className="space-y-5">
+                        {/* Nama & Email */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">Nama Pemilik *</label>
+                                <input required type="text" placeholder="Nama lengkap" value={form.name}
+                                    onChange={e => setForm({ ...form, name: e.target.value })}
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name[0]}</p>}
+                            </div>
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">Email *</label>
+                                <input required type="email" placeholder="email@contoh.com" value={form.email}
+                                    onChange={e => setForm({ ...form, email: e.target.value })}
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email[0]}</p>}
+                            </div>
                         </div>
 
-                        <form onSubmit={handleSubmit} className="p-10 space-y-6">
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <input required placeholder="Nama Pemilik" value={form.name}
-                                    onChange={e => setForm({...form, name: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
-
-                                <input required type="email" placeholder="Email" value={form.email}
-                                    onChange={e => setForm({...form, email: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
+                        {/* Nama UMKM & WhatsApp */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">Nama UMKM *</label>
+                                <input required type="text" placeholder="Contoh: Salon Budi" value={form.umkm_name}
+                                    onChange={e => setForm({ ...form, umkm_name: e.target.value })}
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                {errors.umkm_name && <p className="mt-1 text-xs text-red-600">{errors.umkm_name[0]}</p>}
                             </div>
-
-                            <input required placeholder="Nama UMKM (contoh: Salon Budi)" value={form.umkm_name}
-                                onChange={e => setForm({...form, umkm_name: e.target.value})}
-                                className="w-full px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
-
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <input required placeholder="No. WhatsApp" value={form.phone}
-                                    onChange={e => setForm({...form, phone: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
-
-                                <select required value={form.category}
-                                    onChange={e => setForm({...form, category: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500">
-                                    <option value="">Pilih Kategori</option>
-                                    {categories.map(cat => <option key={cat}>{cat}</option>)}
-                                </select>
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">WhatsApp *</label>
+                                <input required type="tel" placeholder="628123456789" value={form.phone}
+                                    onChange={e => setForm({ ...form, phone: e.target.value })}
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                {errors.phone && <p className="mt-1 text-xs text-ment-600">{errors.phone[0]}</p>}
                             </div>
-
-                            <textarea required placeholder="Alamat Lengkap UMKM" rows={3} value={form.address}
-                                onChange={e => setForm({...form, address: e.target.value})}
-                                className="w-full px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500"></textarea>
-
-                            <div className="grid gap-6 md:grid-cols-2">
-                                <input required type="password" placeholder="Password" value={form.password}
-                                    onChange={e => setForm({...form, password: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
-
-                                <input required type="password" placeholder="Konfirmasi Password" value={form.password_confirmation}
-                                    onChange={e => setForm({...form, password_confirmation: e.target.value})}
-                                    className="px-6 py-4 text-lg border-2 outline-none rounded-xl focus:border-indigo-500" />
-                            </div>
-
-                            <button type="submit" disabled={loading}
-                                className="flex items-center justify-center w-full gap-3 py-6 text-xl font-bold text-white transition shadow-lg bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl hover:from-indigo-700 hover:to-purple-700">
-                                {loading ? <Loader2 className="animate-spin" /> : 'Daftar Sekarang & Mulai Gratis'}
-                            </button>
-                        </form>
-
-                        <div className="p-8 text-center bg-gray-50">
-                            <p className="text-gray-600">
-                                Sudah punya akun? <Link to="/login" className="font-bold text-indigo-600 hover:underline">Login di sini</Link>
-                            </p>
                         </div>
+
+                        {/* Alamat & Kategori */}
+                        <div>
+                            <label className="block mb-2 text-sm font-semibold text-gray-700">Alamat Lengkap *</label>
+                            <textarea required rows={3} placeholder="Jl. Contoh No.123, Jakarta" value={form.address}
+                                onChange={e => setForm({ ...form, address: e.target.value })}
+                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg resize-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                            {errors.address && <p className="mt-1 text-xs text-red-600">{errors.address[0]}</p>}
+                        </div>
+
+                        <div>
+                            <label className="block mb-2 text-sm font-semibold text-gray-700">Kategori Usaha *</label>
+                            <select required value={form.category}
+                                onChange={e => setForm({ ...form, category: e.target.value })}
+                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100">
+                                <option value="">Pilih kategori</option>
+                                {categories.map(cat => (
+                                    <option key={cat} value={cat}>{cat}</option>
+                                ))}
+                            </select>
+                            {errors.category && <p className="mt-1 text-xs text-red-600">{errors.category[0]}</p>}
+                        </div>
+
+                        {/* Password */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">Password *</label>
+                                <div className="relative">
+                                    <input required type={showPassword ? 'text' : 'password'} placeholder="Min. 8 karakter" value={form.password}
+                                        onChange={e => setForm({ ...form, password: e.target.value })}
+                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                    <button type="button" onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 flex items-center text-gray-500 right-3">
+                                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                                {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password[0]}</p>}
+                            </div>
+                            <div>
+                                <label className="block mb-2 text-sm font-semibold text-gray-700">Konfirmasi Password *</label>
+                                <div className="relative">
+                                    <input required type={showConfirmPassword ? 'text' : 'password'} placeholder="Ulangi password" value={form.password_confirmation}
+                                        onChange={e => setForm({ ...form, password_confirmation: e.target.value })}
+                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100" />
+                                    <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                                        className="absolute inset-y-0 flex items-center text-gray-500 right-3">
+                                        {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button type="submit" disabled={loading}
+                            className="flex items-center justify-center w-full gap-3 py-4 mt-6 text-lg font-bold text-white transition-all rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 disabled:opacity-70">
+                            {loading ? (
+                                <> <Loader2 className="w-6 h-6 animate-spin" /> Mendaftarkan... </>
+                            ) : (
+                                <> <BadgeCheck className="w-6 h-6" /> Daftar UMKM Sekarang </>
+                            )}
+                        </button>
+                    </form>
+
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-gray-600">
+                            Sudah punya akun?{' '}
+                            <Link to="/login" className="font-bold text-indigo-600 hover:underline">
+                                Masuk di sini
+                            </Link>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            {/* RIGHT SIDE — HERO (Desktop Only) */}
+            <div className="flex-1 hidden bg-gradient-to-br from-indigo-600 to-purple-700 lg:flex lg:items-center lg:justify-center">
+                <div className="max-w-md p-8 text-white">
+                    <h2 className="mb-6 text-4xl font-bold">Mulai Digitalisasi Bisnis Anda</h2>
+                    <p className="mb-8 text-lg text-indigo-100">
+                        Kelola booking, notifikasi WhatsApp, dan dashboard analitik — semuanya dalam satu tempat.
+                    </p>
+                    <div className="space-y-5 text-lg">
+                        {['Kelola booking 24/7', 'Notifikasi WhatsApp otomatis', 'Dashboard analitik lengkap', 'Gratis selamanya!'].map((item, i) => (
+                            <div key={i} className="flex items-center gap-4">
+                                <div className="flex items-center justify-center w-8 h-8 bg-white rounded-full bg-opacity-20">
+                                    <CheckCircle2 className="w-5 h-5" />
+                                </div>
+                                <span>{item}</span>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

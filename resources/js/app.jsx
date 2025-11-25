@@ -2,6 +2,7 @@
 import './bootstrap';
 import '../css/app.css';
 import React from 'react';
+import { useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
@@ -13,11 +14,18 @@ import Welcome from '@/Pages/Welcome';
 import Register from '@/Pages/Auth/Register';
 import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
 import UmkmSettings from '@/Pages/Umkm/Settings';
+import useUmkmStore from '@/Stores/useUmkmStore';
 
 function App() {
     const token = localStorage.getItem('token');
     const user = localStorage.getItem('user');
     const parsedUser = user ? JSON.parse(user) : null;
+
+    const { fetchUmkm } = useUmkmStore();
+
+    useEffect(() => {
+        fetchUmkm(); // ← INI YANG MEMICU AUTO LOAD SEKALI SAJA!
+    }, [fetchUmkm]);
 
     // Kalau belum login
     if (!token || !parsedUser) {
@@ -55,8 +63,8 @@ function App() {
           {/* SUPERADMIN */}
           {parsedUser.role === 'superadmin' && (
             <>
-              <Route path="/admin/dashboard" element={<AdminDashboard />} />
-              <Route path="*" element={<Navigate to="/admin/dashboard" replace />} />
+              <Route path="/superadmin/dashboard" element={<AdminDashboard />} />
+              <Route path="*" element={<Navigate to="/superadmin/dashboard" replace />} />
             </>
           )}
         </Routes>

@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import {
     Home, FileText, Settings, Calendar, DollarSign, Users, AlertCircle,
-    CheckCircle2, Clock, XCircle, MessageCircle, Eye, LogOut, ChevronLeft, ChevronRight
+    CheckCircle2, Clock, XCircle, MessageCircle, Eye, LogOut, ChevronLeft, ChevronRight, Image, Check, X, MoreVertical
 } from 'lucide-react';
 import api from '@/Services/Api';
 import dayjs from 'dayjs';
@@ -35,16 +35,58 @@ export default function UmkmDashboard() {
         dailyBookings: { labels: ['Sen','Sel','Rab','Kam','Jum','Sab','Min'], data: [0,0,0,0,0,0,0] },
         revenue: { online: 0, onSite: 0 }
     });
-    
+
     const [bookings, setBookings] = useState({ diterima: [], pending: [], cancelled: [] });
-    const [activeTab, setActiveTab] = useState('diterima');
+    const [activeTab, setActiveTab] = useState('pending');
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState(dayjs()); // untuk kalender
     const [showCalendar, setShowCalendar] = useState(false);
     const navigate = useNavigate();
     const location = useLocation();
+    const [openDropdown, setOpenDropdown] = useState(null);
+
+    const toggleDropdown = (e, id) => {
+        e.stopPropagation();
+        setOpenDropdown(openDropdown === id ? null : id);
+    };
+
+    useEffect(() => {
+        const handleClickOutside = () => setOpenDropdown(null);
+        if (openDropdown !== null) {
+            document.addEventListener('click', handleClickOutside);
+        }
+        return () => document.removeEventListener('click', handleClickOutside);
+    }, [openDropdown]);
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
+
+    const openWhatsApp = (booking) => {
+        if (!booking.customer_phone) return alert('Nomor WhatsApp tidak tersedia');
+
+        const phone = booking.customer_phone.replace(/\D/g, '').replace(/^0/, '62');
+        const date = dayjs(booking.datetime).format('dddd, D MMMM YYYY');
+        const time = dayjs(booking.datetime).format('HH:mm');
+
+        const message = encodeURIComponent(
+        `Halo kak ${booking.customer_name}!
+
+        Terima kasih sudah booking di tempat kami ✨
+
+        📋 Detail Booking:
+        Layanan: ${booking.service_name}
+        Tanggal: ${date}
+        Jam: ${time}
+        Total: Rp ${Number(booking.total_price).toLocaleString('id-ID')}
+
+        Kami tunggu kedatangannya ya!
+        Jika ada perubahan jadwal, silakan balas pesan ini.
+
+        Terima kasih
+        Have a great day!`
+        );
+
+        window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+    };
 
     useEffect(() => {
         const loadData = async () => {
@@ -83,6 +125,13 @@ export default function UmkmDashboard() {
     };
 
     const currentQueue = getQueueByDate(selectedDate);
+
+    useEffect(() => {
+        const btn = document.getElementById('wa-floating');
+        if (btn) {
+            btn.style.display = (bookings.pending.length > 0 || bookings.diterima.length > 0) ? 'flex' : 'none';
+        }
+    }, [bookings]);
 
     const handleConfirm = async (bookingId) => {
         if (!confirm('Yakin ingin menerima booking ini?')) return;
@@ -147,7 +196,7 @@ export default function UmkmDashboard() {
         } finally {
             setLoading(false);
         }
-    };  
+    };
 
     const handleMarkServed = async (bookingId) => {
         if (!confirm('Pelanggan sudah dilayani?')) return;
@@ -165,7 +214,7 @@ export default function UmkmDashboard() {
 
     const handleLogout = () => {
         localStorage.clear();
-        navigate('/');
+        window.location.href = '/';
     };
 
     const navItems = [
@@ -219,8 +268,8 @@ export default function UmkmDashboard() {
                             {navItems.map((item) => (
                                 <Link key={item.name} to={item.href}
                                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                                        location.pathname === item.href 
-                                            ? 'bg-indigo-100 text-indigo-700' 
+                                        location.pathname === item.href
+                                            ? 'bg-indigo-100 text-indigo-700'
                                             : 'text-gray-600 hover:bg-gray-100'
                                     }`}>
                                     <item.icon className="w-5 h-5" />
@@ -256,7 +305,7 @@ export default function UmkmDashboard() {
                         <div className="relative p-6 mb-8 overflow-hidden text-white shadow-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-700 rounded-3xl animate-pulse-slow">
                             <div className="absolute inset-0 bg-black opacity-20"></div>
                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent"></div>
-                            
+
                             <div className="relative z-10 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
                             <div className="flex items-center gap-5">
                                 <div className="p-4 bg-white bg-opacity-25 shadow-xl rounded-2xl backdrop-blur-lg">
@@ -329,27 +378,36 @@ export default function UmkmDashboard() {
                             </div>
 
                             {/* TABEL BOOKING — TETAP 100% SEPERTI ASLINYA */}
-                            <div className="hidden overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl xl:block">
+                            <div className="overflow-hidden bg-white border border-gray-200 shadow-sm rounded-xl">
                                 <div className="p-5 border-b bg-gray-50">
                                     <h3 className="text-lg font-bold text-gray-800">Booking Terbaru</h3>
                                 </div>
+
+                                {/* TABS — PENDING DEFAULT */}
                                 <div className="flex border-b bg-gray-50">
                                     {[
-                                        { key: 'diterima', label: 'Diterima', icon: CheckCircle2, color: 'text-green-600', count: bookings.diterima.length },
-                                        { key: 'pending', label: 'Pending', icon: Clock, color: 'text-yellow-600', count: bookings.pending.length },
-                                        { key: 'cancelled', label: 'Dibatalkan', icon: XCircle, color: 'text-red-600', count: bookings.cancelled.length },
+                                        { key: 'diterima', label: 'Diterima', icon: CheckCircle2, color: 'text-green-600' },
+                                        { key: 'pending', label: 'Pending', icon: Clock, color: 'text-yellow-600' },
+                                        { key: 'cancelled', label: 'Dibatalkan', icon: XCircle, color: 'text-red-600' },
                                     ].map(tab => (
-                                        <button key={tab.key} onClick={() => setActiveTab(tab.key)}
-                                            className={`flex-1 px-4 py-3 flex items-center justify-center gap-2 text-sm font-medium transition-all ${
-                                                activeTab === tab.key 
-                                                    ? 'text-indigo-700 border-b-3 border-indigo-600 bg-white' 
+                                        <button
+                                            key={tab.key}
+                                            onClick={() => setActiveTab(tab.key)}
+                                            className={`flex-1 px-4 py-3 flex items-center justify-center gap-2 text-sm font-medium transition-all relative ${
+                                                activeTab === tab.key
+                                                    ? 'text-indigo-700 border-b-3 border-indigo-600 bg-white'
                                                     : 'text-gray-600 hover:bg-gray-100'
-                                            }`}>
+                                            }`}
+                                        >
                                             <tab.icon className={`w-4 h-4 ${tab.color}`} />
-                                            {tab.label} ({tab.count})
+                                            {tab.label} ({bookings[tab.key].length})
+                                            {tab.key === 'pending' && bookings.pending.length > 0 && (
+                                                <span className="absolute w-3 h-3 bg-red-500 rounded-full -top-1 -right-1 animate-ping"></span>
+                                            )}
                                         </button>
                                     ))}
                                 </div>
+
                                 <div className="overflow-y-auto max-h-96">
                                     <table className="w-full">
                                         <thead className="sticky top-0 bg-gray-50">
@@ -357,37 +415,135 @@ export default function UmkmDashboard() {
                                                 <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">ID</th>
                                                 <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Pelanggan</th>
                                                 <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Layanan</th>
+                                                <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Harga</th>
                                                 <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Waktu</th>
+                                                <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Status</th>
                                                 <th className="px-4 py-3 text-xs font-medium text-left text-gray-500">Aksi</th>
                                             </tr>
                                         </thead>
                                         <tbody className="divide-y divide-gray-200">
                                             {bookings[activeTab].length === 0 ? (
                                                 <tr>
-                                                    <td colSpan="5" className="px-6 py-12 text-center text-gray-500">
-                                                        Belum ada booking {activeTab === 'pending' ? 'menunggu' : activeTab}
+                                                    <td colSpan="8" className="px-6 py-12 text-center text-gray-500">
+                                                        Belum ada booking {activeTab === 'pending' ? 'menunggu konfirmasi' : activeTab}
                                                     </td>
                                                 </tr>
                                             ) : (
                                                 bookings[activeTab].slice(0, 8).map((b) => (
                                                     <tr key={b.id} className="transition hover:bg-indigo-50">
                                                         <td className="px-4 py-3 text-sm font-medium">#{b.id}</td>
-                                                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{b.nama}</td>
-                                                        <td className="px-4 py-3 text-sm text-gray-600">{b.layanan}</td>
+                                                        <td className="px-4 py-3 text-sm font-medium text-gray-800">{b.customer_name}</td>
+                                                        <td className="px-4 py-3 text-sm text-gray-600">{b.service_name}</td>
+                                                        <td className="px-4 py-3 text-sm font-bold text-green-600">
+                                                            Rp {Number(b.total_price).toLocaleString('id-ID')}
+                                                        </td>
                                                         <td className="px-4 py-3 text-sm text-gray-600">{b.waktu}</td>
+
+                                                        {/* KOLOM STATUS DENGAN WARNA */}
                                                         <td className="px-4 py-3">
-                                                            {activeTab === 'pending' && (
-                                                                <div className="flex gap-2">
-                                                                    <button onClick={() => handleConfirm(b.id)}
-                                                                        className="px-4 py-2 text-xs font-bold text-white transition bg-green-600 rounded-lg hover:bg-green-700">
-                                                                        Terima
-                                                                    </button>
-                                                                    <button onClick={() => handleReject(b.id)}
-                                                                        className="px-4 py-2 text-xs font-bold text-red-600 transition bg-red-100 rounded-lg hover:bg-red-200">
-                                                                        Tolak
-                                                                    </button>
-                                                                </div>
+                                                            {b.payment_method === 'offline' ? (
+                                                                <span className="px-3 py-1 text-xs font-bold text-white bg-blue-600 rounded-full">
+                                                                    Cash
+                                                                </span>
+                                                            ) : activeTab === 'pending' ? (
+                                                                <span className="px-3 py-1 text-xs font-bold text-white bg-orange-500 rounded-full">
+                                                                    Verifikasi
+                                                                </span>
+                                                            ) : (
+                                                                <span className="px-3 py-1 text-xs font-bold text-white bg-green-600 rounded-full">
+                                                                    Diterima
+                                                                </span>
                                                             )}
+                                                        </td>
+
+                                                        {/* AKSI */}
+                                                        <td className="px-4 py-3">
+                                                            <div className="relative">
+                                                                {/* Tombol Titik Tiga */}
+                                                                <button
+                                                                    onClick={(e) => toggleDropdown(e, b.id)}
+                                                                    className="p-2 text-gray-600 transition-all rounded-full hover:bg-gray-100 hover:text-gray-900"
+                                                                    title="Aksi"
+                                                                >
+                                                                    <MoreVertical className="w-5 h-5" />
+                                                                </button>
+
+                                                                {/* Dropdown — HANYA MUNCUL KALAU openDropdown === b.id */}
+                                                                {openDropdown === b.id && (
+                                                                    <div
+                                                                        className="absolute right-0 z-50 w-64 mt-2 bg-white border border-gray-100 shadow-xl rounded-2xl"
+                                                                        onClick={(e) => e.stopPropagation()}
+                                                                    >
+                                                                        <div className="py-2">
+                                                                            {/* WhatsApp */}
+                                                                            <button
+                                                                                onClick={() => {
+                                                                                    openWhatsApp(b);
+                                                                                    setOpenDropdown(null);
+                                                                                }}
+                                                                                className="flex items-center w-full px-4 py-3 text-sm text-left text-gray-700 transition hover:bg-gray-50"
+                                                                            >
+                                                                                <MessageCircle className="w-4 h-4 mr-3 text-green-600" />
+                                                                                Chat via WhatsApp
+                                                                            </button>
+
+                                                                            {/* Lihat Bukti Bayar */}
+                                                                            {b.payment_proof && (
+                                                                                <a
+                                                                                    href={`/storage/${b.payment_proof}`}
+                                                                                    target="_blank"
+                                                                                    rel="noopener noreferrer"
+                                                                                    className="flex items-center block w-full px-4 py-3 text-sm text-left text-gray-700 transition hover:bg-gray-50"
+                                                                                    onClick={() => setOpenDropdown(null)}
+                                                                                >
+                                                                                    <Image className="w-4 h-4 mr-3 text-blue-600" />
+                                                                                    Lihat Bukti Pembayaran
+                                                                                </a>
+                                                                            )}
+
+                                                                            {/* Divider kalau ada aksi konfirmasi */}
+                                                                            {activeTab === 'pending' && b.payment_method !== 'offline' && (
+                                                                                <hr className="my-2 border-gray-200" />
+                                                                            )}
+
+                                                                            {/* Terima Booking */}
+                                                                            {activeTab === 'pending' && b.payment_method !== 'offline' && (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        handleConfirm(b.id);
+                                                                                        setOpenDropdown(null);
+                                                                                    }}
+                                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-left text-green-700 transition hover:bg-green-50"
+                                                                                >
+                                                                                    <Check className="w-4 h-4 mr-3" />
+                                                                                    Terima Booking
+                                                                                </button>
+                                                                            )}
+
+                                                                            {/* Tolak Booking */}
+                                                                            {activeTab === 'pending' && b.payment_method !== 'offline' && (
+                                                                                <button
+                                                                                    onClick={() => {
+                                                                                        handleReject(b.id);
+                                                                                        setOpenDropdown(null);
+                                                                                    }}
+                                                                                    className="flex items-center w-full px-4 py-3 text-sm font-medium text-left text-red-700 transition hover:bg-red-50"
+                                                                                >
+                                                                                    <X className="w-4 h-4 mr-3" />
+                                                                                    Tolak Booking
+                                                                                </button>
+                                                                            )}
+
+                                                                            {/* Info kalau offline */}
+                                                                            {b.payment_method === 'offline' && activeTab === 'pending' && (
+                                                                                <div className="px-4 py-3 text-xs italic text-gray-500">
+                                                                                    Bayar di tempat · Otomatis diterima
+                                                                                </div>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                                )}
+                                                            </div>
                                                         </td>
                                                     </tr>
                                                 ))
@@ -422,13 +578,13 @@ export default function UmkmDashboard() {
                                 {/* KALENDER — LANGSUNG TAMPIL DARI AWAL (TIDAK PERLU KLIK TOMBOL) */}
                                 <div className="p-4 border-b bg-gradient-to-b from-gray-50 to-gray-100">
                                     <div className="flex items-center justify-between mb-3">
-                                        <button 
+                                        <button
                                             onClick={() => setSelectedDate(selectedDate.subtract(1, 'month'))}
                                             className="p-1 transition rounded-lg hover:bg-white hover:shadow">
                                             <ChevronLeft className="w-5 h-5 text-gray-700" />
                                         </button>
                                         <p className="text-sm font-bold text-gray-800">{selectedDate.format('MMMM YYYY')}</p>
-                                        <button 
+                                        <button
                                             onClick={() => setSelectedDate(selectedDate.add(1, 'month'))}
                                             className="p-1 transition rounded-lg hover:bg-white hover:shadow">
                                             <ChevronRight className="w-5 h-5 text-gray-700" />
@@ -493,15 +649,15 @@ export default function UmkmDashboard() {
                                                             {i + 1}
                                                         </div>
                                                         <div>
-                                                            <p className="font-bold text-gray-800">{b.nama}</p>
-                                                            <p className="text-xs text-gray-600">{b.layanan}</p>
+                                                            <p className="font-bold text-gray-800">{b.customer_name}</p>
+                                                            <p className="text-xs text-gray-600">{b.service_name}</p>
                                                         </div>
                                                     </div>
                                                     <div className="text-right">
                                                         <p className="text-xl font-bold text-blue-700">{time}</p>
                                                         {isNow && <p className="text-xs font-bold text-rose-600 animate-pulse">SEDANG GILIRAN!</p>}
                                                         {isSoon && <p className="text-xs font-bold text-amber-700">{diff} menit lagi</p>}
-                                                        <button 
+                                                        <button
                                                             onClick={() => handleMarkServed(b.id)}
                                                             className="px-4 py-1.5 mt-2 text-xs font-bold text-white bg-emerald-600 rounded-full hover:bg-emerald-700 transition shadow">
                                                             Selesai
@@ -513,7 +669,7 @@ export default function UmkmDashboard() {
                                     )}
                                 </div>
                             </div>
-                            
+
                         </div>
                     </div>
                 </div>

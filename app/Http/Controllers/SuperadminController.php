@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UMKM;
+use App\Models\Umkm;
 use Inertia\Inertia;
 
 class SuperadminController extends Controller
 {
     public function index()
     {
-        $umkms = UMKM::all();
+        $umkms = Umkm::all();
 
         return Inertia::render('Admin/Dashboard', [
             'umkms' => $umkms,

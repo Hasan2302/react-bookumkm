@@ -1,7 +1,7 @@
 // resources/js/Pages/Umkm/Settings.jsx
 import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { Store, Upload, Plus, Trash2, Clock, Save, Home, FileText, Settings, LogOut } from 'lucide-react';
+import { Store, Upload, Plus, Trash2, Clock, Save, Home, FileText, Settings, LogOut, QrCode } from 'lucide-react';
 import api from '@/Services/Api';
 
 export default function UmkmSettings() {
@@ -11,6 +11,7 @@ export default function UmkmSettings() {
     const [umkm, setUmkm] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [bannerPreview, setBannerPreview] = useState(null);
+    const [qrisPreview, setQrisPreview] = useState(null);
 
     const user = JSON.parse(localStorage.getItem('user') || '{}');
 
@@ -31,14 +32,14 @@ export default function UmkmSettings() {
             try {
                 const res = await api.get('/umkm/me');
                 const data = res.data.data;
-    
+
                 // PERBAIKAN UTAMA: PARSE JSON STRING!
                 let services = [];
                 let opening_hours = {
                     senin: '08:00-17:00', selasa: '08:00-17:00', rabu: '08:00-17:00',
                     kamis: '08:00-17:00', jumat: '08:00-17:00', sabtu: '09:00-15:00', minggu: 'Tutup'
                 };
-    
+
                 // Parse services
                 if (data.services) {
                     if (typeof data.services === 'string') {
@@ -53,7 +54,7 @@ export default function UmkmSettings() {
                     }
                 }
                 if (services.length === 0) services = [{ name: '', price: '' }];
-    
+
                 // Parse opening_hours
                 if (data.opening_hours) {
                     if (typeof data.opening_hours === 'string') {
@@ -66,7 +67,7 @@ export default function UmkmSettings() {
                         opening_hours = { ...opening_hours, ...data.opening_hours };
                     }
                 }
-    
+
                 setUmkm(data);
                 setForm({
                     name: data.name || '',
@@ -77,10 +78,11 @@ export default function UmkmSettings() {
                     services: services,
                     opening_hours: opening_hours
                 });
-    
+
+                setQrisPreview(data.qris_image ? `/storage/${data.qris_image}` : null);
                 setLogoPreview(data.logo ? `/storage/${data.logo}` : null);
                 setBannerPreview(data.banner ? `/storage/${data.banner}` : null);
-    
+
             } catch (err) {
                 console.error(err);
                 if (err.response?.status === 401) {
@@ -106,22 +108,49 @@ export default function UmkmSettings() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+
         const formData = new FormData();
-        ['name', 'phone', 'address', 'category', 'description'].forEach(key => formData.append(key, form[key]));
-        formData.append('services', JSON.stringify(form.services.filter(s => s.name.trim() !== '')));
+
+        ['name', 'phone', 'address', 'category', 'description'].forEach(key => {
+            formData.append(key, form[key] || '');
+        });
         formData.append('opening_hours', JSON.stringify(form.opening_hours));
 
         const logo = document.getElementById('logo')?.files[0];
         const banner = document.getElementById('banner')?.files[0];
+        const qris = document.getElementById('qris')?.files[0];
         if (logo) formData.append('logo', logo);
         if (banner) formData.append('banner', banner);
+        if (qris) formData.append('qris_image', qris);
+
+        formData.append('_method', 'PUT');
 
         try {
-            const res = await api.post('/umkm/settings', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            localStorage.setItem('umkm', JSON.stringify(res.data.data));
-            alert('Profil berhasil diperbarui!');
+            const response = await fetch('/api/umkm/settings', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Gagal menyimpan');
+            }
+
+            localStorage.setItem('umkm', JSON.stringify(result.data));
+            alert('Profil & QRIS berhasil diperbarui!');
+
+            if (qris) {
+                setQrisPreview(`/storage/${result.data.qris_image}?t=${Date.now()}`);
+            }
+
         } catch (err) {
-            alert('Gagal menyimpan: ' + (err.response?.data?.message || ''));
+            console.error(err);
+            alert('Gagal menyimpan: ' + err.message);
         } finally {
             setLoading(false);
         }
@@ -236,38 +265,65 @@ export default function UmkmSettings() {
                             </div>
                         </div>
 
-                        {/* KANAN: LAYANAN + JAM BUKA */}
+                        {/* KANAN: GANTI DARI LAYANAN + JAM BUKA → JADI QRIS + JAM BUKA */}
                         <div className="space-y-8">
-                            {/* LAYANAN */}
+
+                            {/* QRIS UPLOAD — FITUR BARU! */}
                             <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-800">Layanan & Harga</h2>
-                                    <button type="button" onClick={handleAddService}
-                                        className="flex items-center gap-2 px-5 py-3 text-white transition bg-indigo-600 shadow-lg rounded-xl hover:bg-indigo-700">
-                                        <Plus className="w-5 h-5" /> Tambah
-                                    </button>
+                                    <h2 className="flex items-center gap-3 text-2xl font-bold text-gray-800">
+                                        <QrCode className="w-8 h-8 text-emerald-600" /> QRIS Pembayaran
+                                    </h2>
+                                    <span className="px-4 py-2 text-xs font-bold text-white rounded-full bg-emerald-600">
+                                        Rekomendasi UMKM Modern
+                                    </span>
                                 </div>
-                                <div className="space-y-4">
-                                    {form.services.map((s, i) => (
-                                        <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-                                            <input type="text" placeholder="Nama layanan" value={s.name}
-                                                onChange={e => handleServiceChange(i, 'name', e.target.value)}
-                                                className="flex-1 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500" />
-                                            <input type="number" placeholder="Harga" value={s.price}
-                                                onChange={e => handleServiceChange(i, 'price', e.target.value)}
-                                                className="w-32 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500" />
-                                            {form.services.length > 1 && (
-                                                <button type="button" onClick={() => handleRemoveService(i)}
-                                                    className="p-3 text-red-600 transition bg-red-50 rounded-xl hover:bg-red-100">
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
+
+                                <div className="space-y-6">
+                                    <div className="p-6 border-2 border-dashed border-emerald-300 rounded-2xl bg-emerald-50">
+                                        <p className="mb-4 text-sm font-medium text-gray-700">
+                                            Upload gambar QRIS Anda (dari GoPay, OVO, Dana, ShopeePay, dll)
+                                        </p>
+
+                                        <label className="block cursor-pointer">
+                                            <input
+                                                type="file"
+                                                id="qris"
+                                                accept="image/*"
+                                                className="hidden"
+                                                onChange={(e) => {
+                                                    if (e.target.files[0]) {
+                                                        setQrisPreview(URL.createObjectURL(e.target.files[0]));
+                                                    }
+                                                }}
+                                            />
+                                            <div className="flex flex-col items-center justify-center p-8 transition-all border-4 border-dashed rounded-2xl hover:border-emerald-500 hover:bg-emerald-100">
+                                                {qrisPreview ? (
+                                                    <div className="space-y-4 text-center">
+                                                        <img src={qrisPreview} alt="QRIS" className="mx-auto shadow-2xl rounded-xl max-h-80" />
+                                                        <p className="text-sm font-bold text-emerald-600">QRIS siap digunakan!</p>
+                                                        <p className="text-xs text-gray-500">Klik lagi untuk ganti gambar</p>
+                                                    </div>
+                                                ) : (
+                                                    <>
+                                                        <QrCode className="w-20 h-20 mb-4 text-emerald-500" />
+                                                        <p className="text-lg font-bold text-gray-700">Klik untuk upload QRIS</p>
+                                                        <p className="text-sm text-gray-500">PNG, JPG • Maks 2MB</p>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </label>
+                                    </div>
+
+                                    <div className="p-4 border border-blue-200 bg-blue-50 rounded-xl">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>Tips:</strong> Gunakan QRIS All Payment (bisa terima dari semua e-wallet & bank)
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
-                            {/* JAM OPERASIONAL */}
+                            {/* JAM OPERASIONAL — TETAP ADA */}
                             <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
                                 <h2 className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-800">
                                     <Clock className="text-indigo-600 w-7 h-7" /> Jam Operasional
@@ -278,12 +334,13 @@ export default function UmkmSettings() {
                                             <label className="w-20 text-sm font-semibold text-gray-700 capitalize">{dayLabels[i]}</label>
                                             <input type="text" value={form.opening_hours[day]}
                                                 onChange={e => handleHourChange(day, e.target.value)}
-                                                placeholder="08:00-17:00" 
+                                                placeholder="08:00-17:00"
                                                 className="flex-1 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
                                         </div>
                                     ))}
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>

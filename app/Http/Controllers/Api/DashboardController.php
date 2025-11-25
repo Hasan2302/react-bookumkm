@@ -106,25 +106,33 @@ class DashboardController extends Controller
 
             $query = \DB::table('bookings')
                 ->where('umkm_id', $umkmId)
-                ->select('id', 'customer_name', 'service_name', 'date', 'time', 'status')
+                ->select(
+                    'id', 'customer_name', 'service_name', 'date', 'time',
+                    'status', 'customer_phone', 'total_price',
+                    'payment_method', 'payment_proof' // TAMBAHAN INI!
+                )
                 ->latest('created_at');
 
-            $diterima = $query->clone()->where('status', 'confirmed')->take(10)->get();
-            $pending = $query->clone()->where('status', 'pending')->take(10)->get();
+            $diterima  = $query->clone()->where('status', 'confirmed')->take(10)->get();
+            $pending   = $query->clone()->where('status', 'pending')->take(10)->get();
             $cancelled = $query->clone()->whereIn('status', ['cancelled', 'rejected', 'no_show'])->take(10)->get();
 
             $format = function($b) {
                 return [
-                    'id' => $b->id,
-                    'nama' => $b->customer_name ?? 'Pelanggan',
-                    'layanan' => $b->service_name ?? 'Layanan Booking',
-                    'waktu' => Carbon::parse($b->date)->format('d M Y') . ', ' . $b->time,
+                    'id'             => $b->id,
+                    'customer_name'  => $b->customer_name ?? 'Pelanggan',
+                    'service_name'   => $b->service_name ?? 'Layanan Booking',
+                    'customer_phone' => $b->customer_phone,
+                    'total_price'    => (int)$b->total_price,
+                    'payment_method' => $b->payment_method ?? 'offline',
+                    'payment_proof'  => $b->payment_proof, // Kirim path bukti
+                    'waktu'          => Carbon::parse($b->date)->format('d M Y') . ', ' . substr($b->time, 0, 5),
                 ];
             };
 
             return response()->json([
-                'diterima' => $diterima->map($format),
-                'pending' => $pending->map($format),
+                'diterima'  => $diterima->map($format),
+                'pending'   => $pending->map($format),
                 'cancelled' => $cancelled->map($format),
             ]);
 

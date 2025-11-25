@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\UmkmController;
 use App\Http\Controllers\SuperadminController;
 use App\Http\Controllers\UserController;
@@ -8,7 +9,6 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-// Landing Page
 Route::get('/', function () {
     return Inertia::render('Welcome', [
         'canLogin' => Route::has('login'),
@@ -18,6 +18,11 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
+// === HALAMAN REGISTER UMKM (BISA DIBUKA LANGSUNG DI BROWSER) ===
+Route::get('/register-umkm', function () {
+    return Inertia::render('Auth/RegisterUmkm'); // ← nama file harus persis!
+})->name('register-umkm');
+
 // DASHBOARD UTAMA: Redirect berdasarkan role
 Route::get('/dashboard', function () {
     $role = strtolower(auth()->user()->role);
@@ -25,7 +30,7 @@ Route::get('/dashboard', function () {
     return match ($role) {
         'superadmin'    => redirect()->route('superadmin.dashboard'),
         'umkm_admin'    => redirect()->route('umkm.dashboard'),
-        default         => Inertia::render('Dashboard'), // user biasa
+        default         => Inertia::render('Dashboard'),
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 

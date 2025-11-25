@@ -15,6 +15,7 @@ class FormField extends Model
         'type',
         'required',
         'options',
+        'price',
         'sort_order'
     ];
 

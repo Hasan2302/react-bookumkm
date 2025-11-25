@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\UMKM;
+use App\Models\Umkm;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -10,7 +10,7 @@ class UmkmController extends Controller
 {
     public function show($subdomain)
     {
-        $umkm = UMKM::where('subdomain', $subdomain)->firstOrFail();
+        $umkm = Umkm::where('subdomain', $subdomain)->firstOrFail();
 
         return Inertia::render('UmkmDetail', [
             'umkm' => $umkm,

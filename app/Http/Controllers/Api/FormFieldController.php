@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\FormField;
 use Illuminate\Http\Request;
+use App\Models\Umkm;
 
 class FormFieldController extends Controller
 {
@@ -48,5 +49,26 @@ class FormFieldController extends Controller
             auth()->user()->umkm->formFields()->where('id', $fieldId)->update(['sort_order' => $index]);
         }
         return response()->json(['message' => 'Urutan disimpan']);
+    }
+
+    public function publicShowById($id)
+    {
+        $umkm = Umkm::findOrFail($id);
+
+        $fields = $umkm->formFields()->orderBy('sort_order')->get();
+
+        // Kalau belum ada form, kasih default
+        if ($fields->isEmpty()) {
+            $fields = collect([
+                ['label' => 'Nama Lengkap', 'type' => 'text', 'required' => true, 'options' => null],
+                ['label' => 'Nomor WhatsApp', 'type' => 'phone', 'required' => true, 'options' => null],
+                ['label' => 'Catatan', 'type' => 'textarea', 'required' => false, 'options' => null],
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'data' => $fields
+        ]);
     }
 }
