@@ -259,7 +259,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                 )}
 
                 {/* Content - Scrollable, Mobile Optimized */}
-                <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto max-h-[calc(100vh-220px)] sm:max-h-[calc(90vh-240px)]">
+                <div className="p-4 sm:p-6 lg:p-8 overflow-y-auto max-h-[calc(100vh-220px)] sm:max-h-[calc(90vh-280px)] lg:max-h-[calc(90vh-320px)]">
                     
                     {/* Step 1: Pilih Tanggal */}
                     {step === 1 && (

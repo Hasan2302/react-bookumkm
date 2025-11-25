@@ -11,18 +11,7 @@ class UmkmSeeder extends Seeder
 {
     public function run(): void
     {
-        $umkmUsers = User::where('role', 'umkm_admin')->get();
-
-        if ($umkmUsers->isEmpty()) {
-            $user = User::create([
-                'name' => 'UMKM Demo',
-                'email' => 'umkm@demo.com',
-                'password' => bcrypt('password'),
-                'role' => 'umkm_admin',
-            ]);
-            $umkmUsers = collect([$user]);
-        }
-
+        // Create individual users for each UMKM
         $umkms = [
             [
                 'name' => 'Barbershop Premium',
@@ -123,10 +112,33 @@ class UmkmSeeder extends Seeder
                 'slug' => 'bengkel-motor-jaya',
                 'status' => 'active',
             ],
+            [
+                'name' => 'Laundry Express Clean',
+                'phone' => '081234567896',
+                'address' => 'Jl. Casablanca No. 88, Jakarta Selatan',
+                'category' => 'Laundry',
+                'description' => 'Layanan laundry cepat dan bersih dengan harga terjangkau. Melayani cuci kering, setrika, dan dry clean untuk berbagai jenis pakaian.',
+                'services' => json_encode(['Cuci Kering', 'Cuci Setrika', 'Dry Clean', 'Cuci Sepatu', 'Cuci Boneka']),
+                'opening_hours' => json_encode([
+                    'Senin-Sabtu' => '07:00 - 20:00',
+                    'Minggu' => '08:00 - 17:00',
+                ]),
+                'logo' => null,
+                'banner' => null,
+                'subdomain' => 'laundry-express-clean',
+                'slug' => 'laundry-express-clean',
+                'status' => 'active',
+            ],
         ];
 
         foreach ($umkms as $index => $umkmData) {
-            $user = $umkmUsers->random();
+            // Create unique user for each UMKM
+            $user = User::create([
+                'name' => $umkmData['name'] . ' Owner',
+                'email' => 'owner' . ($index + 1) . '@' . Str::slug($umkmData['name']) . '.com',
+                'password' => bcrypt('password'),
+                'role' => 'umkm_admin',
+            ]);
             
             UMKM::create(array_merge($umkmData, [
                 'user_id' => $user->id,
