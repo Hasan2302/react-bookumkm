@@ -34,42 +34,49 @@ class UmkmSettingsController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'nullable|string',
-            'address' => 'nullable|string',
-            'category' => 'nullable|string',
-            'description' => 'nullable|string',
-            'services' => 'nullable|json',
+            'name'          => 'required|string|max:255',
+            'phone'         => 'nullable|string|max:20',
+            'address'       => 'nullable|string',
+            'category'      => 'nullable|string|max:100',
+            'description'   => 'nullable|string',
             'opening_hours' => 'nullable|json',
-            'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'logo'          => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'banner'        => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:3072',
+            'qris_image'    => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
         ]);
 
-        // Upload logo
         if ($request->hasFile('logo')) {
-            if ($umkm->logo) Storage::delete('public/' . $umkm->logo);
+            if ($umkm->logo && Storage::exists('public/' . $umkm->logo)) {
+                Storage::delete('public/' . $umkm->logo);
+            }
             $validated['logo'] = $request->file('logo')->store('umkm/logo', 'public');
         }
 
-        // Upload banner
         if ($request->hasFile('banner')) {
-            if ($umkm->banner) Storage::delete('public/' . $umkm->banner);
+            if ($umkm->banner && Storage::exists('public/' . $umkm->banner)) {
+                Storage::delete('public/' . $umkm->banner);
+            }
             $validated['banner'] = $request->file('banner')->store('umkm/banner', 'public');
         }
 
-        // Parse JSON
-        if ($request->filled('services')) {
-            $validated['services'] = json_decode($request->services, true);
+        if ($request->hasFile('qris_image')) {
+            if ($umkm->qris_image && Storage::exists('public/' . $umkm->qris_image)) {
+                Storage::delete('public/' . $umkm->qris_image);
+            }
+            $validated['qris_image'] = $request->file('qris_image')->store('umkm/qris', 'public');
         }
+
         if ($request->filled('opening_hours')) {
             $validated['opening_hours'] = json_decode($request->opening_hours, true);
         }
+
+        $validated['services'] = null;
 
         $umkm->update($validated);
 
         return response()->json([
             'success' => true,
-            'message' => 'Profil berhasil diperbarui!',
+            'message' => 'Profil & QRIS berhasil diperbarui!',
             'data' => $umkm->fresh()
         ]);
     }

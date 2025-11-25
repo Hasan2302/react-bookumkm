@@ -13,7 +13,7 @@ class Umkm extends Model
 
     protected $fillable = [
         'user_id', 'name', 'phone', 'address', 'category',
-        'logo', 'banner', 'description', 'services', 'opening_hours',
+        'logo', 'banner', 'qris_image', 'description', 'services', 'opening_hours',
         'subdomain', 'slug', 'status'
     ];
 

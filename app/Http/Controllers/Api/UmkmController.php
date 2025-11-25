@@ -35,7 +35,7 @@ class UmkmController extends Controller
     public function index()
     {
         $umkms = Umkm::where('status', 'active')
-            ->select('id', 'name', 'category', 'address', 'phone', 'logo', 'banner', 'subdomain', 'slug', 'services', 'opening_hours')
+            ->select('id', 'name', 'category', 'address', 'phone', 'logo', 'banner', 'qris_image', 'subdomain', 'slug', 'services', 'opening_hours')
             ->get()
             ->map(function ($umkm) {
                 return [
@@ -46,6 +46,7 @@ class UmkmController extends Controller
                     'phone'         => $umkm->phone,
                     'logo'          => $umkm->logo ? asset('storage/' . $umkm->logo) : null,
                     'banner'        => $umkm->banner ? asset('storage/' . $umkm->banner) : null,
+                    'qris_image'    => $umkm->qris_image ? $umkm->qris_image : null,
                     'subdomain'     => $umkm->subdomain,
                     'slug'          => $umkm->slug,
                     'services'      => $umkm->services ?? [],        // sudah array otomatis!
@@ -109,16 +110,26 @@ class UmkmController extends Controller
     // GET /api/umkms/{id} → Detail UMKM (untuk edit)
     public function show($id)
     {
-        $umkm = Umkm::find($id);
-
-        if (!$umkm) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
-        }
+        $umkm = Umkm::with('formFields')->findOrFail($id);
 
         return response()->json([
-            'status'  => 'success',
-            'data'    => $umkm
-        ], 200);
+            'status' => 'success',
+            'data'   => [
+                'id'            => $umkm->id,
+                'name'          => $umkm->name,
+                'phone'         => $umkm->phone,
+                'address'       => $umkm->address,
+                'category'      => $umkm->category,
+                'description'   => $umkm->description,
+                'logo'          => $umkm->logo,
+                'banner'        => $umkm->banner,
+                'qris_image'    => $umkm->qris_image,
+                'subdomain'     => $umkm->subdomain,
+                'slug'          => $umkm->slug,
+                'opening_hours' => $umkm->opening_hours,
+                'form_fields'   => $umkm->formFields,
+            ]
+        ]);
     }
 
     // POST /api/umkms/{id} → Update UMKM (method override karena React pakai POST)
@@ -198,14 +209,29 @@ class UmkmController extends Controller
     // Tetap ada untuk publik (frontend)
     public function showBySubdomain($subdomain)
     {
-        $umkm = Umkm::where('subdomain', $subdomain)->where('status', 'active')->firstOrFail();
-
-        $umkm->services = $umkm->services ? json_decode($umkm->services, true) : [];
-        $umkm->opening_hours = $umkm->opening_hours ? json_decode($umkm->opening_hours, true) : [];
+        $umkm = Umkm::with('formFields')
+            ->where('subdomain', $subdomain)
+            ->where('status', 'active')
+            ->firstOrFail();
 
         return response()->json([
-            'status'  => 'success',
-            'data'    => $umkm
+            'status' => 'success',
+            'data'   => [
+                'id'            => $umkm->id,
+                'name'          => $umkm->name,
+                'phone'         => $umkm->phone,
+                'address'       => $umkm->address,
+                'category'      => $umkm->category,
+                'description'   => $umkm->description,
+                'logo'          => $umkm->logo,
+                'banner'        => $umkm->banner,
+                'qris_image'    => $umkm->qris_image,
+                'subdomain'     => $umkm->subdomain,
+                'slug'          => $umkm->slug,
+                'opening_hours' => $umkm->opening_hours ? json_decode($umkm->opening_hours, true) : [],
+                'services'      => $umkm->services ? json_decode($umkm->services, true) : [],
+                'form_fields'   => $umkm->formFields,
+            ]
         ]);
     }
 

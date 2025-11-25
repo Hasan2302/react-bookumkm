@@ -25,6 +25,7 @@ Route::post('/register-umkm', [AuthController::class, 'registerUmkm']);
 Route::get('/umkms', [UmkmController::class, 'index']);
 Route::get('/umkms/{id}', [UmkmController::class, 'show']);
 Route::get('/umkms/{id}/form-fields', [FormFieldController::class, 'publicShowById']);
+Route::get('/umkms/{umkm}/booked-times', [BookingController::class, 'getBookedTimes']);
 Route::post('/bookings', [BookingController::class, 'store']);
 
 // Dashboard UMKM
@@ -40,7 +41,7 @@ Route::middleware('auth:sanctum')->group(function () {
 // SETTINGS UMKM
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/umkm/me', [UmkmSettingsController::class, 'me']);
-    Route::post('/umkm/settings', [UmkmSettingsController::class, 'update']);
+    Route::match(['post', 'put'], '/umkm/settings', [UmkmSettingsController::class, 'update']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
