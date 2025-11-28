@@ -2,10 +2,13 @@
 
 namespace App\Http\Controllers\Api;
 
+
 use App\Http\Controllers\Controller;
 use App\Models\Umkm;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Validator;
 
 class UmkmController extends Controller
 {
@@ -109,7 +112,7 @@ class UmkmController extends Controller
             'phone'      => 'nullable|string|max:20',
             'address'    => 'nullable|string',
             'category'   => 'nullable|string|max:100',
-            'description'=> 'nullable|string',
+            'description' => 'nullable|string',
             'subdomain'  => 'required|string|unique:umkms,subdomain|max:50',
             'status'     => 'required|in:active,suspended',
             'logo'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
@@ -187,7 +190,7 @@ class UmkmController extends Controller
             'phone'      => 'nullable|string|max:20',
             'address'    => 'nullable|string',
             'category'   => 'nullable|string|max:100',
-            'description'=> 'nullable|string',
+            'description' => 'nullable|string',
             'subdomain'  => 'required|string|max:50|unique:umkms,subdomain,' . $id,
             'status'     => 'required|in:active,suspended',
             'logo'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
