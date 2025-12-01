@@ -1,5 +1,4 @@
 <?php
-// app/Http/Controllers/Api/UmkmSettingsController.php
 
 namespace App\Http\Controllers\Api;
 
