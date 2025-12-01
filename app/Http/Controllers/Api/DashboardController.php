@@ -1,11 +1,11 @@
 <?php
-// app/Http/Controllers/Api/DashboardController.php → GANTI SELURUHNYA DENGAN INI!
 
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class DashboardController extends Controller
@@ -23,7 +23,7 @@ class DashboardController extends Controller
             $startOfMonth = Carbon::now()->startOfMonth();
 
             // Langsung query dari database, tanpa relasi kalau error
-            $bookings = \DB::table('bookings')->where('umkm_id', $umkmId);
+            $bookings = DB::table('bookings')->where('umkm_id', $umkmId);
 
             $todayBookings = $bookings->clone()->whereDate('created_at', $today)->count();
 
@@ -104,7 +104,7 @@ class DashboardController extends Controller
 
             $umkmId = $user->umkm->id;
 
-            $query = \DB::table('bookings')
+            $query = DB::table('bookings')
                 ->where('umkm_id', $umkmId)
                 ->select('id', 'customer_name', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
                 ->latest('created_at');
@@ -148,7 +148,7 @@ class DashboardController extends Controller
             $date = $request->query('date', Carbon::today()->toDateString());
             $umkmId = $user->umkm->id;
 
-            $bookings = \DB::table('bookings')
+            $bookings = DB::table('bookings')
                 ->where('umkm_id', $umkmId)
                 ->whereDate('date', $date)
                 ->whereIn('status', ['confirmed', 'served']) // Tampilkan yang confirmed & served
