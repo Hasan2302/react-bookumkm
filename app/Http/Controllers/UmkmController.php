@@ -51,6 +51,26 @@ class UmkmController extends Controller
         return Inertia::render('Umkm/FormBuilder');
     }
 
+    public function reservations()
+    {
+        return Inertia::render('Umkm/Reservations');
+    }
+
+    public function services()
+    {
+        return Inertia::render('Umkm/Services');
+    }
+
+    public function customers()
+    {
+        return Inertia::render('Umkm/Customers');
+    }
+
+    public function finance()
+    {
+        return Inertia::render('Umkm/Finance');
+    }
+
     public function settings()
     {
         return Inertia::render('Umkm/Settings');

@@ -2,7 +2,7 @@ import { X, MapPin, Star, Clock, Phone, Mail, Calendar, Info } from 'lucide-reac
 import { useEffect } from 'react';
 
 // Constants
-const STORAGE_URL = 'http://127.0.0.1:8000/storage/';
+const STORAGE_URL = '/storage/';
 const DEFAULT_RATING = 4.9;
 const RATING_STARS = 5;
 const DEFAULT_SCHEDULE = 'Senin - Jumat: 09:00 - 17:00';
@@ -31,14 +31,14 @@ const DEFAULT_IMAGES = {
 // Helper Functions
 const getCategoryKey = (category) => {
     const categoryLower = category?.toLowerCase() || '';
-    
+
     if (categoryLower.includes('salon') || categoryLower.includes('spa')) return 'salon';
     if (categoryLower.includes('barber') || categoryLower.includes('cukur')) return 'barbershop';
     if (categoryLower.includes('cafe') || categoryLower.includes('resto') || categoryLower.includes('kuliner')) return 'cafe';
     if (categoryLower.includes('bengkel')) return 'bengkel';
     if (categoryLower.includes('klinik')) return 'klinik';
     if (categoryLower.includes('laundry')) return 'laundry';
-    
+
     return 'default';
 };
 
@@ -76,24 +76,24 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
     const logoUrl = getImageUrl(umkm.logo, umkm.category, 'logo');
 
     return (
-        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/60 backdrop-blur-sm p-0 sm:p-4">
+        <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center bg-black/60 backdrop-blur-sm sm:p-4">
             {/* Modal Container */}
-            <div 
+            <div
                 className="relative w-full max-w-4xl bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[95vh] sm:max-h-[90vh] overflow-hidden animate-slide-up"
                 onClick={(e) => e.stopPropagation()}
             >
                 {/* Close Button */}
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 z-20 p-2 bg-white/90 backdrop-blur-sm rounded-full shadow-lg hover:bg-white transition-all duration-200 active:scale-95"
+                    className="absolute z-20 p-2 transition-all duration-200 rounded-full shadow-lg top-4 right-4 bg-white/90 backdrop-blur-sm hover:bg-white active:scale-95"
                 >
-                    <X className="w-5 h-5 sm:w-6 sm:h-6 text-gray-700" />
+                    <X className="w-5 h-5 text-gray-700 sm:w-6 sm:h-6" />
                 </button>
 
                 {/* Scrollable Content */}
                 <div className="overflow-y-auto max-h-[95vh] sm:max-h-[90vh] scrollbar-thin">
                     {/* Banner Image */}
-                    <div className="relative h-48 sm:h-64 md:h-80 overflow-hidden">
+                    <div className="relative h-48 overflow-hidden sm:h-64 md:h-80">
                         <img
                             src={bannerUrl}
                             alt={umkm.name}
@@ -103,9 +103,9 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent" />
-                        
+
                         {/* Logo */}
-                        <div className="absolute bottom-4 left-4 w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 overflow-hidden border-4 border-white shadow-xl rounded-xl sm:rounded-2xl bg-white">
+                        <div className="absolute w-16 h-16 overflow-hidden bg-white border-4 border-white shadow-xl bottom-4 left-4 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-xl sm:rounded-2xl">
                             <img
                                 src={logoUrl}
                                 alt="logo"
@@ -123,12 +123,12 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                         <div className="mb-6">
                             <div className="flex items-start justify-between gap-4 mb-3">
                                 <div className="flex-1 min-w-0">
-                                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+                                    <h2 className="mb-2 text-2xl font-bold text-gray-900 sm:text-3xl md:text-4xl">
                                         {umkm.name}
                                     </h2>
-                                    
+
                                     {umkm.category && (
-                                        <span className="inline-block px-3 py-1 text-xs sm:text-sm font-semibold rounded-full bg-primary-100 text-primary-700">
+                                        <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full sm:text-sm bg-brand-100 text-brand-700">
                                             {umkm.category}
                                         </span>
                                     )}
@@ -139,11 +139,11 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             <div className="flex items-center gap-2 mb-4">
                                 <div className="flex items-center gap-0.5">
                                     {[...Array(RATING_STARS)].map((_, i) => (
-                                        <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
+                                        <Star key={i} className="w-4 h-4 text-yellow-400 fill-current sm:w-5 sm:h-5" />
                                     ))}
                                 </div>
-                                <span className="text-sm sm:text-base font-semibold text-gray-900">{DEFAULT_RATING}</span>
-                                <span className="text-xs sm:text-sm text-gray-500">(127 ulasan)</span>
+                                <span className="text-sm font-semibold text-gray-900 sm:text-base">{DEFAULT_RATING}</span>
+                                <span className="text-xs text-gray-500 sm:text-sm">(127 ulasan)</span>
                             </div>
                         </div>
 
@@ -151,26 +151,26 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                         {umkm.description && (
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <Info className="w-5 h-5 text-primary-600" />
-                                    <h3 className="text-lg sm:text-xl font-bold text-gray-900">Tentang</h3>
+                                    <Info className="w-5 h-5 text-brand-600" />
+                                    <h3 className="text-lg font-bold text-gray-900 sm:text-xl">Tentang</h3>
                                 </div>
-                                <p className="text-sm sm:text-base text-gray-700 leading-relaxed">
+                                <p className="text-sm leading-relaxed text-gray-700 sm:text-base">
                                     {umkm.description}
                                 </p>
                             </div>
                         )}
 
                         {/* Information Cards */}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                        <div className="grid grid-cols-1 gap-4 mb-6 sm:grid-cols-2">
                             {/* Address */}
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary-100">
-                                        <MapPin className="w-5 h-5 text-primary-600" />
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                        <MapPin className="w-5 h-5 text-brand-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-semibold text-gray-900 mb-1">Alamat</h4>
-                                        <p className="text-xs sm:text-sm text-gray-600 leading-relaxed">
+                                        <h4 className="mb-1 text-sm font-semibold text-gray-900">Alamat</h4>
+                                        <p className="text-xs leading-relaxed text-gray-600 sm:text-sm">
                                             {umkm.address}
                                         </p>
                                     </div>
@@ -178,14 +178,14 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             </div>
 
                             {/* Schedule */}
-                            <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                            <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary-100">
-                                        <Clock className="w-5 h-5 text-primary-600" />
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                        <Clock className="w-5 h-5 text-brand-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="text-sm font-semibold text-gray-900 mb-1">Jam Operasional</h4>
-                                        <p className="text-xs sm:text-sm text-gray-600">
+                                        <h4 className="mb-1 text-sm font-semibold text-gray-900">Jam Operasional</h4>
+                                        <p className="text-xs text-gray-600 sm:text-sm">
                                             {umkm.schedule || DEFAULT_SCHEDULE}
                                         </p>
                                     </div>
@@ -194,16 +194,16 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
 
                             {/* Phone */}
                             {umkm.phone && (
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary-100">
-                                            <Phone className="w-5 h-5 text-primary-600" />
+                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                            <Phone className="w-5 h-5 text-brand-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-semibold text-gray-900 mb-1">Telepon</h4>
-                                            <a 
+                                            <h4 className="mb-1 text-sm font-semibold text-gray-900">Telepon</h4>
+                                            <a
                                                 href={`tel:${umkm.phone}`}
-                                                className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 font-medium"
+                                                className="text-xs font-medium sm:text-sm text-brand-600 hover:text-brand-700"
                                             >
                                                 {umkm.phone}
                                             </a>
@@ -214,16 +214,16 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
 
                             {/* Email */}
                             {umkm.email && (
-                                <div className="p-4 bg-gray-50 rounded-xl border border-gray-200">
+                                <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex-shrink-0 w-10 h-10 flex items-center justify-center rounded-lg bg-primary-100">
-                                            <Mail className="w-5 h-5 text-primary-600" />
+                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                            <Mail className="w-5 h-5 text-brand-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
-                                            <h4 className="text-sm font-semibold text-gray-900 mb-1">Email</h4>
-                                            <a 
+                                            <h4 className="mb-1 text-sm font-semibold text-gray-900">Email</h4>
+                                            <a
                                                 href={`mailto:${umkm.email}`}
-                                                className="text-xs sm:text-sm text-primary-600 hover:text-primary-700 font-medium break-all"
+                                                className="text-xs font-medium break-all sm:text-sm text-brand-600 hover:text-brand-700"
                                             >
                                                 {umkm.email}
                                             </a>
@@ -234,7 +234,7 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                         </div>
 
                         {/* Action Buttons */}
-                        <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-200">
+                        <div className="flex flex-col gap-3 pt-4 border-t border-gray-200 sm:flex-row">
                             <button
                                 onClick={onClose}
                                 className="flex-1 px-6 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-gray-700 bg-gray-100 rounded-xl hover:bg-gray-200 transition-all duration-200 active:scale-95"
@@ -246,7 +246,7 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                                     onClose();
                                     onBooking(umkm);
                                 }}
-                                className="flex-1 px-6 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+                                className="flex-1 px-6 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <Calendar className="w-5 h-5" />
                                 <span>Booking Sekarang</span>

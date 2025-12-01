@@ -1,17 +1,20 @@
 // resources/js/Pages/Umkm/Settings.jsx
 import { useState, useEffect } from 'react';
-import { Head, Link, router } from '@inertiajs/react';
-import { Store, Upload, Plus, Trash2, Clock, Save, Home, FileText, Settings, LogOut } from 'lucide-react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Store, Upload, Plus, Trash2, Clock, Save, Home, FileText, Settings, LogOut, QrCode } from 'lucide-react';
 import api from '@/Services/Api';
+import MetronicLayout from '@/Layouts/MetronicLayout';
 
-export default function UmkmSettings({ auth }) {
-    const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
+export default function UmkmSettings() {
+    const navigate = useNavigate();
+    const location = useLocation();
     const [loading, setLoading] = useState(false);
     const [umkm, setUmkm] = useState(null);
     const [logoPreview, setLogoPreview] = useState(null);
     const [bannerPreview, setBannerPreview] = useState(null);
+    const [qrisPreview, setQrisPreview] = useState(null);
 
-    const user = auth?.user || {};
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
 
     const [form, setForm] = useState({
         name: '', phone: '', address: '', category: '', description: '',
@@ -19,25 +22,18 @@ export default function UmkmSettings({ auth }) {
         opening_hours: { senin: '08:00-17:00', selasa: '08:00-17:00', rabu: '08:00-17:00', kamis: '08:00-17:00', jumat: '08:00-17:00', sabtu: '09:00-15:00', minggu: 'Tutup' }
     });
 
-    const navItems = [
-        { name: 'Dashboard', href: '/umkm/dashboard', icon: Home },
-        { name: 'Form Builder', href: '/umkm/formbuilder', icon: FileText },
-        { name: 'Pengaturan', href: '/umkm/settings', icon: Settings },
-    ];
-
     useEffect(() => {
         const fetchUmkm = async () => {
             try {
                 const res = await api.get('/umkm/me');
                 const data = res.data.data;
-    
-                // PERBAIKAN UTAMA: PARSE JSON STRING!
+
                 let services = [];
                 let opening_hours = {
                     senin: '08:00-17:00', selasa: '08:00-17:00', rabu: '08:00-17:00',
                     kamis: '08:00-17:00', jumat: '08:00-17:00', sabtu: '09:00-15:00', minggu: 'Tutup'
                 };
-    
+
                 // Parse services
                 if (data.services) {
                     if (typeof data.services === 'string') {
@@ -52,7 +48,7 @@ export default function UmkmSettings({ auth }) {
                     }
                 }
                 if (services.length === 0) services = [{ name: '', price: '' }];
-    
+
                 // Parse opening_hours
                 if (data.opening_hours) {
                     if (typeof data.opening_hours === 'string') {
@@ -65,7 +61,7 @@ export default function UmkmSettings({ auth }) {
                         opening_hours = { ...opening_hours, ...data.opening_hours };
                     }
                 }
-    
+
                 setUmkm(data);
                 setForm({
                     name: data.name || '',
@@ -76,15 +72,16 @@ export default function UmkmSettings({ auth }) {
                     services: services,
                     opening_hours: opening_hours
                 });
-    
+
+                setQrisPreview(data.qris_image ? `/storage/${data.qris_image}` : null);
                 setLogoPreview(data.logo ? `/storage/${data.logo}` : null);
                 setBannerPreview(data.banner ? `/storage/${data.banner}` : null);
-    
+
             } catch (err) {
                 console.error(err);
                 if (err.response?.status === 401) {
                     localStorage.clear();
-                    router.visit('/login');
+                    navigate('/login');
                 }
             }
         };
@@ -105,93 +102,127 @@ export default function UmkmSettings({ auth }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
+
         const formData = new FormData();
-        ['name', 'phone', 'address', 'category', 'description'].forEach(key => formData.append(key, form[key]));
-        formData.append('services', JSON.stringify(form.services.filter(s => s.name.trim() !== '')));
+
+        ['name', 'phone', 'address', 'category', 'description'].forEach(key => {
+            formData.append(key, form[key] || '');
+        });
         formData.append('opening_hours', JSON.stringify(form.opening_hours));
 
         const logo = document.getElementById('logo')?.files[0];
         const banner = document.getElementById('banner')?.files[0];
+        const qris = document.getElementById('qris')?.files[0];
         if (logo) formData.append('logo', logo);
         if (banner) formData.append('banner', banner);
+        if (qris) formData.append('qris_image', qris);
+
+        formData.append('_method', 'PUT');
 
         try {
-            const res = await api.post('/umkm/settings', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
-            localStorage.setItem('umkm', JSON.stringify(res.data.data));
-            alert('Profil berhasil diperbarui!');
+            const response = await fetch('/api/umkm/settings', {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                    'Accept': 'application/json',
+                },
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (!response.ok) {
+                throw new Error(result.message || 'Gagal menyimpan');
+            }
+
+            localStorage.setItem('umkm', JSON.stringify(result.data));
+            alert('Profil & QRIS berhasil diperbarui!');
+
+            if (qris) {
+                setQrisPreview(`/storage/${result.data.qris_image}?t=${Date.now()}`);
+            }
+
         } catch (err) {
-            alert('Gagal menyimpan: ' + (err.response?.data?.message || ''));
+            console.error(err);
+            alert('Gagal menyimpan: ' + err.message);
         } finally {
             setLoading(false);
         }
     };
 
-    if (!umkm) return <div className="flex items-center justify-center min-h-screen text-3xl font-bold text-indigo-600">Memuat...</div>;
+    const handleDeleteImage = async (type) => {
+        if (!confirm('Are you sure you want to delete this image?')) return;
+        setLoading(true);
+        try {
+            const res = await api.delete('/umkm/settings/image', { data: { type } });
+            const updatedUmkm = res.data.data;
+            
+            localStorage.setItem('umkm', JSON.stringify(updatedUmkm));
+            setUmkm(updatedUmkm);
+            
+            if (type === 'logo') setLogoPreview(null);
+            if (type === 'banner') setBannerPreview(null);
+            if (type === 'qris_image') setQrisPreview(null);
+            
+            alert('Image deleted successfully!');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete image');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!umkm) return (
+        <MetronicLayout>
+            <div className="flex items-center justify-center h-96">
+                <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        </MetronicLayout>
+    );
 
     const days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
     const dayLabels = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
     return (
-        <>
-            <Head title="Pengaturan - UMKM" />
-            
-            {/* NAVBAR ATAS — SAMA DENGAN DASHBOARD */}
-            <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
-                <div className="px-4 py-3 mx-auto max-w-7xl md:px-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 md:gap-8">
-                            {navItems.map((item) => (
-                                <Link key={item.name} href={item.href}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${currentPath === item.href ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                    <item.icon className="w-5 h-5" />
-                                    <span className="hidden sm:block">{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="hidden text-sm font-medium md:block">Hi, {user.name}!</span>
-                            <button onClick={() => router.post('/logout')}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg bg-red-50 hover:bg-red-100">
-                                <LogOut className="w-4 h-4" /> <span className="hidden md:inline">Logout</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <MetronicLayout title="Settings" breadcrumbs={['Profile']}>
             {/* TOMBOL SIMPAN FLOATING */}
             <button onClick={handleSubmit} disabled={loading}
-                className="fixed z-50 flex items-center gap-3 px-8 py-5 text-xl font-bold text-white transition-all rounded-full shadow-2xl bg-gradient-to-r from-emerald-500 to-teal-600 bottom-20 right-6 hover:scale-105">
-                <Save className="w-7 h-7" /> {loading ? 'Menyimpan...' : 'SIMPAN PERUBAHAN'}
+                className="fixed z-50 flex items-center gap-3 px-6 py-4 text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-10 right-10 hover:bg-primary-active hover:shadow-xl">
+                <Save className="w-5 h-5" /> {loading ? 'Saving...' : 'SAVE CHANGES'}
             </button>
 
-            {/* MAIN CONTENT — LAYOUT 2 KOLOM, SUPER RAPIH */}
-            <div className="min-h-screen pb-32 bg-gradient-to-br from-indigo-50 via-white to-purple-50 md:pb-6">
-                <div className="px-4 py-8 mx-auto max-w-7xl">
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-bold text-gray-900">Pengaturan Profil UMKM</h1>
-                        <p className="text-gray-600">Kelola informasi bisnis agar lebih profesional</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                        {/* KIRI: FOTO + INFO DASAR */}
-                        <div className="space-y-8">
-                            {/* LOGO & BANNER */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-800">
-                                    <Store className="text-indigo-600 w-7 h-7" /> Foto Profil & Banner
-                                </h2>
+            <div className="space-y-8">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    {/* KIRI: FOTO + INFO DASAR */}
+                    <div className="space-y-8">
+                        {/* LOGO & BANNER */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <Store className="w-5 h-5 text-gray-400" />
+                                    Profile & Banner
+                                </h3>
+                            </div>
+                            <div className="p-6">
                                 <div className="grid gap-6 md:grid-cols-2">
                                     <div>
-                                        <p className="mb-3 text-sm font-medium text-gray-700">Logo</p>
-                                        <label className="block cursor-pointer">
-                                            <div className="relative overflow-hidden border-4 border-dashed rounded-2xl w-44 h-44 bg-gray-50">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <p className="text-sm font-semibold text-gray-700">Logo</p>
+                                            {logoPreview && (
+                                                <button onClick={() => handleDeleteImage('logo')} className="text-xs text-danger hover:underline flex items-center gap-1">
+                                                    <Trash2 className="w-3 h-3" /> Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                        <label className="block cursor-pointer group">
+                                            <div className="relative overflow-hidden border border-dashed border-gray-300 rounded-xl w-full aspect-square bg-gray-50 group-hover:border-primary transition-colors">
                                                 {logoPreview ? (
-                                                    <img src={logoPreview} alt="Logo" className="object-cover w-full h-full rounded-2xl" />
+                                                    <img src={logoPreview} alt="Logo" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-12 h-12 mb-2" />
-                                                        <span className="text-xs">Upload Logo</span>
+                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <span className="text-xs font-medium">Upload Logo</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="logo" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
@@ -200,15 +231,22 @@ export default function UmkmSettings({ auth }) {
                                         </label>
                                     </div>
                                     <div>
-                                        <p className="mb-3 text-sm font-medium text-gray-700">Banner</p>
-                                        <label className="block cursor-pointer">
-                                            <div className="relative overflow-hidden border-4 border-dashed rounded-2xl h-44 bg-gray-50">
+                                        <div className="flex justify-between items-center mb-3">
+                                            <p className="text-sm font-semibold text-gray-700">Banner</p>
+                                            {bannerPreview && (
+                                                <button onClick={() => handleDeleteImage('banner')} className="text-xs text-danger hover:underline flex items-center gap-1">
+                                                    <Trash2 className="w-3 h-3" /> Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                        <label className="block cursor-pointer group">
+                                            <div className="relative overflow-hidden border border-dashed border-gray-300 rounded-xl w-full aspect-square bg-gray-50 group-hover:border-primary transition-colors">
                                                 {bannerPreview ? (
-                                                    <img src={bannerPreview} alt="Banner" className="object-cover w-full h-full rounded-2xl" />
+                                                    <img src={bannerPreview} alt="Banner" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-16 h-16 mb-2" />
-                                                        <span className="text-xs">Upload Banner</span>
+                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <span className="text-xs font-medium">Upload Banner</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="banner" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
@@ -218,90 +256,134 @@ export default function UmkmSettings({ auth }) {
                                     </div>
                                 </div>
                             </div>
-
-                            {/* INFORMASI DASAR */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="mb-6 text-2xl font-bold text-gray-800">Informasi Dasar</h2>
-                                <div className="space-y-5">
-                                    <input type="text" placeholder="Nama UMKM" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" required />
-                                    <input type="text" placeholder="No. WhatsApp" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
-                                    <input type="text" placeholder="Kategori (contoh: Salon, Laundry)" value={form.category} onChange={e => setForm({...form, category: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
-                                    <textarea rows="3" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 resize-none rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
-                                    <textarea rows="4" placeholder="Deskripsi singkat tentang UMKM Anda..." value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 resize-none rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
-                                </div>
-                            </div>
                         </div>
 
-                        {/* KANAN: LAYANAN + JAM BUKA */}
-                        <div className="space-y-8">
-                            {/* LAYANAN */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-800">Layanan & Harga</h2>
-                                    <button type="button" onClick={handleAddService}
-                                        className="flex items-center gap-2 px-5 py-3 text-white transition bg-indigo-600 shadow-lg rounded-xl hover:bg-indigo-700">
-                                        <Plus className="w-5 h-5" /> Tambah
-                                    </button>
-                                </div>
-                                <div className="space-y-4">
-                                    {form.services.map((s, i) => (
-                                        <div key={i} className="flex items-center gap-4 p-4 bg-gray-50 rounded-2xl">
-                                            <input type="text" placeholder="Nama layanan" value={s.name}
-                                                onChange={e => handleServiceChange(i, 'name', e.target.value)}
-                                                className="flex-1 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500" />
-                                            <input type="number" placeholder="Harga" value={s.price}
-                                                onChange={e => handleServiceChange(i, 'price', e.target.value)}
-                                                className="w-32 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500" />
-                                            {form.services.length > 1 && (
-                                                <button type="button" onClick={() => handleRemoveService(i)}
-                                                    className="p-3 text-red-600 transition bg-red-50 rounded-xl hover:bg-red-100">
-                                                    <Trash2 className="w-5 h-5" />
-                                                </button>
-                                            )}
-                                        </div>
-                                    ))}
-                                </div>
+                        {/* INFORMASI DASAR */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900">Basic Info</h3>
                             </div>
-
-                            {/* JAM OPERASIONAL */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-800">
-                                    <Clock className="text-indigo-600 w-7 h-7" /> Jam Operasional
-                                </h2>
-                                <div className="space-y-4">
-                                    {days.map((day, i) => (
-                                        <div key={day} className="flex items-center gap-4">
-                                            <label className="w-20 text-sm font-semibold text-gray-700 capitalize">{dayLabels[i]}</label>
-                                            <input type="text" value={form.opening_hours[day]}
-                                                onChange={e => handleHourChange(day, e.target.value)}
-                                                placeholder="08:00-17:00" 
-                                                className="flex-1 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
-                                        </div>
-                                    ))}
+                            <div className="p-6 space-y-5">
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">UMKM Name</label>
+                                    <input type="text" placeholder="Nama UMKM" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
+                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" required />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
+                                    <input type="text" placeholder="No. WhatsApp" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
+                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                    <input type="text" placeholder="Kategori (contoh: Salon, Laundry)" value={form.category} onChange={e => setForm({...form, category: e.target.value})}
+                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <textarea rows="3" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})}
+                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                </div>
+                                <div>
+                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    <textarea rows="4" placeholder="Deskripsi singkat tentang UMKM Anda..." value={form.description} onChange={e => setForm({...form, description: e.target.value})}
+                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            {/* MOBILE NAVBAR */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg md:hidden">
-                <div className="grid grid-cols-3 py-3">
-                    {navItems.map((item) => (
-                        <Link key={item.name} href={item.href}
-                            className={`flex flex-col items-center text-xs font-medium py-2 ${currentPath === item.href ? 'text-indigo-600' : 'text-gray-500'}`}>
-                            <item.icon className="w-6 h-6 mb-1" />
-                            {item.name}
-                        </Link>
-                    ))}
+                    {/* KANAN: QRIS + JAM BUKA */}
+                    <div className="space-y-8">
+
+                        {/* QRIS UPLOAD */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <QrCode className="w-5 h-5 text-gray-400" /> Payment (QRIS)
+                                </h3>
+                                <span className="px-3 py-1 text-xs font-bold text-success bg-success/10 rounded-md">
+                                    Recommended
+                                </span>
+                            </div>
+
+                            <div className="p-6 space-y-6">
+                                <div className="p-6 border border-dashed border-gray-300 rounded-xl bg-gray-50 hover:border-primary hover:bg-primary/5 transition-all group relative">
+                                    {qrisPreview && (
+                                        <button onClick={() => handleDeleteImage('qris_image')} className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm text-danger hover:bg-danger/10 z-10" title="Delete QRIS">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    <p className="mb-4 text-sm font-medium text-gray-600 text-center">
+                                        Upload your QRIS image here
+                                    </p>
+
+                                    <label className="block cursor-pointer">
+                                        <input
+                                            type="file"
+                                            id="qris"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files[0]) {
+                                                    setQrisPreview(URL.createObjectURL(e.target.files[0]));
+                                                }
+                                            }}
+                                        />
+                                        <div className="flex flex-col items-center justify-center">
+                                            {qrisPreview ? (
+                                                <div className="space-y-4 text-center w-full">
+                                                    <img src={qrisPreview} alt="QRIS" className="mx-auto shadow-lg rounded-lg max-h-64 object-contain" />
+                                                    <p className="text-sm font-bold text-success">QRIS Ready!</p>
+                                                    <p className="text-xs text-gray-400">Click to replace</p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center">
+                                                    <QrCode className="w-12 h-12 mb-3 text-gray-300 mx-auto group-hover:text-primary transition-colors" />
+                                                    <p className="text-sm font-bold text-gray-700 group-hover:text-primary transition-colors">Click to upload QRIS</p>
+                                                    <p className="text-xs text-gray-400 mt-1">PNG, JPG • Max 2MB</p>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div className="p-4 border border-primary/20 bg-primary/5 rounded-lg flex gap-3">
+                                    <div className="mt-0.5">
+                                        <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center">
+                                            <span className="text-xs font-bold text-primary">i</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs font-medium text-gray-600">
+                                        Use <strong>QRIS All Payment</strong> to accept payments from all e-wallets and banking apps.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* JAM OPERASIONAL */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                                    <Clock className="w-5 h-5 text-gray-400" /> Opening Hours
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {days.map((day, i) => (
+                                    <div key={day} className="flex items-center gap-4">
+                                        <label className="w-24 text-sm font-semibold text-gray-600 capitalize">{dayLabels[i]}</label>
+                                        <input type="text" value={form.opening_hours[day]}
+                                            onChange={e => handleHourChange(day, e.target.value)}
+                                            placeholder="08:00-17:00"
+                                            className="flex-1 px-4 py-2.5 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
-        </>
+        </MetronicLayout>
     );
 }

@@ -15,9 +15,24 @@ return new class extends Migration
             $table->id();
             $table->foreignId('umkm_id')->constrained('umkms')->onDelete('cascade');
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
+            
+            // Customer Info
+            $table->string('customer_name')->nullable();
+            $table->string('customer_phone')->nullable();
+            $table->string('customer_email')->nullable();
+
+            // Service Info
+            $table->string('service_name')->nullable();
+            $table->decimal('service_price', 15, 2)->default(0);
+
             $table->date('date');
             $table->time('time');
-            $table->enum('payment_method', ['online', 'cod']);
+            
+            // Transaction
+            $table->decimal('total_price', 15, 2)->default(0);
+            $table->enum('payment_method', ['online', 'cod', 'qris', 'transfer']);
+            $table->string('payment_proof')->nullable();
+            
             $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
             $table->timestamps();
         });
