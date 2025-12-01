@@ -106,7 +106,7 @@ class DashboardController extends Controller
 
             $query = \DB::table('bookings')
                 ->where('umkm_id', $umkmId)
-                ->select('id', 'customer_name', 'service_name', 'date', 'time', 'status')
+                ->select('id', 'customer_name', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
                 ->latest('created_at');
 
             $diterima = $query->clone()->where('status', 'confirmed')->take(10)->get();
@@ -116,8 +116,12 @@ class DashboardController extends Controller
             $format = function($b) {
                 return [
                     'id' => $b->id,
-                    'nama' => $b->customer_name ?? 'Pelanggan',
-                    'layanan' => $b->service_name ?? 'Layanan Booking',
+                    'customer_name' => $b->customer_name ?? 'Pelanggan',
+                    'service_name' => $b->service_name ?? 'Layanan Booking',
+                    'total_price' => $b->total_price ?? 0,
+                    'payment_method' => $b->payment_method ?? 'offline',
+                    'payment_proof' => $b->payment_proof,
+                    'status' => $b->status,
                     'waktu' => Carbon::parse($b->date)->format('d M Y') . ', ' . $b->time,
                 ];
             };
