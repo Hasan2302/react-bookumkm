@@ -63,3 +63,23 @@
 .animate-slide-up {
     animation: slide-up 0.3s ease-out;
 }
+
+.glass {
+    @apply border shadow-2xl bg-white/70 backdrop-blur-xl border-white/20;
+}
+
+.glass-dark {
+    @apply border shadow-2xl bg-gray-900/60 backdrop-blur-xl border-gray-700/30;
+}
+
+.glass-card {
+    @apply border shadow-inner bg-white/50 backdrop-blur-md border-white/10 rounded-3xl shadow-black/5;
+}
+
+.glass-navbar {
+    @apply border-b shadow-lg bg-white/60 backdrop-blur-2xl border-white/20;
+}
+
+.glass-sidebar {
+    @apply border-r shadow-2xl bg-white/80 backdrop-blur-2xl border-white/20;
+}

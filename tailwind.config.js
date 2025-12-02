@@ -10,6 +10,8 @@ export default {
         './resources/js/**/*.jsx',
     ],
 
+    darkMode: 'class',
+
     theme: {
         extend: {
             fontFamily: {
@@ -29,6 +31,11 @@ export default {
                     900: '#2e405e',
                     950: '#1f2a3e',
                 },
+                glass: 'rgba(255, 255, 255, 0.15)',
+                'glass-dark': 'rgba(0, 0, 0, 0.3)',
+                backdropBlur: {
+                    xs: '2px',
+                }
             },
             backgroundImage: {
                 'gradient-primary': 'linear-gradient(135deg, #4A70A9 0%, #8FABD4 100%)',

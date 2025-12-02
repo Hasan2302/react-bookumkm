@@ -37,6 +37,7 @@ Route::get('/dashboard', function () {
 // === SUPERADMIN ROUTES ===
 Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('superadmin.')->group(function () {
     Route::get('/dashboard', [SuperadminController::class, 'dashboard'])->name('dashboard');
+    Route::get('/umkm', [SuperadminController::class, 'umkm'])->name('umkm');
 });
 
 // === UMKM ADMIN ROUTES ===

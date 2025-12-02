@@ -15,6 +15,8 @@ import Register from '@/Pages/Auth/Register';
 import RegisterUmkm from '@/Pages/Auth/RegisterUmkm';
 import UmkmSettings from '@/Pages/Umkm/Settings';
 import useUmkmStore from '@/Stores/useUmkmStore';
+import UmkmPage from '@/Pages/Admin/Umkm';
+import { ThemeProvider } from '@/Components/ThemeProvider';
 
 function App() {
     const token = localStorage.getItem('token');
@@ -30,20 +32,23 @@ function App() {
     // Kalau belum login
     if (!token || !parsedUser) {
         return (
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<Login />} />
-              <Route path="/" element={<Welcome />} />           {/* ← Landing Page */}
-              <Route path="*" element={<Navigate to="/" replace />} />
-              <Route path="/register" element={<Register />} />
-              <Route path="/register-umkm" element={<RegisterUmkm />} />
-            </Routes>
-          </BrowserRouter>
+          <ThemeProvider>
+            <BrowserRouter>
+                <Routes>
+                <Route path="/login" element={<Login />} />
+                <Route path="/" element={<Welcome />} />           {/* ← Landing Page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+                <Route path="/register" element={<Register />} />
+                <Route path="/register-umkm" element={<RegisterUmkm />} />
+                </Routes>
+            </BrowserRouter>
+          </ThemeProvider>
         );
       }
 
     // Kalau sudah login → arahkan sesuai role
     return (
+    <ThemeProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={<Navigate to="/" replace />} />
@@ -64,11 +69,13 @@ function App() {
           {parsedUser.role === 'superadmin' && (
             <>
               <Route path="/superadmin/dashboard" element={<AdminDashboard />} />
+              <Route path="/superadmin/umkm" element={<UmkmPage />} />
               <Route path="*" element={<Navigate to="/superadmin/dashboard" replace />} />
             </>
           )}
         </Routes>
       </BrowserRouter>
+    </ThemeProvider>
     );
   }
 

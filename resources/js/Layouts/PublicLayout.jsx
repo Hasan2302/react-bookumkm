@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from '@inertiajs/react';
+import { Link } from 'react-router-dom';
 import { Menu, X, Calendar, Mail, Phone, MapPin, Facebook, Instagram, Twitter } from 'lucide-react';
 
 export default function PublicLayout({ children, canLogin, canRegister }) {
@@ -28,7 +28,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                 <div className="px-6 mx-auto max-w-7xl lg:px-8">
                     <div className="relative flex items-center justify-between h-16">
                         {/* Logo - Left */}
-                        <Link href="/" className="group">
+                        <Link to="/" className="group">
                             <span className={`text-xl font-bold tracking-tight transition-colors duration-300 ${scrolled ? 'text-primary-900' : 'text-white drop-shadow-lg'}`}>
                                 BookUMKM
                             </span>
@@ -37,7 +37,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                         {/* Center Menu - Desktop */}
                         <div className="absolute hidden space-x-1 transform -translate-x-1/2 left-1/2 md:flex">
                             <Link
-                                href="/"
+                                to="/"
                                 className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
                                     scrolled
                                         ? 'text-gray-700 hover:bg-gray-700/20 hover:text-primary-700'
@@ -62,7 +62,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
 
                         <div className="items-center hidden space-x-3 md:flex">
                             <Link
-                                href="/login"
+                                to="/login"
                                 className={`px-4 py-2 text-sm font-medium transition-all duration-300 rounded-lg ${
                                     scrolled
                                         ? 'text-gray-700 hover:bg-gray-700/20 hover:text-primary-700'
@@ -73,7 +73,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             </Link>
                             {canRegister && (
                                 <Link
-                                    href="/register"
+                                    to="/register"
                                     className={`relative px-6 py-2 text-sm font-semibold transition-all duration-300 overflow-hidden group rounded-lg ${
                                         scrolled
                                             ? 'bg-white text-primary-700 border-2 border-primary-200 hover:bg-white/80 hover:border-primary-300 shadow-sm'
@@ -109,7 +109,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                     <div className="absolute left-0 right-0 shadow-glass-lg md:hidden top-full bg-white/80 backdrop-blur-2xl">
                         <div className="px-4 py-4 space-y-1">
                             <Link
-                                href="/"
+                                to="/"
                                 className="block px-4 py-2.5 text-sm font-medium text-gray-700 transition-all duration-300 rounded-lg hover:bg-gray-700/20 hover:text-primary-700"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
@@ -127,7 +127,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 <>
                                     <div className="pt-3 mt-3 space-y-2 border-t border-gray-200/50">
                                         <Link
-                                            href="/login"
+                                            to="/login"
                                             className="relative block px-4 py-2.5 text-sm font-semibold text-primary-700 transition-all duration-300 rounded-lg overflow-hidden group bg-primary-50 hover:bg-primary-100 shadow-sm"
                                             onClick={() => setMobileMenuOpen(false)}
                                         >
@@ -140,7 +140,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                         </Link>
                                         {canRegister && (
                                             <Link
-                                                href="/register"
+                                                to="/register"
                                                 className="relative block px-4 py-3 text-sm font-bold text-center text-white transition-all duration-300 overflow-hidden group shadow-glass bg-gradient-primary rounded-lg hover:shadow-glass-lg hover:scale-[1.02]"
                                                 onClick={() => setMobileMenuOpen(false)}
                                             >
@@ -186,7 +186,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             <h3 className="mb-4 text-lg font-bold">Quick Links</h3>
                             <ul className="space-y-3">
                                 <li>
-                                    <Link href="/" className="text-blue-100 transition hover:text-white hover:underline">
+                                    <Link to="/" className="text-blue-100 transition hover:text-white hover:underline">
                                         Home
                                     </Link>
                                 </li>
@@ -196,12 +196,12 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/login" className="text-blue-100 transition hover:text-white hover:underline">
+                                    <Link to="/login" className="text-blue-100 transition hover:text-white hover:underline">
                                         Login
                                     </Link>
                                 </li>
                                 <li>
-                                    <Link href="/register" className="text-blue-100 transition hover:text-white hover:underline">
+                                    <Link to="/register" className="text-blue-100 transition hover:text-white hover:underline">
                                         Daftar UMKM
                                     </Link>
                                 </li>

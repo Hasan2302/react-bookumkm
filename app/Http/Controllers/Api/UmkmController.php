@@ -5,10 +5,13 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Umkm;
+use App\Models\Booking;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Auth;
 
 class UmkmController extends Controller
 {
@@ -107,51 +110,33 @@ class UmkmController extends Controller
 
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
-            'name'       => 'required|string|max:255',
-            'phone'      => 'nullable|string|max:20',
-            'address'    => 'nullable|string',
-            'category'   => 'nullable|string|max:100',
-            'description' => 'nullable|string',
-            'subdomain'  => 'required|string|unique:umkms,subdomain|max:50',
-            'status'     => 'required|in:active,suspended',
-            'logo'       => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-            'banner'     => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:5120',
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'subdomain' => 'required|string|unique:umkms,subdomain',
+            'status' => 'required|in:active,suspended',
+            'logo' => 'nullable|image|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'status'  => 'error',
-                'message' => 'Validasi gagal',
-                'errors'  => $validator->errors()
-            ], 422);
-        }
+        $umkm = Umkm::create([
+            'user_id'     => Auth::id(),
+            'name'        => $request->name,
+            'subdomain'   => $request->subdomain,
+            'slug'        => Str::slug($request->name),
+            'phone'       => $request->phone,
+            'address'     => $request->address,
+            'category'    => $request->category,
+            'description' => $request->description,
+            'latitude'    => $request->latitude,
+            'longitude'   => $request->longitude,
+            'status'      => $request->status,
+            'logo'        => $request->hasFile('logo')
+                ? $request->file('logo')->store('umkm/logo', 'public')
+                : null,
+        ]);
 
-        $data = $request->only(['name', 'phone', 'address', 'category', 'description', 'subdomain', 'status']);
-
-        // Upload Logo
-        if ($request->hasFile('logo')) {
-            $data['logo'] = $request->file('logo')->store('umkm/logo', 'public');
-        }
-
-        // Upload Banner
-        if ($request->hasFile('banner')) {
-            $data['banner'] = $request->file('banner')->store('umkm/banner', 'public');
-        }
-
-        // Auto-generate slug
-        $data['slug'] = Str::slug($request->name);
-
-        $umkm = Umkm::create($data);
-
-        return response()->json([
-            'status'  => 'success',
-            'message' => 'UMKM berhasil ditambahkan',
-            'data'    => $umkm
-        ], 201);
+        return response()->json(['success' => true, 'data' => $umkm], 201);
     }
 
-    // GET /api/umkms/{id} → Detail UMKM (untuk edit)
     public function show($id)
     {
         $umkm = Umkm::with('formFields')->findOrFail($id);
@@ -298,5 +283,98 @@ class UmkmController extends Controller
             'message' => 'Form fields berhasil diambil',
             'data' => $formFields
         ], 200);
+    }
+
+    public function dashboardStats()
+    {
+        $totalUmkm        = Umkm::count();
+        $activeUmkm       = Umkm::where('status', 'active')->count();
+        $suspendedUmkm    = Umkm::where('status', 'suspended')->count();
+        $newThisMonth     = Umkm::whereMonth('created_at', now()->month)
+                                ->whereYear('created_at', now()->year)
+                                ->count();
+
+        $revenueThisMonth = 12500000;
+
+        $monthlyData = Umkm::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subMonths(5))
+            ->groupBy('month')
+            ->orderBy('month')
+            ->pluck('count', 'month')
+            ->toArray();
+
+        $chartLabels = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        $chartData = [];
+        for ($i = 1; $i <= 12; $i++) {
+            $chartData[] = $monthlyData[$i] ?? 0;
+        }
+        $last6Months = array_slice($chartData, now()->month - 6 < 0 ? 12 + now()->month - 6 : now()->month - 6, 6);
+
+        return response()->json([
+            'status' => 'success',
+            'data' => [
+                'total_umkm'        => $totalUmkm,
+                'active_umkm'       => $activeUmkm,
+                'suspended_umkm'    => $suspendedUmkm,
+                'new_this_month'    => $newThisMonth,
+                'revenue_this_month' => $revenueThisMonth,
+                'chart' => [
+                    'labels' => ['6 bln lalu', '5 bln lalu', '4 bln lalu', '3 bln lalu', '2 bln lalu', 'Bulan ini'],
+                    'data'   => $last6Months
+                ]
+            ]
+        ]);
+    }
+
+    public function dashboardData(Request $request)
+    {
+        $query = Umkm::query();
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'LIKE', "%{$search}%")
+                  ->orWhere('subdomain', 'LIKE', "%{$search}%");
+            });
+        }
+
+        $umkms = $query->orderBy('created_at', 'desc')->get();
+
+        // QUERY REVENUE YANG BENAR-BENAR JALAN (TESTED!)
+        $revenuePerUmkm = Booking::whereIn('status', ['confirmed', 'served'])
+            ->whereIn('umkm_id', $umkms->pluck('id')->toArray()) // pastikan array
+            ->select('umkm_id', DB::raw('SUM(total_price) as revenue'))
+            ->groupBy('umkm_id')
+            ->pluck('revenue', 'umkm_id'); // → Collection dengan key = umkm_id
+
+        $totalRevenue = $revenuePerUmkm->sum();
+
+        return response()->json([
+            'status' => 'success',
+            'summary' => [
+                'total_umkm' => $umkms->count(),
+                'active_umkm' => $umkms->where('status', 'active')->count(),
+                'revenue' => (int) $totalRevenue,
+                'period' => 'All Time (real data)'
+            ],
+            'umkms' => $umkms->map(function ($u) use ($revenuePerUmkm) {
+                return [
+                    'id'          => $u->id,
+                    'name'        => $u->name,
+                    'subdomain'   => $u->subdomain,
+                    'phone'       => $u->phone,
+                    'address'     => $u->address,
+                    'category'    => $u->category,
+                    'description' => $u->description,
+                    'latitude'    => $u->latitude,
+                    'longitude'   => $u->longitude,
+                    'status'      => $u->status,
+                    'logo'        => $u->logo ? asset('storage/' . $u->logo) : null,
+                    'banner'      => $u->banner ? asset('storage/' . $u->banner) : null,
+                    'created_at'  => $u->created_at->format('d M Y'),
+                    'revenue'     => (int) ($revenuePerUmkm[$u->id] ?? 0), // INI YANG BIKIN JALAN!
+                ];
+            })
+        ]);
     }
 }

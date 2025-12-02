@@ -66,4 +66,6 @@ Route::middleware(['auth:sanctum', 'role:superadmin'])->group(function () {
     Route::get('/admin/umkms/{id}', [UmkmController::class, 'show']);
     Route::match(['post', 'put', 'patch'], '/admin/umkms/{id}', [UmkmController::class, 'update']);
     Route::delete('/admin/umkms/{id}', [UmkmController::class, 'destroy']);
+    Route::get('/admin/dashboard/stats', [UmkmController::class, 'dashboardStats']);
+    Route::get('/admin/dashboard/data', [UmkmController::class, 'dashboardData']);
 });

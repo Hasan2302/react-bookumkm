@@ -1,930 +1,376 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+// resources/js/Pages/Superadmin/Dashboard.jsx
+import AdminSidebar from '@/Components/AdminSidebar';
+import { Search, Filter, X, TrendingUp, Users, Building2, DollarSign, Calendar } from 'lucide-react';
+import { useTheme } from '@/Components/ThemeProvider';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from 'react';
+import axios from 'axios';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
+import 'flatpickr/dist/themes/dark.css';
 import {
-    Eye,
-    Edit,
-    Trash2,
-    X,
-    Plus,
-    LogOut,
-    Search,
-    MapPin,
-    Phone,
-    Loader2,
-    AlertCircle,
-    Globe,
-    Building,
-    Users,
-    CheckCircle,
-    XCircle,
-    Calendar,
-} from "lucide-react";
-import api from "@/Services/Api";
+    ResponsiveContainer,
+    LineChart, Line,
+    BarChart, Bar,
+    PieChart, Pie, Cell,
+    AreaChart, Area,
+    XAxis, YAxis, CartesianGrid, Tooltip
+  } from 'recharts';
 
-const ITEMS_PER_PAGE = 12;
+export default function Dashboard() {
+  const { isDark } = useTheme();
+  const [collapsed, setCollapsed] = useState(false);
+  const [stats, setStats] = useState(null);
+  const [chartData, setChartData] = useState([]);
+  const [searchResults, setSearchResults] = useState([]);
+  const [search, setSearch] = useState('');
+  const [showDropdown, setShowDropdown] = useState(false);
+  const [showFilter, setShowFilter] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [chartType, setChartType] = useState('line');
 
-// Toast
-const showToast = (message, type = "success") => {
-    const toast = document.createElement("div");
-    toast.className = `fixed bottom-4 left-4 right-4 sm:bottom-6 sm:left-auto sm:right-6 z-[9999] px-6 py-4 rounded-2xl shadow-2xl text-white font-bold text-center transition-all duration-300
-    ${type === "success" ? "bg-black" : "bg-red-600"}`;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(() => toast.remove(), 4000);
-};
+  const pieData = [
+    { name: 'Total UMKM', value: stats?.total_umkm || 120 },
+    { name: 'Revenue (dalam juta)', value: (stats?.revenue || 11800000) / 1000000 }
+  ];
 
-// Modal Dasar
-const BaseModal = ({
-    isOpen,
-    onClose,
-    title,
-    children,
-    maxWidth = "max-w-2xl",
-}) => {
-    if (!isOpen) return null;
-    return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-60"
-            onClick={onClose}
-        >
-            <div
-                className={`w-full ${maxWidth} bg-white rounded-3xl shadow-2xl max-h-screen overflow-y-auto border border-gray-200`}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <div className="flex items-center justify-between p-5 border-b border-gray-200 sm:p-6">
-                    <h3 className="text-xl font-bold text-gray-900 sm:text-2xl">
-                        {title}
-                    </h3>
-                    <button
-                        onClick={onClose}
-                        className="p-2 transition rounded-full hover:bg-gray-100"
-                    >
-                        <X className="w-6 h-6 text-gray-600" />
-                    </button>
-                </div>
-                <div className="p-5 sm:p-6">{children}</div>
-            </div>
-        </div>
-    );
-};
+  const tooltipStyle = {
+    backgroundColor: isDark ? '#1f2937' : '#ffffff',
+    border: 'none',
+    borderRadius: '12px',
+    boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
+    padding: '12px'
+  };
 
-export default function SuperadminDashboard() {
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const [umkms, setUmkms] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState("");
-    const [statusFilter, setStatusFilter] = useState("all");
-    const [page, setPage] = useState(1);
+  const dateInputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const fpInstance = useRef(null);
 
-    const [showDetail, setShowDetail] = useState(false);
-    const [showForm, setShowForm] = useState(false);
-    const [showDelete, setShowDelete] = useState(false);
-    const [selectedUmkm, setSelectedUmkm] = useState(null);
-    const [editingUmkm, setEditingUmkm] = useState(null);
-    const [deletingUmkm, setDeletingUmkm] = useState(null);
-    const [submitting, setSubmitting] = useState(false);
-    const [deleting, setDeleting] = useState(false);
+  const formatRupiah = (num) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(num || 0);
 
-    const [form, setForm] = useState({
-        name: "",
-        phone: "",
-        address: "",
-        category: "",
-        description: "",
-        subdomain: "",
-        status: "active",
-        logo: null,
-        banner: null,
-        logoPreview: "",
-        bannerPreview: "",
-    });
+  const [filter, setFilter] = useState({
+    startDate: null,
+    endDate: null,
+    status: 'all'
+  });
 
-    const fetchUmkms = useCallback(async () => {
-        try {
-            setLoading(true);
-            const res = await api.get("/admin/umkms");
-            setUmkms(res.data.data || []);
-        } catch (err) {
-            showToast("Gagal memuat data UMKM", "error");
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
-    useEffect(() => {
-        if (user.role === "superadmin") fetchUmkms();
-    }, [fetchUmkms, user.role]);
-
-    useEffect(() => setPage(1), [search, statusFilter]);
-
-    // STATISTIK
-    const stats = useMemo(() => {
-        const total = umkms.length;
-        const active = umkms.filter((u) => u.status === "active").length;
-        const suspended = umkms.filter((u) => u.status === "suspended").length;
-
-        const now = new Date();
-        const thisMonth = `${now.getFullYear()}-${String(
-            now.getMonth() + 1
-        ).padStart(2, "0")}`;
-        const newThisMonth = umkms.filter(
-            (u) => u.created_at?.substring(0, 7) === thisMonth
-        ).length;
-
-        return { total, active, suspended, newThisMonth };
-    }, [umkms]);
-
-    const filteredUmkms = useMemo(() => {
-        return umkms.filter((umkm) => {
-            const matchSearch =
-                !search ||
-                umkm.name?.toLowerCase().includes(search.toLowerCase()) ||
-                umkm.subdomain?.toLowerCase().includes(search.toLowerCase()) ||
-                umkm.phone?.includes(search);
-            const matchStatus =
-                statusFilter === "all" ||
-                (statusFilter === "active" && umkm.status === "active") ||
-                (statusFilter === "suspended" && umkm.status === "suspended");
-            return matchSearch && matchStatus;
-        });
-    }, [umkms, search, statusFilter]);
-
-    const totalPages = Math.ceil(filteredUmkms.length / ITEMS_PER_PAGE);
-    const currentPageData = filteredUmkms.slice(
-        (page - 1) * ITEMS_PER_PAGE,
-        page * ITEMS_PER_PAGE
-    );
-
-    const handleFileChange = (e, type) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        if (form[type + "Preview"]?.startsWith("blob:"))
-            URL.revokeObjectURL(form[type + "Preview"]);
-        setForm((prev) => ({
-            ...prev,
-            [type]: file,
-            [type + "Preview"]: URL.createObjectURL(file),
-        }));
-    };
-
-    const handleSubdomainChange = (e) => {
-        const value = e.target.value.toLowerCase().replace(/[^a-z0-9]/g, "");
-        setForm((prev) => ({ ...prev, subdomain: value }));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        if (submitting) return;
-        setSubmitting(true);
-        const formData = new FormData();
-        // Debug: cek value status yang akan dikirim
-        console.log("Status yang dikirim:", form.status);
-        Object.keys(form).forEach((key) => {
-            if (form[key] !== null && !key.includes("Preview"))
-                formData.append(key, form[key]);
-        });
-        if (editingUmkm) formData.append("_method", "PUT");
-
-        try {
-            if (editingUmkm) {
-                const res = await api.post(
-                    `/admin/umkms/${editingUmkm.id}`,
-                    formData,
-                    {
-                        headers: { "Content-Type": "multipart/form-data" },
-                    }
-                );
-                showToast("UMKM berhasil diperbarui!");
-                // Update state umkms langsung tanpa fetch ulang
-                setUmkms((prev) =>
-                    prev.map((item) =>
-                        item.id === editingUmkm.id
-                            ? { ...item, ...res.data.data }
-                            : item
-                    )
-                );
-            } else {
-                await api.post("/admin/umkms", formData, {
-                    headers: { "Content-Type": "multipart/form-data" },
-                });
-                showToast("UMKM berhasil ditambahkan!");
-                fetchUmkms(); // Untuk penambahan, tetap fetch ulang agar data baru masuk
-            }
-            setShowForm(false);
-            resetForm();
-        } catch (err) {
-            // Ambil pesan error validasi detail jika ada
-            let errorMsg = "Gagal menyimpan data";
-            if (err.response?.data) {
-                if (err.response.data.message) {
-                    errorMsg = err.response.data.message;
-                }
-                if (err.response.data.errors) {
-                    // Gabungkan semua pesan error validasi
-                    errorMsg = Object.values(err.response.data.errors)
-                        .flat()
-                        .join("\n");
-                }
-            }
-            showToast(errorMsg, "error");
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (deleting) return;
-        setDeleting(true);
-        try {
-            await api.delete(`/admin/umkms/${deletingUmkm.id}`);
-            showToast("UMKM berhasil dihapus!");
-            fetchUmkms();
-            setShowDelete(false);
-            setDeletingUmkm(null);
-        } catch (err) {
-            showToast("Gagal menghapus UMKM", "error");
-        } finally {
-            setDeleting(false);
-        }
-    };
-
-    const openEdit = (umkm) => {
-        setEditingUmkm(umkm);
-        setForm({
-            name: umkm.name || "",
-            phone: umkm.phone || "",
-            address: umkm.address || "",
-            category: umkm.category || "",
-            description: umkm.description || "",
-            subdomain: umkm.subdomain || "",
-            status: umkm.status || "active",
-            logo: null,
-            banner: null,
-            logoPreview: umkm.logo ? `/storage/${umkm.logo}` : "",
-            bannerPreview: umkm.banner ? `/storage/${umkm.banner}` : "",
-        });
-        setShowForm(true);
-    };
-
-    const resetForm = () => {
-        setForm({
-            name: "",
-            phone: "",
-            address: "",
-            category: "",
-            description: "",
-            subdomain: "",
-            status: "active",
-            logo: null,
-            banner: null,
-            logoPreview: "",
-            bannerPreview: "",
-        });
-        setEditingUmkm(null);
-    };
-
-    const handleLogout = () => {
-        localStorage.clear();
-        window.location.href = "/login";
-    };
-
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen bg-gray-50">
-                <div className="flex items-center gap-3 text-xl font-semibold text-gray-700">
-                    <Loader2 className="w-8 h-8 animate-spin" /> Memuat
-                    Dashboard...
-                </div>
-            </div>
-        );
+  const fetchDashboard = async () => {
+    setLoading(true);
+    try {
+      const res = await axios.get('/api/admin/dashboard/data', {
+        params: {
+          start_date: filter.startDate,
+          end_date: filter.endDate,
+          status: filter.status !== 'all' ? filter.status : undefined,
+        },
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setStats(res.data.summary);
+      setChartData(res.data.chart || dummyChartData);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
+  };
 
-    return (
-        <>
-            {/* NAVBAR */}
-            <header className="sticky top-0 z-40 bg-white border-b border-gray-300 shadow-sm">
-                <div className="flex items-center justify-between px-4 py-4 mx-auto max-w-7xl">
-                    <div className="flex items-center gap-3">
-                        <div className="flex items-center justify-center w-10 h-10 text-xl font-bold text-white bg-black rounded-xl">
-                            B
-                        </div>
-                        <h1 className="text-xl font-bold text-gray-900">
-                            BookUMKM • Superadmin
-                        </h1>
-                    </div>
-                    <button
-                        onClick={handleLogout}
-                        className="flex items-center gap-2 text-sm text-gray-600 transition hover:text-gray-900"
-                    >
-                        <LogOut className="w-5 h-5" />{" "}
-                        <span className="hidden sm:inline">Logout</span>
-                    </button>
-                </div>
-            </header>
+  const dummyChartData = [
+    { name: 'Jan', umkm: 12, revenue: 2400000 },
+    { name: 'Feb', umkm: 19, revenue: 3800000 },
+    { name: 'Mar', umkm: 24, revenue: 5200000 },
+    { name: 'Apr', umkm: 28, revenue: 6800000 },
+    { name: 'Mei', umkm: 35, revenue: 9200000 },
+    { name: 'Jun', umkm: 42, revenue: 11800000 },
+  ];
 
-            <div className="min-h-screen pb-24 bg-gray-50 sm:pb-8">
-                <div className="px-4 py-6 mx-auto max-w-7xl">
-                    {/* STATISTIK RINGKAS */}
-                    <div className="grid grid-cols-2 gap-4 mb-8 lg:grid-cols-4">
-                        <div className="p-6 transition bg-white border border-gray-300 shadow-sm rounded-2xl hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">
-                                        Total UMKM
-                                    </p>
-                                    <p className="mt-2 text-3xl font-bold text-gray-900">
-                                        {stats.total}
-                                    </p>
-                                </div>
-                                <Users className="w-10 h-10 text-gray-700" />
-                            </div>
-                        </div>
+  const handleSearch = async (value) => {
+    setSearch(value);
+    if (!value.trim()) {
+      setSearchResults([]);
+      setShowDropdown(false);
+      return;
+    }
+    try {
+      const res = await axios.get('/api/admin/dashboard/data', {
+        params: { search: value },
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setSearchResults(res.data.umkms);
+      setShowDropdown(true);
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
-                        <div className="p-6 transition bg-white border border-gray-300 shadow-sm rounded-2xl hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">
-                                        Aktif
-                                    </p>
-                                    <p className="mt-2 text-3xl font-bold text-gray-900">
-                                        {stats.active}
-                                    </p>
-                                </div>
-                                <CheckCircle className="w-10 h-10 text-black" />
-                            </div>
-                        </div>
+  useEffect(() => {
+    if (showFilter && dateInputRef.current) {
+      fpInstance.current = flatpickr(dateInputRef.current, {
+        mode: "range",
+        dateFormat: "d M Y",
+        theme: isDark ? "dark" : "light",
+        conjunction: " - ",
+        onClose: (dates) => {
+          if (dates.length === 2) {
+            setFilter(prev => ({
+              ...prev,
+              startDate: dates[0]?.toISOString().split('T')[0],
+              endDate: dates[1]?.toISOString().split('T')[0]
+            }));
+          }
+        }
+      });
+    }
+  }, [showFilter, isDark]);
 
-                        <div className="p-6 transition bg-white border border-gray-300 shadow-sm rounded-2xl hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">
-                                        Nonaktif
-                                    </p>
-                                    <p className="mt-2 text-3xl font-bold text-red-600">
-                                        {stats.suspended}
-                                    </p>
-                                </div>
-                                <XCircle className="w-10 h-10 text-red-600" />
-                            </div>
-                        </div>
+  useEffect(() => {
+    const handleClick = (e) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
+        setShowDropdown(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
 
-                        <div className="p-6 transition bg-white border border-gray-300 shadow-sm rounded-2xl hover:shadow-md">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <p className="text-sm text-gray-600">
-                                        Baru Bulan Ini
-                                    </p>
-                                    <p className="mt-2 text-3xl font-bold text-gray-900">
-                                        {stats.newThisMonth}
-                                    </p>
-                                </div>
-                                <Calendar className="w-10 h-10 text-gray-700" />
-                            </div>
-                        </div>
-                    </div>
+  useEffect(() => {
+    fetchDashboard();
+  }, [filter]);
 
-                    {/* Title + Filter */}
-                    <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-                        <div>
-                            <h2 className="text-2xl font-bold text-gray-900">
-                                Daftar UMKM
-                            </h2>
-                            <p className="mt-1 text-sm text-gray-600">
-                                Menampilkan{" "}
-                                <strong>{filteredUmkms.length}</strong> UMKM
-                                {statusFilter !== "all" &&
-                                    ` (${
-                                        statusFilter === "active"
-                                            ? "Aktif"
-                                            : "Nonaktif"
-                                    })`}
-                            </p>
-                        </div>
+  return (
+    <div className={`min-h-screen ${isDark ? 'bg-gray-950' : 'bg-gray-50'} transition-colors`}>
+      <AdminSidebar collapsed={collapsed} onToggle={() => setCollapsed(!collapsed)} />
 
-                        <div className="flex p-1 bg-gray-100 rounded-xl">
-                            <button
-                                onClick={() => setStatusFilter("all")}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                                    statusFilter === "all"
-                                        ? "bg-black text-white"
-                                        : "text-gray-700 hover:bg-gray-200"
-                                }`}
-                            >
-                                Semua
-                            </button>
-                            <button
-                                onClick={() => setStatusFilter("active")}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                                    statusFilter === "active"
-                                        ? "bg-black text-white"
-                                        : "text-gray-700 hover:bg-gray-200"
-                                }`}
-                            >
-                                Aktif
-                            </button>
-                            <button
-                                onClick={() => setStatusFilter("suspended")}
-                                className={`px-5 py-2.5 rounded-lg text-sm font-bold transition-all ${
-                                    statusFilter === "suspended"
-                                        ? "bg-red-600 text-white"
-                                        : "text-gray-700 hover:bg-gray-200"
-                                }`}
-                            >
-                                Nonaktif
-                            </button>
-                        </div>
-                    </div>
+      <main style={{ marginLeft: window.innerWidth < 1024 ? 0 : collapsed ? '80px' : '320px' }} className="min-h-screen transition-all duration-500">
+        <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
-                    {/* Search */}
-                    <div className="relative mb-8">
-                        <Search className="absolute w-5 h-5 text-gray-500 -translate-y-1/2 left-4 top-1/2" />
-                        <input
-                            type="text"
-                            placeholder="Cari nama, subdomain, atau telepon..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full py-4 pl-12 pr-4 transition bg-white border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-black"
-                        />
-                    </div>
-
-                    {/* Cards */}
-                    {currentPageData.length === 0 ? (
-                        <div className="py-20 text-center">
-                            <p className="text-xl font-medium text-gray-500">
-                                Tidak ada UMKM ditemukan
-                            </p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                            {currentPageData.map((umkm) => (
-                                <div
-                                    key={umkm.id}
-                                    className="relative overflow-hidden transition-all duration-300 bg-white border border-gray-300 shadow-md rounded-3xl hover:shadow-2xl"
-                                >
-                                    <div className="absolute z-10 top-3 right-3">
-                                        <span
-                                            className={`px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-lg ${
-                                                umkm.status === "active"
-                                                    ? "bg-black"
-                                                    : "bg-red-600"
-                                            }`}
-                                        >
-                                            {umkm.status === "active"
-                                                ? "AKTIF"
-                                                : "NONAKTIF"}
-                                        </span>
-                                    </div>
-
-                                    <div className="p-6 pt-10">
-                                        <div className="flex items-center gap-4 mb-5">
-                                            {umkm.logo ? (
-                                                <img
-                                                    src={`http://127.0.0.1:8000/storage/${umkm.logo}`}
-                                                    alt={umkm.name}
-                                                    className="object-cover w-16 h-16 transition shadow-lg rounded-2xl grayscale hover:grayscale-0"
-                                                />
-                                            ) : (
-                                                <div className="flex items-center justify-center w-16 h-16 text-2xl font-bold text-white bg-gray-800 shadow-lg rounded-2xl">
-                                                    {umkm.name.charAt(0)}
-                                                </div>
-                                            )}
-                                            <div>
-                                                <h3 className="text-lg font-bold text-gray-900 line-clamp-2">
-                                                    {umkm.name}
-                                                </h3>
-                                                <p className="text-xs text-gray-500 truncate">
-                                                    {umkm.subdomain}
-                                                    .bookumkm.com
-                                                </p>
-                                            </div>
-                                        </div>
-
-                                        <div className="mb-6 space-y-3 text-sm text-gray-600">
-                                            {umkm.address && (
-                                                <div className="flex items-start gap-3">
-                                                    <MapPin className="w-5 h-5 text-gray-600 mt-0.5" />
-                                                    <span className="line-clamp-2">
-                                                        {umkm.address}
-                                                    </span>
-                                                </div>
-                                            )}
-                                            {umkm.phone && (
-                                                <div className="flex items-center gap-3">
-                                                    <Phone className="w-5 h-5 text-gray-600" />
-                                                    <span>{umkm.phone}</span>
-                                                </div>
-                                            )}
-                                        </div>
-
-                                        <div className="flex gap-3">
-                                            <button
-                                                onClick={() => {
-                                                    setSelectedUmkm(umkm);
-                                                    setShowDetail(true);
-                                                }}
-                                                className="flex-1 py-3 font-semibold text-white transition bg-black rounded-2xl hover:bg-gray-800"
-                                            >
-                                                Detail
-                                            </button>
-                                            <button
-                                                onClick={() => openEdit(umkm)}
-                                                className="p-3 transition bg-gray-100 rounded-2xl hover:bg-gray-200"
-                                            >
-                                                <Edit className="w-5 h-5 text-gray-700" />
-                                            </button>
-                                            <button
-                                                onClick={() => {
-                                                    setDeletingUmkm(umkm);
-                                                    setShowDelete(true);
-                                                }}
-                                                className="p-3 transition bg-gray-100 rounded-2xl hover:bg-gray-200"
-                                            >
-                                                <Trash2 className="w-5 h-5 text-gray-700" />
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex justify-center gap-3 mt-12">
-                            <button
-                                onClick={() =>
-                                    setPage((p) => Math.max(1, p - 1))
-                                }
-                                disabled={page === 1}
-                                className="px-6 py-3 transition bg-white border border-gray-300 rounded-xl disabled:opacity-50 hover:bg-gray-50"
-                            >
-                                Previous
-                            </button>
-                            <span className="px-6 py-3 font-medium text-gray-700">
-                                Halaman {page} dari {totalPages}
-                            </span>
-                            <button
-                                onClick={() =>
-                                    setPage((p) => Math.min(totalPages, p + 1))
-                                }
-                                disabled={page === totalPages}
-                                className="px-6 py-3 transition bg-white border border-gray-300 rounded-xl disabled:opacity-50 hover:bg-gray-50"
-                            >
-                                Next
-                            </button>
-                        </div>
-                    )}
-
-                    {/* FAB Mobile & Tombol Tambah Desktop */}
-                    <button
-                        onClick={() => {
-                            resetForm();
-                            setShowForm(true);
-                        }}
-                        className="fixed z-30 flex items-center justify-center text-white transition bg-black rounded-full shadow-2xl bottom-6 right-6 w-14 h-14 hover:scale-110 sm:hidden"
-                    >
-                        <Plus className="w-8 h-8" />
-                    </button>
-
-                    <div className="fixed hidden bottom-8 right-8 sm:block">
-                        <button
-                            onClick={() => {
-                                resetForm();
-                                setShowForm(true);
-                            }}
-                            className="flex items-center gap-3 px-8 py-4 font-bold text-white transition bg-black shadow-2xl rounded-2xl hover:bg-gray-800"
-                        >
-                            <Plus className="w-6 h-6" /> Tambah UMKM
-                        </button>
-                    </div>
-                </div>
+          {/* PAGE HEADER */}
+          <div className="flex flex-col gap-6 mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Overview</h1>
+              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                Snapshot performa UMKM dalam {filter.startDate ? 'periode terpilih' : '30 hari terakhir'}
+              </p>
             </div>
 
-            {/* Modal Detail */}
-            <BaseModal
-                isOpen={showDetail}
-                onClose={() => setShowDetail(false)}
-                title="Detail UMKM"
-                maxWidth="max-w-4xl"
-            >
-                {selectedUmkm && (
-                    <div className="space-y-8">
-                        {selectedUmkm.banner ? (
-                            <img
-                                src={`http://127.0.0.1:8000/storage/${selectedUmkm.banner}`}
-                                alt="banner"
-                                className="object-cover w-full h-64 rounded-2xl grayscale"
-                            />
-                        ) : (
-                            <div className="flex items-center justify-center w-full h-64 bg-gray-200 border-2 border-dashed rounded-2xl">
-                                <Building className="w-16 h-16 text-gray-400" />
-                            </div>
-                        )}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setShowFilter(true)}
+                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+              >
+                <Filter className="w-4 h-4" />
+                Filter
+              </button>
+            </div>
+          </div>
 
-                        <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
-                            <div className="md:col-span-1">
-                                {selectedUmkm.logo ? (
-                                    <img
-                                        src={`http://127.0.0.1:8000/storage/${selectedUmkm.logo}`}
-                                        alt={selectedUmkm.name}
-                                        className="w-full max-w-xs mx-auto shadow-lg rounded-2xl grayscale"
-                                    />
-                                ) : (
-                                    <div className="flex items-center justify-center w-48 h-48 mx-auto text-6xl font-bold text-white bg-gray-800 shadow-lg rounded-2xl">
-                                        {selectedUmkm.name.charAt(0)}
-                                    </div>
-                                )}
-                            </div>
+          {/* KPI CARDS */}
+          <section className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+            {loading ? (
+              Array(4).fill().map((_, i) => (
+                <div key={i} className="p-6 bg-white border rounded-xl dark:bg-gray-800 animate-pulse">
+                  <div className="w-24 h-4 mb-4 bg-gray-200 rounded dark:bg-gray-700"></div>
+                  <div className="w-32 h-8 bg-gray-300 rounded dark:bg-gray-600"></div>
+                </div>
+              ))
+            ) : (
+              <>
+                <KPICard title="Total UMKM" value={stats?.total_umkm || 0} icon={Building2} change="+12.5%" positive />
+                <KPICard title="UMKM Aktif" value={stats?.active_umkm || 0} icon={Users} change="+8.2%" positive />
+                <KPICard title="Total Revenue" value={formatRupiah(stats?.revenue || 0)} icon={DollarSign} change="+24.1%" positive />
+                <KPICard title="Pertumbuhan" value="+42%" icon={TrendingUp} change="vs tahun lalu" positive />
+              </>
+            )}
+          </section>
 
-                            <div className="space-y-6 md:col-span-2">
-                                <div>
-                                    <h2 className="text-3xl font-bold text-gray-900">
-                                        {selectedUmkm.name}
-                                    </h2>
-                                    <p className="mt-2 text-lg text-gray-600">
-                                        {selectedUmkm.category ||
-                                            "Kategori belum diisi"}
-                                    </p>
-                                </div>
+          {/* CHART + SEARCH */}
+          <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+            {/* CHART DENGAN TAB SWITCHER */}
+            <div className="p-6 bg-white border lg:col-span-2 rounded-xl dark:bg-gray-800">
+                <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="font-semibold text-gray-900 dark:text-white">Pertumbuhan UMKM & Revenue</p>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-3 text-gray-700">
-                                        <Globe className="w-5 h-5" />
-                                        <span className="font-medium">
-                                            Subdomain:
-                                        </span>
-                                        <a
-                                            href={`https://${selectedUmkm.subdomain}.bookumkm.com`}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                            className="text-black underline hover:no-underline"
-                                        >
-                                            {selectedUmkm.subdomain}
-                                            .bookumkm.com
-                                        </a>
-                                    </div>
-                                    {selectedUmkm.phone && (
-                                        <div className="flex items-center gap-3 text-gray-700">
-                                            <Phone className="w-5 h-5" />
-                                            <span>{selectedUmkm.phone}</span>
-                                        </div>
-                                    )}
-                                    {selectedUmkm.address && (
-                                        <div className="flex items-start gap-3 text-gray-700">
-                                            <MapPin className="w-5 h-5 mt-1" />
-                                            <span>{selectedUmkm.address}</span>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {selectedUmkm.description && (
-                                    <div>
-                                        <h4 className="mb-2 font-semibold text-gray-900">
-                                            Deskripsi
-                                        </h4>
-                                        <p className="leading-relaxed text-gray-700">
-                                            {selectedUmkm.description}
-                                        </p>
-                                    </div>
-                                )}
-
-                                <div className="pt-4">
-                                    <span
-                                        className={`inline-block px-4 py-2 rounded-full text-white font-bold ${
-                                            selectedUmkm.status === "active"
-                                                ? "bg-black"
-                                                : "bg-red-600"
-                                        }`}
-                                    >
-                                        {selectedUmkm.status === "active"
-                                            ? "AKTIF"
-                                            : "NONAKTIF"}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-            </BaseModal>
-
-            {/* Modal Tambah/Edit */}
-            <BaseModal
-                isOpen={showForm}
-                onClose={() => {
-                    setShowForm(false);
-                    resetForm();
-                }}
-                title={editingUmkm ? "Edit UMKM" : "Tambah UMKM Baru"}
-            >
-                <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Nama UMKM
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            value={form.name}
-                            onChange={(e) =>
-                                setForm({ ...form, name: e.target.value })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Telepon
-                        </label>
-                        <input
-                            type="text"
-                            value={form.phone}
-                            onChange={(e) =>
-                                setForm({ ...form, phone: e.target.value })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Alamat
-                        </label>
-                        <textarea
-                            rows="3"
-                            value={form.address}
-                            onChange={(e) =>
-                                setForm({ ...form, address: e.target.value })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        ></textarea>
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Kategori
-                        </label>
-                        <input
-                            type="text"
-                            value={form.category}
-                            onChange={(e) =>
-                                setForm({ ...form, category: e.target.value })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        />
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Subdomain
-                        </label>
-                        <input
-                            type="text"
-                            required
-                            value={form.subdomain}
-                            onChange={handleSubdomainChange}
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        />
-                        <small className="text-gray-500">
-                            {form.subdomain || "contoh"}.bookumkm.com
-                        </small>
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Deskripsi
-                        </label>
-                        <textarea
-                            rows="4"
-                            value={form.description}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    description: e.target.value,
-                                })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-black focus:outline-none"
-                        ></textarea>
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Logo
-                        </label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange(e, "logo")}
-                            className="w-full"
-                        />
-                        {form.logoPreview && (
-                            <img
-                                src={form.logoPreview.startsWith('http') ? form.logoPreview : `http://127.0.0.1:8000/storage/${form.logoPreview}`}
-                                alt="preview"
-                                className="object-cover w-32 h-32 mt-4 shadow rounded-xl grayscale"
-                            />
-                        )}
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Banner
-                        </label>
-                        <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileChange(e, "banner")}
-                            className="w-full"
-                        />
-                        {form.bannerPreview && (
-                            <img
-                                src={form.bannerPreview.startsWith('http') ? form.bannerPreview : `http://127.0.0.1:8000/storage/${form.bannerPreview}`}
-                                alt="preview"
-                                className="object-cover w-full h-48 mt-4 shadow rounded-xl grayscale"
-                            />
-                        )}
-                    </div>
-                    <div>
-                        <label className="block mb-2 text-sm font-medium text-gray-700">
-                            Status
-                        </label>
-                        <select
-                            value={form.status}
-                            onChange={(e) =>
-                                setForm({ ...form, status: e.target.value })
-                            }
-                            className="w-full px-4 py-3 border border-gray-300 rounded-xl"
-                        >
-                            <option value="active">Aktif</option>
-                            <option value="suspended">Nonaktif</option>
-                        </select>
-                    </div>
-                    <div className="flex justify-end gap-4 pt-6">
+                    {/* TAB BUTTON GROUP */}
+                    <div className="inline-flex p-1 border border-gray-300 rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    {['line', 'bar', 'pie', 'area'].map((type) => (
                         <button
-                            type="button"
-                            onClick={() => {
-                                setShowForm(false);
-                                resetForm();
-                            }}
-                            className="px-8 py-3 font-medium transition bg-gray-200 hover:bg-gray-300 rounded-xl"
+                        key={type}
+                        onClick={() => setChartType(type)}
+                        className={`px-4 py-2 text-xs font-medium rounded-md transition-all capitalize
+                            ${chartType === type
+                            ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
+                            : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
+                            }`}
                         >
-                            Batal
+                        {type === 'pie' ? 'Pie' : type.charAt(0).toUpperCase() + type.slice(1)}
                         </button>
-                        <button
-                            type="submit"
-                            disabled={submitting}
-                            className="flex items-center gap-2 px-8 py-3 font-bold text-white transition bg-black hover:bg-gray-800 rounded-xl disabled:opacity-70"
-                        >
-                            {submitting ? (
-                                <>
-                                    Menyimpan
-                                    <Loader2 className="w-5 h-5 ml-2 animate-spin" />
-                                </>
-                            ) : editingUmkm ? (
-                                "Update"
-                            ) : (
-                                "Simpan"
-                            )}
-                        </button>
-                    </div>
-                </form>
-            </BaseModal>
-
-            {/* Modal Hapus */}
-            <BaseModal
-                isOpen={showDelete}
-                onClose={() => setShowDelete(false)}
-                title="Hapus UMKM"
-                maxWidth="max-w-md"
-            >
-                <div className="py-10 text-center">
-                    <AlertCircle className="w-16 h-16 mx-auto mb-4 text-red-600" />
-                    <p className="text-2xl font-bold text-gray-900">
-                        Yakin ingin menghapus?
-                    </p>
-                    <p className="mt-3 text-gray-600">
-                        UMKM{" "}
-                        <strong className="text-black">
-                            {deletingUmkm?.name}
-                        </strong>{" "}
-                        akan dihapus permanen.
-                    </p>
-                    <div className="flex justify-center gap-4 mt-10">
-                        <button
-                            onClick={() => setShowDelete(false)}
-                            className="px-8 py-3 font-medium transition bg-gray-200 hover:bg-gray-300 rounded-xl"
-                        >
-                            Batal
-                        </button>
-                        <button
-                            onClick={handleDelete}
-                            disabled={deleting}
-                            className="flex items-center gap-2 px-8 py-3 font-medium text-white transition bg-red-600 hover:bg-red-700 rounded-xl disabled:opacity-70"
-                        >
-                            {deleting ? (
-                                <>
-                                    Menghapus
-                                    <Loader2 className="w-5 h-5 ml-2 animate-spin" />
-                                </>
-                            ) : (
-                                "Hapus Permanen"
-                            )}
-                        </button>
+                    ))}
                     </div>
                 </div>
-            </BaseModal>
-        </>
-    );
+
+                <ResponsiveContainer width="100%" height={380}>
+                    {chartType === 'line' && (
+                    <LineChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <Tooltip contentStyle={tooltipStyle} />
+                        <Line type="monotone" dataKey="umkm" stroke="#8b5cf6" strokeWidth={3} name="UMKM Baru" dot={{ r: 5 }} />
+                        <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} name="Revenue (Rp)" dot={{ r: 5 }} />
+                    </LineChart>
+                    )}
+
+                    {chartType === 'bar' && (
+                    <BarChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <Tooltip contentStyle={tooltipStyle} />
+                        <Bar dataKey="umkm" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="UMKM Baru" />
+                        <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} name="Revenue" />
+                    </BarChart>
+                    )}
+
+                    {chartType === 'pie' && (
+                    <PieChart>
+                        <Pie
+                        data={pieData}
+                        cx="50%"
+                        cy="50%"
+                        labelLine={false}
+                        label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        outerRadius={120}
+                        fill="#8884d8"
+                        dataKey="value"
+                        >
+                        {pieData.map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={index === 0 ? '#8b5cf6' : '#10b981'} />
+                        ))}
+                        </Pie>
+                        <Tooltip contentStyle={tooltipStyle} />
+                    </PieChart>
+                    )}
+
+                    {chartType === 'area' && (
+                    <AreaChart data={chartData}>
+                        <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <Tooltip contentStyle={tooltipStyle} />
+                        <Area type="monotone" dataKey="umkm" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="UMKM Baru" />
+                        <Area type="monotone" dataKey="revenue" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Revenue" />
+                    </AreaChart>
+                    )}
+                </ResponsiveContainer>
+            </div>
+
+            {/* SEARCH CARD */}
+            <div className="p-6 bg-white border rounded-xl dark:bg-gray-800">
+              <p className="mb-4 font-semibold text-gray-900 dark:text-white">Cari UMKM</p>
+              <div className="relative" ref={dropdownRef}>
+                <div className="relative">
+                  <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    placeholder="Nama, subdomain..."
+                    className="w-full py-3 pl-10 pr-4 bg-transparent border border-gray-300 rounded-lg dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                  />
+                </div>
+
+                <AnimatePresence>
+                  {showDropdown && searchResults.length > 0 && (
+                    <motion.div initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+                      className="mt-3 space-y-3 overflow-y-auto max-h-96">
+                      {searchResults.map(u => (
+                        <div key={u.id} className="flex items-center gap-4 p-3 transition rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700">
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900 dark:text-white">{u.name}</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400">{u.subdomain}.bookumkm.id</p>
+                          </div>
+                          <p className="text-lg font-bold text-gray-900 dark:text-white">{formatRupiah(u.revenue)}</p>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </main>
+
+      {/* OFFCANVAS FILTER */}
+      <AnimatePresence>
+        {showFilter && (
+          <>
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+              onClick={() => setShowFilter(false)}
+              className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm" />
+            <motion.div
+              initial={{ x: '100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '100%' }}
+              transition={{ type: "spring", damping: 30, stiffness: 300 }}
+              className="fixed top-0 right-0 z-50 h-full p-8 overflow-y-auto bg-white border-l border-gray-200 shadow-2xl w-96 dark:bg-gray-900 dark:border-gray-800"
+            >
+              <div className="flex items-center justify-between mb-8">
+                <h2 className="text-2xl font-bold">Filter</h2>
+                <button onClick={() => setShowFilter(false)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+
+              <div className="space-y-6">
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Rentang Tanggal</label>
+                  <input ref={dateInputRef} type="text" readOnly placeholder="Pilih tanggal..." className="w-full px-4 py-3 border border-gray-300 rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800" />
+                </div>
+
+                <div>
+                  <label className="block mb-2 text-sm font-medium">Status</label>
+                  <select value={filter.status} onChange={(e) => setFilter(prev => ({ ...prev, status: e.target.value }))}
+                    className="w-full px-4 py-3 border border-gray-300 rounded-lg dark:border-gray-600 bg-gray-50 dark:bg-gray-800">
+                    <option value="all">Semua Status</option>
+                    <option value="active">Aktif</option>
+                    <option value="suspended">Suspended</option>
+                  </select>
+                </div>
+
+                <div className="flex gap-3 pt-6">
+                  <button onClick={() => { setFilter({ startDate: null, endDate: null, status: 'all' }); setShowFilter(false); }}
+                    className="flex-1 py-3 font-medium border border-gray-300 rounded-lg dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800">
+                    Reset
+                  </button>
+                  <button onClick={() => setShowFilter(false)}
+                    className="flex-1 py-3 font-medium text-white transition bg-gray-900 rounded-lg dark:bg-white dark:text-gray-900 hover:bg-gray-800 dark:hover:bg-gray-200">
+                    Terapkan
+                  </button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
+// KPI Card Component
+function KPICard({ title, value, icon: Icon, change, positive = true }) {
+  return (
+    <div className="p-6 bg-white border shadow-sm rounded-xl dark:bg-gray-800">
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
+        <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+      </div>
+      <p className="mt-3 text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
+      {change && (
+        <p className={`mt-2 text-sm font-medium ${positive ? 'text-green-600' : 'text-red-600'}`}>
+          {positive ? 'Up' : 'Down'} {change}
+        </p>
+      )}
+    </div>
+  );
 }

@@ -15,4 +15,9 @@ class SuperadminController extends Controller
             'umkms' => $umkms,
         ]);
     }
+
+    public function umkm()
+    {
+        return Inertia::render('Admin/Umkm');
+    }
 }
