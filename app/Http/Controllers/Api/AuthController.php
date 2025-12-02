@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use App\Models\User;
-use App\Models\Umkm;
+use App\Models\UMKM;
 
 class AuthController extends Controller
 {
@@ -116,7 +116,7 @@ class AuthController extends Controller
             ]);
 
             // 2. Buat UMKM otomatis
-            $umkm = Umkm::create([
+            $umkm = UMKM::create([
                 'user_id'    => $user->id,
                 'name'       => $request->umkm_name,
                 'phone'      => $request->phone,
