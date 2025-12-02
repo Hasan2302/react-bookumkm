@@ -28,6 +28,6 @@ class Booking extends Model
 
     public function umkm()
     {
-        return $this->belongsTo(Umkm::class);
+        return $this->belongsTo(UMKM::class);
     }
 }

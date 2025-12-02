@@ -13,7 +13,7 @@ import {
     Stethoscope, Package, MessageCircle, Instagram, Video
 } from 'lucide-react';
 
-export default function Welcome(userLocation) {
+export default function Welcome({ canLogin, canRegister, userLocation }) {
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedUmkm, setSelectedUmkm] = useState(null);
@@ -97,7 +97,7 @@ export default function Welcome(userLocation) {
     // BARU BOLEH RETURN DI SINI (setelah semua hook!)
     if (loading) {
         return (
-            <PublicLayout>
+            <PublicLayout canLogin={canLogin} canRegister={canRegister}>
                 <div className="py-32 text-center">
                     <div className="text-2xl font-semibold text-gray-600">Memuat UMKM...</div>
                 </div>
@@ -107,7 +107,7 @@ export default function Welcome(userLocation) {
 
     if (error) {
         return (
-            <PublicLayout>
+            <PublicLayout canLogin={canLogin} canRegister={canRegister}>
                 <div className="py-32 text-center">
                     <div className="text-xl font-semibold text-red-600">{error}</div>
                 </div>
@@ -280,7 +280,7 @@ const handleClearLocation = () => {
 };
 
 return (
-    <PublicLayout>
+    <PublicLayout canLogin={canLogin} canRegister={canRegister}>
         <MagneticCursor />
         {/* Hero Section - Linear Style Light Mode */}
         <section className="relative pt-24 pb-20 overflow-hidden bg-white sm:pt-32 lg:pt-40 sm:pb-28 lg:pb-32">

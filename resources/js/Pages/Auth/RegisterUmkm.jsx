@@ -42,8 +42,9 @@ export default function RegisterUmkm() {
             localStorage.setItem('umkm', JSON.stringify(res.data.data.umkm));
 
             setSuccess(true);
-            setTimeout(() => navigate('/umkm/dashboard'), 2000);
-            window.location.reload();
+            setTimeout(() => {
+                window.location.href = '/umkm/dashboard'; 
+            }, 2000);
         } catch (err) {
             if (err.response?.data?.errors) {
                 setErrors(err.response.data.errors);

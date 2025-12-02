@@ -26,6 +26,6 @@ class FormField extends Model
     // INI YANG PALING PENTING!
     public function umkm()
     {
-        return $this->belongsTo(Umkm::class, 'umkm_id'); // tambahkan 'umkm_id'
+        return $this->belongsTo(UMKM::class, 'umkm_id'); // tambahkan 'umkm_id'
     }
 }
