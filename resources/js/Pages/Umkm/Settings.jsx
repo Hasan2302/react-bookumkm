@@ -3,6 +3,7 @@ import { useState, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Store, Upload, Plus, Trash2, Clock, Save, Home, FileText, Settings, LogOut, QrCode } from 'lucide-react';
 import api from '@/Services/Api';
+import MetronicLayout from '@/Layouts/MetronicLayout';
 
 export default function UmkmSettings() {
     const navigate = useNavigate();
@@ -21,19 +22,12 @@ export default function UmkmSettings() {
         opening_hours: { senin: '08:00-17:00', selasa: '08:00-17:00', rabu: '08:00-17:00', kamis: '08:00-17:00', jumat: '08:00-17:00', sabtu: '09:00-15:00', minggu: 'Tutup' }
     });
 
-    const navItems = [
-        { name: 'Dashboard', href: '/umkm/dashboard', icon: Home },
-        { name: 'Form Builder', href: '/umkm/formbuilder', icon: FileText },
-        { name: 'Pengaturan', href: '/umkm/settings', icon: Settings },
-    ];
-
     useEffect(() => {
         const fetchUmkm = async () => {
             try {
                 const res = await api.get('/umkm/me');
                 const data = res.data.data;
 
-                // PERBAIKAN UTAMA: PARSE JSON STRING!
                 let services = [];
                 let opening_hours = {
                     senin: '08:00-17:00', selasa: '08:00-17:00', rabu: '08:00-17:00',
@@ -156,70 +150,79 @@ export default function UmkmSettings() {
         }
     };
 
-    if (!umkm) return <div className="flex items-center justify-center min-h-screen text-3xl font-bold text-indigo-600">Memuat...</div>;
+    const handleDeleteImage = async (type) => {
+        if (!confirm('Are you sure you want to delete this image?')) return;
+        setLoading(true);
+        try {
+            const res = await api.delete('/umkm/settings/image', { data: { type } });
+            const updatedUmkm = res.data.data;
+
+            localStorage.setItem('umkm', JSON.stringify(updatedUmkm));
+            setUmkm(updatedUmkm);
+
+            if (type === 'logo') setLogoPreview(null);
+            if (type === 'banner') setBannerPreview(null);
+            if (type === 'qris_image') setQrisPreview(null);
+
+            alert('Image deleted successfully!');
+        } catch (err) {
+            console.error(err);
+            alert('Failed to delete image');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (!umkm) return (
+        <MetronicLayout>
+            <div className="flex items-center justify-center h-96">
+                <div className="w-8 h-8 border-4 rounded-full border-primary border-t-transparent animate-spin"></div>
+            </div>
+        </MetronicLayout>
+    );
 
     const days = ['senin', 'selasa', 'rabu', 'kamis', 'jumat', 'sabtu', 'minggu'];
     const dayLabels = ['Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu', 'Minggu'];
 
     return (
-        <>
-            {/* NAVBAR ATAS — SAMA DENGAN DASHBOARD */}
-            <div className="sticky top-0 z-40 bg-white border-b shadow-sm">
-                <div className="px-4 py-3 mx-auto max-w-7xl md:px-6">
-                    <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-4 md:gap-8">
-                            {navItems.map((item) => (
-                                <Link key={item.name} to={item.href}
-                                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${location.pathname === item.href ? 'bg-indigo-100 text-indigo-700' : 'text-gray-600 hover:bg-gray-100'}`}>
-                                    <item.icon className="w-5 h-5" />
-                                    <span className="hidden sm:block">{item.name}</span>
-                                </Link>
-                            ))}
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <span className="hidden text-sm font-medium md:block">Hi, {user.name}!</span>
-                            <button onClick={() => { localStorage.clear(); navigate('/'); }}
-                                className="flex items-center gap-2 px-3 py-2 text-sm text-red-600 rounded-lg bg-red-50 hover:bg-red-100">
-                                <LogOut className="w-4 h-4" /> <span className="hidden md:inline">Logout</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
+        <MetronicLayout title="Settings" breadcrumbs={['Profile']}>
             {/* TOMBOL SIMPAN FLOATING */}
             <button onClick={handleSubmit} disabled={loading}
-                className="fixed z-50 flex items-center gap-3 px-8 py-5 text-xl font-bold text-white transition-all rounded-full shadow-2xl bg-gradient-to-r from-emerald-500 to-teal-600 bottom-20 right-6 hover:scale-105">
-                <Save className="w-7 h-7" /> {loading ? 'Menyimpan...' : 'SIMPAN PERUBAHAN'}
+                className="fixed z-50 flex items-center gap-3 px-6 py-4 text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-10 right-10 hover:bg-primary-active hover:shadow-xl">
+                <Save className="w-5 h-5" /> {loading ? 'Saving...' : 'SAVE CHANGES'}
             </button>
 
-            {/* MAIN CONTENT — LAYOUT 2 KOLOM, SUPER RAPIH */}
-            <div className="min-h-screen pb-32 bg-gradient-to-br from-indigo-50 via-white to-purple-50 md:pb-6">
-                <div className="px-4 py-8 mx-auto max-w-7xl">
-                    <div className="mb-10">
-                        <h1 className="text-3xl font-bold text-gray-900">Pengaturan Profil UMKM</h1>
-                        <p className="text-gray-600">Kelola informasi bisnis agar lebih profesional</p>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
-                        {/* KIRI: FOTO + INFO DASAR */}
-                        <div className="space-y-8">
-                            {/* LOGO & BANNER */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-800">
-                                    <Store className="text-indigo-600 w-7 h-7" /> Foto Profil & Banner
-                                </h2>
+            <div className="space-y-8">
+                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+                    {/* KIRI: FOTO + INFO DASAR */}
+                    <div className="space-y-8">
+                        {/* LOGO & BANNER */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                                    <Store className="w-5 h-5 text-gray-400" />
+                                    Profile & Banner
+                                </h3>
+                            </div>
+                            <div className="p-6">
                                 <div className="grid gap-6 md:grid-cols-2">
                                     <div>
-                                        <p className="mb-3 text-sm font-medium text-gray-700">Logo</p>
-                                        <label className="block cursor-pointer">
-                                            <div className="relative overflow-hidden border-4 border-dashed rounded-2xl w-44 h-44 bg-gray-50">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-sm font-semibold text-gray-700">Logo</p>
+                                            {logoPreview && (
+                                                <button onClick={() => handleDeleteImage('logo')} className="flex items-center gap-1 text-xs text-danger hover:underline">
+                                                    <Trash2 className="w-3 h-3" /> Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                        <label className="block cursor-pointer group">
+                                            <div className="relative w-full overflow-hidden transition-colors border border-gray-300 border-dashed rounded-xl aspect-square bg-gray-50 group-hover:border-primary">
                                                 {logoPreview ? (
-                                                    <img src={logoPreview} alt="Logo" className="object-cover w-full h-full rounded-2xl" />
+                                                    <img src={logoPreview} alt="Logo" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-12 h-12 mb-2" />
-                                                        <span className="text-xs">Upload Logo</span>
+                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <span className="text-xs font-medium">Upload Logo</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="logo" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
@@ -228,15 +231,22 @@ export default function UmkmSettings() {
                                         </label>
                                     </div>
                                     <div>
-                                        <p className="mb-3 text-sm font-medium text-gray-700">Banner</p>
-                                        <label className="block cursor-pointer">
-                                            <div className="relative overflow-hidden border-4 border-dashed rounded-2xl h-44 bg-gray-50">
+                                        <div className="flex items-center justify-between mb-3">
+                                            <p className="text-sm font-semibold text-gray-700">Banner</p>
+                                            {bannerPreview && (
+                                                <button onClick={() => handleDeleteImage('banner')} className="flex items-center gap-1 text-xs text-danger hover:underline">
+                                                    <Trash2 className="w-3 h-3" /> Delete
+                                                </button>
+                                            )}
+                                        </div>
+                                        <label className="block cursor-pointer group">
+                                            <div className="relative w-full overflow-hidden transition-colors border border-gray-300 border-dashed rounded-xl aspect-square bg-gray-50 group-hover:border-primary">
                                                 {bannerPreview ? (
-                                                    <img src={bannerPreview} alt="Banner" className="object-cover w-full h-full rounded-2xl" />
+                                                    <img src={bannerPreview} alt="Banner" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-16 h-16 mb-2" />
-                                                        <span className="text-xs">Upload Banner</span>
+                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <span className="text-xs font-medium">Upload Banner</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="banner" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
@@ -246,118 +256,135 @@ export default function UmkmSettings() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            {/* INFORMASI DASAR */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="mb-6 text-2xl font-bold text-gray-800">Informasi Dasar</h2>
-                                <div className="space-y-5">
+                        {/* INFORMASI DASAR */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900">Basic Info</h3>
+                            </div>
+                            <div className="p-6 space-y-5">
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">UMKM Name</label>
                                     <input type="text" placeholder="Nama UMKM" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" required />
+                                        className="w-full px-4 py-3 text-sm font-medium transition-colors border-transparent rounded-lg bg-gray-50 focus:bg-white focus:border-primary focus:ring-0" required />
+                                </div>
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">WhatsApp Number</label>
                                     <input type="text" placeholder="No. WhatsApp" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                                        className="w-full px-4 py-3 text-sm font-medium transition-colors border-transparent rounded-lg bg-gray-50 focus:bg-white focus:border-primary focus:ring-0" />
+                                </div>
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">Category</label>
                                     <input type="text" placeholder="Kategori (contoh: Salon, Laundry)" value={form.category} onChange={e => setForm({...form, category: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                                        className="w-full px-4 py-3 text-sm font-medium transition-colors border-transparent rounded-lg bg-gray-50 focus:bg-white focus:border-primary focus:ring-0" />
+                                </div>
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">Address</label>
                                     <textarea rows="3" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 resize-none rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                                        className="w-full px-4 py-3 text-sm font-medium transition-colors border-transparent rounded-lg resize-none bg-gray-50 focus:bg-white focus:border-primary focus:ring-0" />
+                                </div>
+                                <div>
+                                    <label className="block mb-2 text-sm font-medium text-gray-700">Description</label>
                                     <textarea rows="4" placeholder="Deskripsi singkat tentang UMKM Anda..." value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                                        className="w-full px-6 py-4 text-lg transition border-2 resize-none rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                                        className="w-full px-4 py-3 text-sm font-medium transition-colors border-transparent rounded-lg resize-none bg-gray-50 focus:bg-white focus:border-primary focus:ring-0" />
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        {/* KANAN: GANTI DARI LAYANAN + JAM BUKA → JADI QRIS + JAM BUKA */}
-                        <div className="space-y-8">
+                    {/* KANAN: QRIS + JAM BUKA */}
+                    <div className="space-y-8">
 
-                            {/* QRIS UPLOAD — FITUR BARU! */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <div className="flex items-center justify-between mb-6">
-                                    <h2 className="flex items-center gap-3 text-2xl font-bold text-gray-800">
-                                        <QrCode className="w-8 h-8 text-emerald-600" /> QRIS Pembayaran
-                                    </h2>
-                                    <span className="px-4 py-2 text-xs font-bold text-white rounded-full bg-emerald-600">
-                                        Rekomendasi UMKM Modern
-                                    </span>
-                                </div>
-
-                                <div className="space-y-6">
-                                    <div className="p-6 border-2 border-dashed border-emerald-300 rounded-2xl bg-emerald-50">
-                                        <p className="mb-4 text-sm font-medium text-gray-700">
-                                            Upload gambar QRIS Anda (dari GoPay, OVO, Dana, ShopeePay, dll)
-                                        </p>
-
-                                        <label className="block cursor-pointer">
-                                            <input
-                                                type="file"
-                                                id="qris"
-                                                accept="image/*"
-                                                className="hidden"
-                                                onChange={(e) => {
-                                                    if (e.target.files[0]) {
-                                                        setQrisPreview(URL.createObjectURL(e.target.files[0]));
-                                                    }
-                                                }}
-                                            />
-                                            <div className="flex flex-col items-center justify-center p-8 transition-all border-4 border-dashed rounded-2xl hover:border-emerald-500 hover:bg-emerald-100">
-                                                {qrisPreview ? (
-                                                    <div className="space-y-4 text-center">
-                                                        <img src={qrisPreview} alt="QRIS" className="mx-auto shadow-2xl rounded-xl max-h-80" />
-                                                        <p className="text-sm font-bold text-emerald-600">QRIS siap digunakan!</p>
-                                                        <p className="text-xs text-gray-500">Klik lagi untuk ganti gambar</p>
-                                                    </div>
-                                                ) : (
-                                                    <>
-                                                        <QrCode className="w-20 h-20 mb-4 text-emerald-500" />
-                                                        <p className="text-lg font-bold text-gray-700">Klik untuk upload QRIS</p>
-                                                        <p className="text-sm text-gray-500">PNG, JPG • Maks 2MB</p>
-                                                    </>
-                                                )}
-                                            </div>
-                                        </label>
-                                    </div>
-
-                                    <div className="p-4 border border-blue-200 bg-blue-50 rounded-xl">
-                                        <p className="text-sm text-blue-800">
-                                            <strong>Tips:</strong> Gunakan QRIS All Payment (bisa terima dari semua e-wallet & bank)
-                                        </p>
-                                    </div>
-                                </div>
+                        {/* QRIS UPLOAD */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="flex items-center justify-between px-6 py-5 border-b border-gray-100">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                                    <QrCode className="w-5 h-5 text-gray-400" /> Payment (QRIS)
+                                </h3>
+                                <span className="px-3 py-1 text-xs font-bold rounded-md text-success bg-success/10">
+                                    Recommended
+                                </span>
                             </div>
 
-                            {/* JAM OPERASIONAL — TETAP ADA */}
-                            <div className="p-8 bg-white border border-gray-200 shadow-xl rounded-3xl">
-                                <h2 className="flex items-center gap-3 mb-6 text-2xl font-bold text-gray-800">
-                                    <Clock className="text-indigo-600 w-7 h-7" /> Jam Operasional
-                                </h2>
-                                <div className="space-y-4">
-                                    {days.map((day, i) => (
-                                        <div key={day} className="flex items-center gap-4">
-                                            <label className="w-20 text-sm font-semibold text-gray-700 capitalize">{dayLabels[i]}</label>
-                                            <input type="text" value={form.opening_hours[day]}
-                                                onChange={e => handleHourChange(day, e.target.value)}
-                                                placeholder="08:00-17:00"
-                                                className="flex-1 px-5 py-3 transition border-2 rounded-xl focus:border-indigo-500 focus:ring-4 focus:ring-indigo-100" />
+                            <div className="p-6 space-y-6">
+                                <div className="relative p-6 transition-all border border-gray-300 border-dashed rounded-xl bg-gray-50 hover:border-primary hover:bg-primary/5 group">
+                                    {qrisPreview && (
+                                        <button onClick={() => handleDeleteImage('qris_image')} className="absolute z-10 p-2 bg-white rounded-full shadow-sm top-2 right-2 text-danger hover:bg-danger/10" title="Delete QRIS">
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    )}
+                                    <p className="mb-4 text-sm font-medium text-center text-gray-600">
+                                        Upload your QRIS image here
+                                    </p>
+
+                                    <label className="block cursor-pointer">
+                                        <input
+                                            type="file"
+                                            id="qris"
+                                            accept="image/*"
+                                            className="hidden"
+                                            onChange={(e) => {
+                                                if (e.target.files[0]) {
+                                                    setQrisPreview(URL.createObjectURL(e.target.files[0]));
+                                                }
+                                            }}
+                                        />
+                                        <div className="flex flex-col items-center justify-center">
+                                            {qrisPreview ? (
+                                                <div className="w-full space-y-4 text-center">
+                                                    <img src={qrisPreview} alt="QRIS" className="object-contain mx-auto rounded-lg shadow-lg max-h-64" />
+                                                    <p className="text-sm font-bold text-success">QRIS Ready!</p>
+                                                    <p className="text-xs text-gray-400">Click to replace</p>
+                                                </div>
+                                            ) : (
+                                                <div className="text-center">
+                                                    <QrCode className="w-12 h-12 mx-auto mb-3 text-gray-300 transition-colors group-hover:text-primary" />
+                                                    <p className="text-sm font-bold text-gray-700 transition-colors group-hover:text-primary">Click to upload QRIS</p>
+                                                    <p className="mt-1 text-xs text-gray-400">PNG, JPG • Max 2MB</p>
+                                                </div>
+                                            )}
                                         </div>
-                                    ))}
+                                    </label>
                                 </div>
+
+                                <div className="flex gap-3 p-4 border rounded-lg border-primary/20 bg-primary/5">
+                                    <div className="mt-0.5">
+                                        <div className="flex items-center justify-center w-5 h-5 rounded-full bg-primary/20">
+                                            <span className="text-xs font-bold text-primary">i</span>
+                                        </div>
+                                    </div>
+                                    <p className="text-xs font-medium text-gray-600">
+                                        Use <strong>QRIS All Payment</strong> to accept payments from all e-wallets and banking apps.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* JAM OPERASIONAL */}
+                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="px-6 py-5 border-b border-gray-100">
+                                <h3 className="flex items-center gap-2 text-lg font-bold text-gray-900">
+                                    <Clock className="w-5 h-5 text-gray-400" /> Opening Hours
+                                </h3>
+                            </div>
+                            <div className="p-6 space-y-4">
+                                {days.map((day, i) => (
+                                    <div key={day} className="flex items-center gap-4">
+                                        <label className="w-24 text-sm font-semibold text-gray-600 capitalize">{dayLabels[i]}</label>
+                                        <input type="text" value={form.opening_hours[day]}
+                                            onChange={e => handleHourChange(day, e.target.value)}
+                                            placeholder="08:00-17:00"
+                                            className="flex-1 px-4 py-2.5 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                    </div>
+                                ))}
                             </div>
 
                         </div>
+
                     </div>
                 </div>
             </div>
-
-            {/* MOBILE NAVBAR */}
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t shadow-lg md:hidden">
-                <div className="grid grid-cols-3 py-3">
-                    {navItems.map((item) => (
-                        <Link key={item.name} to={item.href}
-                            className={`flex flex-col items-center text-xs font-medium py-2 ${location.pathname === item.href ? 'text-indigo-600' : 'text-gray-500'}`}>
-                            <item.icon className="w-6 h-6 mb-1" />
-                            {item.name}
-                        </Link>
-                    ))}
-                </div>
-            </div>
-        </>
+        </MetronicLayout>
     );
 }

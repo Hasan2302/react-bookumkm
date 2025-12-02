@@ -5,11 +5,12 @@ import UmkmCard from '@/Components/UmkmCard';
 import BookingModal from '@/Components/BookingModal';
 import usePublicUmkmStore from '@/Stores/usePublicUmkmStore';
 import UmkmDetailModal from '@/Components/UmkmDetailModal';
+import MagneticCursor from '@/Components/MagneticCursor';
 import {
     Search, Scissors, Coffee, Wrench, Heart, Store, Calendar,
     TrendingUp, Star, Clock, MapPin, Phone, Shield, Award, Users, Zap,
     ChevronRight, Sparkles, Shirt, ChevronDown, Waves, Soup, Car,
-    Stethoscope, Package
+    Stethoscope, Package, MessageCircle, Instagram, Video
 } from 'lucide-react';
 
 export default function Welcome(userLocation) {
@@ -120,7 +121,7 @@ const CATEGORIES = [
         id: 'salon',
         name: 'Salon & Spa',
         icon: Waves,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 45,
         image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop'
     },
@@ -128,7 +129,7 @@ const CATEGORIES = [
         id: 'barbershop',
         name: 'Barbershop',
         icon: Scissors,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 38,
         image: 'https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=300&fit=crop'
     },
@@ -136,7 +137,7 @@ const CATEGORIES = [
         id: 'cafe',
         name: 'Café & Resto',
         icon: Soup,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 52,
         image: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=400&h=300&fit=crop'
     },
@@ -144,7 +145,7 @@ const CATEGORIES = [
         id: 'bengkel',
         name: 'Bengkel',
         icon: Car,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 28,
         image: 'https://images.unsplash.com/photo-1486262715619-67b85e0b08d3?w=400&h=300&fit=crop'
     },
@@ -152,7 +153,7 @@ const CATEGORIES = [
         id: 'klinik',
         name: 'Klinik & Spa',
         icon: Stethoscope,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 34,
         image: 'https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=400&h=300&fit=crop'
     },
@@ -160,7 +161,7 @@ const CATEGORIES = [
         id: 'laundry',
         name: 'Laundry',
         icon: Shirt,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 18,
         image: 'https://images.unsplash.com/photo-1517677208171-0bc6725a3e60?w=400&h=300&fit=crop'
     },
@@ -168,7 +169,7 @@ const CATEGORIES = [
         id: 'lainnya',
         name: 'Lainnya',
         icon: Package,
-        color: 'from-primary-500 to-primary-600',
+        color: 'from-brand-500 to-brand-600',
         count: 24,
         image: 'https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400&h=300&fit=crop'
     },
@@ -176,36 +177,28 @@ const CATEGORIES = [
 
 const HERO_BACKGROUND_IMAGE = 'https://images.unsplash.com/photo-1520607162513-77705c0f0d4a?q=80&w=2069&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D';
 
-const STATS = [
-    { icon: Store, value: '150+', label: 'UMKM', color: 'text-blue-200' },
-    { icon: Calendar, value: '5K+', label: 'Booking', color: 'text-blue-200' },
-    { icon: Star, value: '4.8', label: 'Rating', color: 'text-yellow-300', fill: true }
-];
+
 
 const FEATURES = [
     {
         icon: Zap,
         title: 'Booking Instan',
-        description: 'Reservasi dalam hitungan detik',
-        gradient: 'from-primary-500 to-primary-600'
+        description: 'Reservasi dalam hitungan detik'
     },
     {
         icon: Shield,
         title: 'Aman & Terpercaya',
-        description: 'Data terenkripsi dengan sistem keamanan berlapis',
-        gradient: 'from-primary-600 to-primary-700'
+        description: 'Data terenkripsi dengan sistem keamanan berlapis'
     },
     {
         icon: Clock,
         title: '24/7 Tersedia',
-        description: 'Akses kapan saja tanpa batas waktu',
-        gradient: 'from-primary-500 to-primary-600'
+        description: 'Akses kapan saja tanpa batas waktu'
     },
     {
         icon: Users,
         title: 'Support Responsif',
-        description: 'Tim siap membantu dengan cepat',
-        gradient: 'from-primary-600 to-primary-700'
+        description: 'Tim siap membantu dengan cepat'
     }
 ];
 
@@ -214,6 +207,17 @@ const CTA_BENEFITS = [
     { icon: Calendar, text: 'Booking otomatis' },
     { icon: Users, text: 'Database pelanggan' },
     { icon: TrendingUp, text: 'Tingkatkan revenue' }
+];
+
+const BRAND_LOGOS = [
+    { name: 'GoPay', color: 'text-blue-500' },
+    { name: 'OVO', color: 'text-purple-600' },
+    { name: 'Dana', color: 'text-blue-400' },
+    { name: 'ShopeePay', color: 'text-orange-500' },
+    { name: 'BCA', color: 'text-blue-700' },
+    { name: 'Mandiri', color: 'text-yellow-600' },
+    { name: 'BRI', color: 'text-blue-600' },
+    { name: 'BNI', color: 'text-orange-600' },
 ];
 
 const scrollToUmkmList = () => {
@@ -277,362 +281,334 @@ const handleClearLocation = () => {
 
 return (
     <PublicLayout>
-        {/* <Head title="BookUMKM - Platform Booking UMKM Indonesia" /> */}
+        <MagneticCursor />
+        {/* Hero Section - Linear Style Light Mode */}
+        <section className="relative pt-24 pb-20 overflow-hidden bg-white sm:pt-32 lg:pt-40 sm:pb-28 lg:pb-32">
+            {/* Metronic Grid Background */}
+            <div className="absolute inset-0 bg-[size:30px_30px] bg-[linear-gradient(to_right,#f1f5f9_1px,transparent_1px),linear-gradient(to_bottom,#f1f5f9_1px,transparent_1px)] [mask-image:linear-gradient(to_bottom,black_60%,transparent_100%)]"></div>
 
-        {/* Hero Section with Search Box (Trip.com style) */}
-        {/* Hero Section - Mobile Optimized */}
-        <section className="relative pt-24 pb-16 overflow-hidden sm:pt-28 lg:pt-32 sm:pb-24 lg:pb-32">
-                {/* Background Image with Parallax Effect */}
-                <div className="absolute inset-0">
-                    <img
-                        src={HERO_BACKGROUND_IMAGE}
-                        alt="BookUMKM Background"
-                        className="object-cover w-full h-full scale-110"
-                    />
-                    {/* Gradient Overlay - Enhanced */}
-                    <div className="absolute inset-0 bg-gradient-to-br from-primary-700/45 via-primary-800/55 to-primary-900/65"></div>
+            {/* White Gradients for Edges & Center - Stronger Fade */}
+            <div className="absolute inset-x-0 top-0 h-40 bg-gradient-to-b from-white via-white to-transparent"></div> {/* Top */}
+            <div className="absolute inset-y-0 left-0 w-40 bg-gradient-to-r from-white via-white to-transparent"></div> {/* Left */}
+            <div className="absolute inset-y-0 right-0 w-40 bg-gradient-to-l from-white via-white to-transparent"></div> {/* Right */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.9)_0%,transparent_60%)]"></div> {/* Center Spotlight */}
 
-                    {/* Top gradient untuk kontras navbar */}
-                    <div className="absolute top-0 left-0 right-0 h-48 bg-gradient-to-b from-black/70 via-black/40 to-transparent"></div>
-
-                    {/* Subtle pattern overlay - Minimalist */}
-                    <div className="absolute inset-0 opacity-5">
-                        <div className="absolute top-0 bg-white rounded-full left-1/4 w-96 h-96 blur-3xl"></div>
-                        <div className="absolute bottom-0 bg-blue-200 rounded-full right-1/4 w-96 h-96 blur-3xl"></div>
+            {/* Floating App Icons (Hidden on Mobile) */}
+            <div className="absolute inset-0 hidden pointer-events-none lg:block">
+                {/* Left Side Icons */}
+                <div className="absolute top-1/4 left-10 animate-float-slow">
+                    <div className="flex items-center justify-center w-16 h-16 bg-white shadow-lg rounded-2xl rotate-[-6deg]">
+                        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl">
+                            <MapPin className="w-8 h-8 text-gray-600 fill-current" />
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute top-1/2 left-24 animate-float" style={{ animationDelay: '1s' }}>
+                    <div className="flex items-center justify-center w-14 h-14 bg-white shadow-lg rounded-2xl rotate-[12deg]">
+                        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl">
+                            <MessageCircle className="w-6 h-6 text-gray-600 fill-current" />
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute bottom-1/4 left-12 animate-float-slow" style={{ animationDelay: '2s' }}>
+                    <div className="flex items-center justify-center w-12 h-12 bg-white shadow-lg rounded-2xl rotate-[-15deg]">
+                        <div className="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-xl">
+                            <Instagram className="w-5 h-5 text-gray-600" />
+                        </div>
                     </div>
                 </div>
 
-                <div className="relative z-10 px-3 mx-auto sm:px-4 max-w-7xl lg:px-8">
-                    {/* Hero Text - Minimalist Modern */}
-                    <div className="mb-4 text-center sm:mb-6 lg:mb-8">
-                        {/* Badge - Minimalist */}
-                        <div className="inline-flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 mb-3 sm:mb-4 rounded-full bg-white/10 backdrop-blur-md border border-white/20">
-                            <div className="flex gap-0.5">
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
-                                <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-yellow-400 fill-yellow-400" />
-                            </div>
-                            <div className="w-px h-3 sm:h-4 bg-white/30"></div>
-                            <span className="text-[10px] sm:text-xs font-semibold text-white/90">Platform UMKM Terpercaya</span>
+                {/* Right Side Icons */}
+                <div className="absolute top-1/4 right-10 animate-float" style={{ animationDelay: '1.5s' }}>
+                    <div className="flex items-center justify-center w-16 h-16 bg-white shadow-lg rounded-2xl rotate-[6deg]">
+                        <div className="flex items-center justify-center w-12 h-12 bg-gray-100 rounded-xl">
+                            <Calendar className="w-8 h-8 text-gray-600" />
                         </div>
+                    </div>
+                </div>
+                <div className="absolute top-1/2 right-24 animate-float-slow" style={{ animationDelay: '0.5s' }}>
+                    <div className="flex items-center justify-center w-14 h-14 bg-white shadow-lg rounded-2xl rotate-[-12deg]">
+                        <div className="flex items-center justify-center w-10 h-10 bg-gray-100 rounded-xl">
+                            <Star className="w-6 h-6 text-gray-600 fill-current" />
+                        </div>
+                    </div>
+                </div>
+                <div className="absolute bottom-1/4 right-12 animate-float" style={{ animationDelay: '2.5s' }}>
+                    <div className="flex items-center justify-center w-12 h-12 bg-white shadow-lg rounded-2xl rotate-[15deg]">
+                        <div className="flex items-center justify-center bg-gray-100 w-9 h-9 rounded-xl">
+                            <Video className="w-5 h-5 text-gray-600 fill-current" />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-                        {/* Main Headline - Clean & Bold */}
-                        <h1 className="mb-2 text-3xl font-bold leading-tight text-white sm:mb-3 sm:text-4xl md:text-5xl lg:text-6xl">
-                            Booking UMKM
-                            <br />
-                            <span className="text-blue-200">
-                                Jadi Mudah & Cepat
+            <div className="relative z-10 px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
+                {/* Hero Text */}
+                <div className="mb-8 text-center sm:mb-16">
+                    {/* Badge - Linear style */}
+                    <div data-magnetic="true" className="relative inline-flex p-[1px] mb-6 overflow-hidden transition-all duration-300 rounded-full group hover:scale-105 hover:shadow-lg">
+                        <div className="absolute inset-0 transition-opacity duration-300 opacity-100 bg-gradient-to-r from-brand-500 via-white to-brand-500 animate-gradient-x" />
+                        <div className="relative inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/90 backdrop-blur-md">
+                            <span className="relative flex w-2.5 h-2.5">
+                                <span className="absolute inline-flex w-full h-full rounded-full opacity-75 animate-ping bg-emerald-400"></span>
+                                <span className="relative inline-flex w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                             </span>
-                        </h1>
-
-                        <p className="max-w-2xl px-4 mx-auto text-xs sm:text-sm lg:text-base text-white/90">
-                            Reservasi salon, barbershop, klinik, spa & lebih banyak lagi
-                        </p>
+                            <span className="text-sm font-medium text-gray-700">Platform UMKM Terpercaya</span>
+                        </div>
                     </div>
 
-                    {/* Search Box Card - Integrated with Category Dropdown */}
-                    <div className="max-w-4xl mx-auto px-4 relative z-[100]">
-                        {myLocation && (
-                            <div className="flex items-center justify-between mb-2 text-xs">
-                                <span className="text-white/90">📍 Menampilkan UMKM terdekat</span>
-                                <button
-                                    onClick={handleClearLocation}
-                                    className="underline text-white/90 hover:text-white"
-                                >
-                                    Reset Lokasi
-                                </button>
-                            </div>
-                        )}
+                    {/* Main Headline - Clean & Modern */}
+                    <h1 className="mb-4 text-4xl font-bold leading-tight text-gray-900 sm:text-5xl md:text-5xl lg:text-6xl">
+                        Booking UMKM
+                        <br />
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-600 via-brand-400 to-brand-600 animate-gradient-x bg-[length:200%_auto]">
+                            Jadi Mudah & Cepat
+                        </span>
+                    </h1>
 
-                        {/* Mobile: Compact Search Bar */}
-                        <div className="relative md:hidden">
-                            <div className="flex gap-2">
-                                {/* Location Dropdown Button */}
-                                <div ref={locationDropdownRef} className="relative">
+                    <p className="max-w-2xl px-4 mx-auto text-base text-gray-600 sm:text-lg">
+                        Reservasi salon, barbershop, klinik, spa & lebih banyak lagi
+                    </p>
+                </div>
+
+                {/* Search Box - Linear Style */}
+                <div className="relative max-w-3xl mx-auto">
+                    {/* Search Glow Effect */}
+                    <div className="absolute inset-0 transition-opacity duration-500 transform scale-105 bg-gradient-to-r from-white/80 via-white/50 to-white/80 blur-2xl -z-10"></div>
+
+
+                    {/* Search Bar - Mobile & Desktop */}
+                    <div className="flex gap-3">
+                        {/* Location Button */}
+                        <div ref={locationDropdownRef} className="relative">
+                            <button
+                                data-magnetic="true"
+                                onClick={handleToggleLocationDropdown}
+                                disabled={isLocating}
+                                className={`flex items-center justify-center w-[52px] h-[52px] rounded-full transition-all border-2 ${
+                                    myLocation
+                                        ? 'bg-white text-gray-900 border-red-100 shadow-sm'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
+                                } disabled:opacity-50`}
+                            >
+                                <MapPin className={`w-5 h-5 ${myLocation ? 'text-red-500' : 'text-gray-500'}`} />
+                            </button>
+
+                            {/* Dropdown Menu */}
+                            {showLocationDropdown && (
+                                <div className="absolute top-full left-0 mt-2 w-72 bg-white rounded-xl border border-gray-200 shadow-linear-lg py-2 z-[9999]">
                                     <button
-                                        onClick={handleToggleLocationDropdown}
+                                        onClick={handleGetLocation}
                                         disabled={isLocating}
-                                        className={`flex items-center gap-1.5 px-3 py-3.5 rounded-full transition-all ${
-                                            myLocation
-                                                ? 'bg-primary-600 text-white'
-                                                : 'bg-white/95 text-gray-700 hover:bg-white'
-                                        } shadow-lg disabled:opacity-50`}
+                                        className="flex items-center w-full gap-3 px-4 py-3 text-sm font-medium text-left text-gray-700 transition hover:bg-gray-50 disabled:opacity-50"
                                     >
-                                        <MapPin className="w-4 h-4" />
-                                        <ChevronDown className="w-3.5 h-3.5" />
-                                    </button>
-
-                                    {/* Dropdown Menu - Location Mobile */}
-                                    {showLocationDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-[9999]">
-                                            <button
-                                                onClick={handleGetLocation}
-                                                disabled={isLocating}
-                                                className="w-full px-4 py-2.5 text-left text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center gap-3 disabled:opacity-50"
-                                            >
-                                                <MapPin className="w-4 h-4 text-primary-600" />
-                                                <div className="flex-1">
-                                                    <div className="font-semibold">
-                                                        {isLocating ? 'Mencari Lokasi...' : 'Lokasi Saat Ini'}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        Gunakan GPS saya
-                                                    </div>
-                                                </div>
-                                                {myLocation && (
-                                                    <div className="w-2 h-2 rounded-full bg-primary-600"></div>
-                                                )}
-                                            </button>
-                                            {myLocation && (
-                                                <button
-                                                    onClick={handleClearLocation}
-                                                    className="w-full px-4 py-2.5 text-left text-sm font-medium text-red-600 hover:bg-red-50 flex items-center gap-3"
-                                                >
-                                                    <MapPin className="w-4 h-4" />
-                                                    <span>Reset Lokasi</span>
-                                                </button>
-                                            )}
+                                        <MapPin className="w-5 h-5 text-brand-600" />
+                                        <div className="flex-1">
+                                            <div className="font-semibold text-gray-900">
+                                                {isLocating ? 'Mencari Lokasi...' : 'Lokasi Saat Ini'}
+                                            </div>
+                                            <div className="text-xs text-gray-500">
+                                                Gunakan GPS saya
+                                            </div>
                                         </div>
+                                        {myLocation && (
+                                            <div className="w-2 h-2 rounded-full bg-brand-600"></div>
+                                        )}
+                                    </button>
+                                    {myLocation && (
+                                        <button
+                                            onClick={handleClearLocation}
+                                            className="flex items-center w-full gap-3 px-4 py-3 text-sm font-medium text-left text-red-600 transition hover:bg-red-50"
+                                        >
+                                            <MapPin className="w-5 h-5" />
+                                            <span>Reset Lokasi</span>
+                                        </button>
                                     )}
                                 </div>
-
-                                {/* Search Input */}
-                                <div className="relative flex-1">
-                                    <div className="absolute left-3.5 top-1/2 -translate-y-1/2">
-                                        <Search className="w-4 h-4 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Cari UMKM..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                scrollToUmkmList();
-                                            }
-                                        }}
-                                        className="w-full py-3.5 pl-10 pr-12 text-sm font-medium text-gray-900 placeholder-gray-400 transition-all duration-200 bg-white/95 backdrop-blur-xl border-0 rounded-full shadow-lg focus:shadow-xl focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                                    />
-                                    <button
-                                        onClick={scrollToUmkmList}
-                                        className="absolute p-2 text-white transition-all duration-300 -translate-y-1/2 rounded-full right-2 top-1/2 bg-gradient-to-r from-primary-600 to-primary-700 hover:shadow-lg active:scale-95"
-                                    >
-                                        <Search className="w-4 h-4" />
-                                    </button>
-                                </div>
-                            </div>
-                            {locationError && (
-                                <p className="mt-2 text-xs text-red-300">{locationError}</p>
                             )}
                         </div>
 
-                        {/* Desktop: Enhanced Search Bar */}
-                        <div className="relative hidden md:block">
-                            <div className="flex gap-2">
-                                {/* Location Dropdown - Desktop */}
-                                <div ref={locationDropdownDesktopRef} className="relative">
-                                    <button
-                                        onClick={handleToggleLocationDropdown}
-                                        disabled={isLocating}
-                                        className={`flex items-center gap-2 px-4 py-3 lg:py-4 rounded-full transition-all ${
-                                            myLocation
-                                                ? 'bg-primary-600 text-white'
-                                                : 'bg-white/95 text-gray-700 hover:bg-white'
-                                        } shadow-xl disabled:opacity-50`}
-                                    >
-                                        <MapPin className="w-5 h-5" />
-                                        <span className="text-sm font-semibold">
-                                            {isLocating ? 'Mencari...' : myLocation ? 'Terdekat' : 'Lokasi'}
-                                        </span>
-                                        <ChevronDown className="w-4 h-4" />
-                                    </button>
-
-                                    {/* Dropdown Menu - Location Desktop */}
-                                    {showLocationDropdown && (
-                                        <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-2xl shadow-2xl border border-gray-200 py-2 z-[99999]">
-                                            <button
-                                                onClick={handleGetLocation}
-                                                disabled={isLocating}
-                                                className="flex items-center w-full gap-3 px-4 py-3 text-sm font-medium text-left text-gray-700 hover:bg-gray-50 disabled:opacity-50"
-                                            >
-                                                <MapPin className="w-5 h-5 text-primary-600" />
-                                                <div className="flex-1">
-                                                    <div className="font-semibold">
-                                                        {isLocating ? 'Mencari Lokasi...' : 'Lokasi Saat Ini'}
-                                                    </div>
-                                                    <div className="text-xs text-gray-500">
-                                                        Tampilkan UMKM terdekat dari posisi saya
-                                                    </div>
-                                                </div>
-                                                {myLocation && (
-                                                    <div className="w-2 h-2 rounded-full bg-primary-600"></div>
-                                                )}
-                                            </button>
-                                            {myLocation && (
-                                                <button
-                                                    onClick={handleClearLocation}
-                                                    className="flex items-center w-full gap-3 px-4 py-3 text-sm font-medium text-left text-red-600 hover:bg-red-50"
-                                                >
-                                                    <MapPin className="w-5 h-5" />
-                                                    <span>Reset Lokasi</span>
-                                                </button>
-                                            )}
-                                        </div>
-                                    )}
-                                </div>
-
-                                {/* Search Input */}
-                                <div className="relative flex-1">
-                                    <div className="absolute -translate-y-1/2 left-4 top-1/2">
-                                        <Search className="w-5 h-5 text-gray-400" />
-                                    </div>
-                                    <input
-                                        type="text"
-                                        placeholder="Cari UMKM berdasarkan nama atau lokasi..."
-                                        value={searchTerm}
-                                        onChange={(e) => setSearchTerm(e.target.value)}
-                                        onKeyDown={(e) => {
-                                            if (e.key === 'Enter') {
-                                                scrollToUmkmList();
-                                            }
-                                        }}
-                                        className="w-full py-3 pl-12 text-base font-medium text-gray-900 placeholder-gray-400 transition-all duration-300 border-0 rounded-full shadow-xl lg:py-4 pr-14 bg-white/95 backdrop-blur-xl focus:shadow-2xl focus:outline-none focus:ring-2 focus:ring-primary-500/30"
-                                    />
-                                    <button
-                                        onClick={scrollToUmkmList}
-                                        className="absolute right-2 top-1/2 -translate-y-1/2 p-2.5 lg:p-3 text-white transition-all duration-300 bg-gradient-to-r from-primary-600 to-primary-700 rounded-full hover:shadow-lg active:scale-95"
-                                    >
-                                        <Search className="w-4 h-4 lg:w-5 lg:h-5" />
-                                    </button>
-                                </div>
+                        {/* Search Input */}
+                        <div className="relative flex-1">
+                            <div className="absolute -translate-y-1/2 left-4 top-1/2">
+                                <Search className="w-5 h-5 text-gray-400" />
                             </div>
-                            {locationError && (
-                                <p className="mt-2 text-xs text-red-300">{locationError}</p>
-                            )}
+                            <input
+                                type="text"
+                                placeholder="Cari UMKM berdasarkan nama atau lokasi..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'Enter') {
+                                        scrollToUmkmList();
+                                    }
+                                }}
+                                className="w-full py-3.5 pl-12 pr-24 text-base font-medium text-gray-900 placeholder-gray-400 transition-all duration-200 bg-white border-2 border-gray-200 rounded-full focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
+                            />
+                            <button
+                                data-magnetic="true"
+                                onClick={scrollToUmkmList}
+                                className="absolute px-4 py-2 text-sm font-semibold text-white transition-all duration-200 -translate-y-1/2 rounded-full right-2 top-1/2 bg-brand-600 hover:bg-brand-700 active:scale-95"
+                            >
+                                Cari
+                            </button>
+                        </div>
+                    </div>
+
+                    {locationError && (
+                        <p className="mt-3 text-sm text-red-600">{locationError}</p>
+                    )}
+
+                    {/* Social Proof */}
+                    <div className="flex flex-col items-center justify-center gap-4 mt-8 sm:flex-row sm:gap-6">
+                        {/* Avatars */}
+                        <div className="flex -space-x-3">
+                            {[1, 2, 3, 4].map((i) => (
+                                <img
+                                    key={i}
+                                    className="w-10 h-10 border-2 border-white rounded-full shadow-sm"
+                                    src={`https://i.pravatar.cc/150?img=${i + 10}`}
+                                    alt={`User ${i}`}
+                                />
+                            ))}
                         </div>
 
-                        {/* Quick Stats - Hidden on Mobile, Show on Tablet+ */}
-                        <div className="hidden gap-3 mt-4 text-xs sm:flex sm:items-center sm:justify-center sm:gap-4 text-white/90">
-                            {STATS.map((stat, index) => (
-                                <div key={index} className="flex items-center gap-1.5">
-                                    {index > 0 && <div className="w-px h-3 bg-white/30 mr-1.5"></div>}
-                                    <stat.icon className={`w-3.5 h-3.5 ${stat.color} ${stat.fill ? 'fill-current' : ''}`} />
-                                    <span>
-                                        <strong className="text-white">{stat.value}</strong> {stat.label}
+                        {/* Rating & Stats */}
+                        <div className="flex flex-col items-center text-center sm:items-start sm:text-left">
+                            <div className="flex items-center gap-2 mb-0.5">
+                                <div className="flex gap-0.5">
+                                    {[1, 2, 3, 4, 5].map((star) => (
+                                        <svg key={star} className="w-4 h-4 text-yellow-400 fill-current" viewBox="0 0 20 20">
+                                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                        </svg>
+                                    ))}
+                                </div>
+                                <span className="text-base font-bold text-gray-900">4.8 Rating</span>
+                            </div>
+                            <p className="text-sm font-medium text-gray-600">
+                                <span className="font-bold text-gray-900">150+</span> UMKM • <span className="font-bold text-gray-900">5K+</span> Bookings
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Brand Slider */}
+                    <div className="pt-10 mt-10 sm:mt-16">
+                        {/* <p className="mb-6 text-sm font-medium text-center text-gray-500">
+                            Didukung oleh berbagai metode pembayaran & mitra terpercaya
+                        </p> */}
+
+                        <div className="relative flex overflow-x-hidden group">
+                            <div className="flex items-center gap-12 animate-marquee whitespace-nowrap sm:gap-20">
+                                {/* First set of logos */}
+                                {BRAND_LOGOS.map((brand, index) => (
+                                    <span
+                                        key={`brand-1-${index}`}
+                                        className={`text-xl sm:text-2xl font-bold opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 ${brand.color}`}
+                                    >
+                                        {brand.name}
                                     </span>
-                                </div>
+                                ))}
+                                {/* Duplicate set for seamless loop */}
+                                {BRAND_LOGOS.map((brand, index) => (
+                                    <span
+                                        key={`brand-2-${index}`}
+                                        className={`text-xl sm:text-2xl font-bold opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 ${brand.color}`}
+                                    >
+                                        {brand.name}
+                                    </span>
+                                ))}
+                                {/* Triplicate set for wide screens */}
+                                {BRAND_LOGOS.map((brand, index) => (
+                                    <span
+                                        key={`brand-3-${index}`}
+                                        className={`text-xl sm:text-2xl font-bold opacity-50 grayscale hover:grayscale-0 hover:opacity-100 transition-all duration-300 ${brand.color}`}
+                                    >
+                                        {brand.name}
+                                    </span>
+                                ))}
+                            </div>
+
+                            {/* Fade edges */}
+                            <div className="absolute top-0 left-0 z-10 w-32 h-full bg-gradient-to-r from-white via-white/80 to-transparent"></div>
+                            <div className="absolute top-0 right-0 z-10 w-32 h-full bg-gradient-to-l from-white via-white/80 to-transparent"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {/* Bottom Fade to UMKM Section */}
+            <div className="absolute bottom-0 left-0 right-0 h-32 pointer-events-none bg-gradient-to-b from-transparent to-gray-50"></div>
+        </section>
+
+        {/* UMKM List Section */}
+        <section id="umkm-list" className="py-8 sm:py-12 bg-gray-50">
+            <div className="px-3 mx-auto sm:px-4 max-w-7xl lg:px-8">
+
+                {/* Filter Bar (Dribbble Style) */}
+                {/* Filter Bar (Dribbble Style) */}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 md:flex-nowrap">
+                    {/* Popular Dropdown */}
+                    <div className="relative order-1 shrink-0">
+                        <button data-magnetic="true" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
+                            <span>Terpopuler</span>
+                            <ChevronDown className="w-4 h-4 text-gray-500" />
+                        </button>
+                    </div>
+
+                    {/* Categories Scroll */}
+                    <div className="order-3 w-full min-w-0 md:order-2 md:w-auto md:flex-1">
+                        <div className="flex gap-2 pb-2 -mb-2 overflow-x-auto scrollbar-hide mask-linear-fade md:justify-center">
+                            <button
+                                data-magnetic="true"
+                                onClick={() => {
+                                    setSelectedCategory('');
+                                    scrollToUmkmList();
+                                }}
+                                className={`flex items-center px-6 py-2.5 text-sm font-medium transition-all duration-200 rounded-full whitespace-nowrap border ${
+                                    selectedCategory === ''
+                                        ? 'bg-gray-100 border-gray-200 text-gray-900'
+                                        : 'bg-transparent border-transparent text-gray-600 hover:bg-gray-50'
+                                }`}
+                            >
+                                Semua
+                            </button>
+                            {CATEGORIES.map((category) => (
+                                <button
+                                    key={category.id}
+                                    data-magnetic="true"
+                                    onClick={() => {
+                                        setSelectedCategory(category.id);
+                                        scrollToUmkmList();
+                                    }}
+                                    className={`flex items-center px-6 py-2.5 text-sm font-medium transition-all duration-200 rounded-full whitespace-nowrap border ${
+                                        selectedCategory === category.id
+                                            ? 'bg-gray-100 border-gray-200 text-gray-900'
+                                            : 'bg-transparent border-transparent text-gray-600 hover:bg-gray-50'
+                                    }`}
+                                >
+                                    {category.name}
+                                </button>
                             ))}
                         </div>
                     </div>
-                </div>
-            </section>
 
-            <section className="relative z-10 pt-8 pb-4 sm:pt-10 sm:pb-6 bg-gray-50">
-                <div className="mx-auto max-w-7xl">
-                    {/* Mobile: Horizontal Scroll */}
-                    <div className="relative sm:hidden">
-                        <div className="overflow-x-auto scrollbar-hide">
-                            <div className="flex gap-3 px-3 snap-x snap-mandatory">
-                                {CATEGORIES.map((category) => (
-                                    <button
-                                        key={category.id}
-                                        onClick={() => {
-                                            setSelectedCategory(category.id);
-                                            scrollToUmkmList();
-                                        }}
-                                        className="flex flex-col items-center flex-shrink-0 w-16 gap-2 snap-start"
-                                    >
-                                        {/* Icon Box */}
-                                        <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-all ${
-                                            selectedCategory === category.id
-                                                ? 'bg-primary-600 shadow-md'
-                                                : 'bg-white shadow-sm active:scale-95'
-                                        }`}>
-                                            <category.icon className={`w-7 h-7 ${
-                                                selectedCategory === category.id
-                                                    ? 'text-white'
-                                                    : 'text-primary-600'
-                                            }`} />
-                                        </div>
-                                        {/* Label */}
-                                        <span className={`text-[10px] font-semibold text-center leading-tight w-16 ${
-                                            selectedCategory === category.id
-                                                ? 'text-primary-600'
-                                                : 'text-gray-700'
-                                        }`}>
-                                            {category.name}
-                                        </span>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-                        {/* Gradient Indicator - Right */}
-                        <div className="absolute top-0 bottom-0 right-0 w-12 pointer-events-none bg-gradient-to-l from-gray-50 to-transparent"></div>
-                    </div>
-
-                    {/* Desktop: Grid */}
-                    <div className="hidden gap-4 px-4 sm:grid sm:grid-cols-4 lg:grid-cols-7 lg:px-8">
-                        {CATEGORIES.map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => {
-                                    setSelectedCategory(category.id);
-                                    scrollToUmkmList();
-                                }}
-                                className="flex flex-col items-center gap-2.5"
-                            >
-                                {/* Icon Box */}
-                                <div className={`w-16 h-16 rounded-xl flex items-center justify-center transition-all ${
-                                    selectedCategory === category.id
-                                        ? 'bg-primary-600 shadow-md'
-                                        : 'bg-white shadow-sm hover:shadow-md active:scale-95'
-                                }`}>
-                                    <category.icon className={`w-7 h-7 ${
-                                        selectedCategory === category.id
-                                            ? 'text-white'
-                                            : 'text-primary-600'
-                                    }`} />
-                                </div>
-                                {/* Label */}
-                                <span className={`text-xs font-semibold text-center leading-tight ${
-                                    selectedCategory === category.id
-                                        ? 'text-primary-600'
-                                        : 'text-gray-700'
-                                }`}>
-                                    {category.name}
-                                </span>
-                            </button>
-                        ))}
+                    {/* Filter Button */}
+                    <div className="order-2 shrink-0 md:order-3">
+                        <button data-magnetic="true" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                <line x1="4" y1="21" x2="4" y2="14"></line>
+                                <line x1="4" y1="10" x2="4" y2="3"></line>
+                                <line x1="12" y1="21" x2="12" y2="12"></line>
+                                <line x1="12" y1="8" x2="12" y2="3"></line>
+                                <line x1="20" y1="21" x2="20" y2="16"></line>
+                                <line x1="20" y1="12" x2="20" y2="3"></line>
+                                <line x1="1" y1="14" x2="7" y2="14"></line>
+                                <line x1="9" y1="8" x2="15" y2="8"></line>
+                                <line x1="17" y1="16" x2="23" y2="16"></line>
+                            </svg>
+                            <span>Filter</span>
+                        </button>
                     </div>
                 </div>
-            </section>
-
-            {/* UMKM List Section */}
-            <section id="umkm-list" className="py-8 sm:py-12 bg-gray-50">
-                <div className="px-3 mx-auto sm:px-4 max-w-7xl lg:px-8">
-                    {/* Section Header */}
-                    <div className="flex items-center justify-between gap-3 mb-6 sm:mb-8">
-                        <div className="flex-1 min-w-0">
-                            <h2 className="mb-1 text-xl font-bold text-gray-900 truncate sm:text-2xl lg:text-3xl">
-                                {selectedCategory
-                                    ? CATEGORIES.find(c => c.id === selectedCategory)?.name
-                                    : 'Semua UMKM'}
-                            </h2>
-                            <p className="text-xs text-gray-600 sm:text-sm">
-                                {filteredUmkms.length} UMKM tersedia
-                            </p>
-                        </div>
-                        {selectedCategory && (
-                            <button
-                                onClick={() => setSelectedCategory('')}
-                                className="flex-shrink-0 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-semibold transition-all duration-300 border text-primary-700 border-primary-200 rounded-lg hover:bg-primary-50 active:scale-95"
-                            >
-                                Reset
-                            </button>
-                        )}
-                    </div>
 
                     {/* UMKM Grid */}
                     {filteredUmkms.length > 0 ? (
@@ -658,7 +634,7 @@ return (
                                     setSearchTerm('');
                                     setSelectedCategory('');
                                 }}
-                                className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-300 shadow-lg bg-primary-600 rounded-lg hover:bg-primary-700 active:scale-95"
+                                className="px-5 sm:px-6 py-2.5 sm:py-3 text-sm font-semibold text-white transition-all duration-300 shadow-lg bg-brand-600 rounded-lg hover:bg-brand-700 active:scale-95"
                             >
                                 Reset Pencarian
                             </button>
@@ -667,108 +643,82 @@ return (
                 </div>
             </section>
 
-            {/* Why Choose Us Section - Mobile Optimized */}
-            <section className="relative py-8 overflow-hidden sm:py-12 bg-gradient-to-br from-gray-50 via-blue-50/30 to-gray-50">
-                {/* Subtle background pattern */}
-                <div className="absolute inset-0 opacity-5">
-                    <div className="absolute top-0 rounded-full left-1/4 w-96 h-96 bg-primary-400 blur-3xl"></div>
-                    <div className="absolute bottom-0 rounded-full right-1/4 w-96 h-96 bg-primary-300 blur-3xl"></div>
+        {/* Features Section - Linear Style */}
+        <section id="keunggulan" className="relative py-16 overflow-hidden border-t border-gray-100 sm:py-20 bg-gray-50">
+            <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
+                {/* Header */}
+                <div className="mb-12 text-center sm:mb-16">
+                    <h2 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl">
+                        Kenapa Pilih Book UMKM?
+                    </h2>
+                    <p className="max-w-2xl mx-auto text-base text-gray-600 sm:text-lg">
+                        Solusi booking terlengkap untuk kemudahan Anda
+                    </p>
                 </div>
 
-                <div className="relative px-3 mx-auto sm:px-4 max-w-7xl lg:px-8">
-                    {/* Header - Modern */}
-                    <div className="mb-6 text-center sm:mb-8">
-                        <div className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-3 rounded-full bg-primary-100 text-primary-700">
-                            <Zap className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-                            <span className="text-[10px] sm:text-xs font-semibold">Keunggulan Kami</span>
+                {/* Features Grid */}
+                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    {FEATURES.map((item, idx) => (
+                        <div
+                            key={idx}
+                            className="p-6 transition-all duration-200 bg-white group rounded-xl shadow-linear hover:shadow-linear-md hover:scale-[1.02]"
+                        >
+                            {/* Icon */}
+                            <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-brand-50">
+                                <item.icon className="w-6 h-6 text-brand-600" />
+                            </div>
+
+                            <h3 className="mb-2 text-lg font-bold text-gray-900">
+                                {item.title}
+                            </h3>
+                            <p className="text-sm leading-relaxed text-gray-600">
+                                {item.description}
+                            </p>
                         </div>
-                        <h2 className="mb-2 text-lg font-bold text-gray-900 sm:text-xl lg:text-2xl">
-                            Kenapa Pilih BookUMKM?
+                    ))}
+                </div>
+            </div>
+        </section>
+
+        {/* CTA Section - Linear Purple */}
+        <section id="cara-kerja" className="relative py-20 overflow-hidden border-t border-gray-100 sm:py-24 lg:py-32 bg-gradient-primary">
+            <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
+                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                    {/* Left: Content */}
+                    <div className="text-center lg:text-left">
+                        <h2 className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
+                            Punya UMKM?
+                            <br />
+                            Bergabung Sekarang!
                         </h2>
-                        <p className="max-w-2xl px-4 mx-auto text-xs text-gray-600 sm:text-sm">
-                            Solusi booking terlengkap untuk kemudahan Anda
+
+                        <p className="max-w-xl mx-auto mb-8 text-lg leading-relaxed lg:mx-0 text-white/90">
+                            Tingkatkan bisnis dengan sistem booking online modern. Kelola reservasi dan pelanggan dengan mudah.
                         </p>
-                    </div>
 
-                    {/* Features Grid - Compact Cards */}
-                    <div className="grid grid-cols-1 gap-3 sm:gap-4 md:grid-cols-2 lg:grid-cols-4">
-                        {FEATURES.map((item, idx) => (
-                            <div
-                                key={idx}
-                                className="relative p-4 transition-all duration-300 bg-white border border-gray-200 rounded-lg sm:p-5 lg:p-6 group sm:rounded-xl hover:border-primary-300 hover:shadow-lg active:scale-95"
-                            >
-                                {/* Icon with gradient background */}
-                                <div className={`inline-flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 mb-3 sm:mb-4 rounded-lg sm:rounded-xl bg-gradient-to-br ${item.gradient} shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                                    <item.icon className="w-5 h-5 text-white sm:w-6 sm:h-6" />
+                        {/* Benefits List */}
+                        <div className="grid grid-cols-1 gap-3 mb-8 sm:grid-cols-2">
+                            {CTA_BENEFITS.map((item, idx) => (
+                                <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg bg-white/10 border-white/20">
+                                    <item.icon className="w-5 h-5 text-white" />
+                                    <span className="text-sm font-medium text-white">{item.text}</span>
                                 </div>
+                            ))}
+                        </div>
 
-                                <h3 className="mb-1.5 sm:mb-2 text-sm sm:text-base lg:text-lg font-bold text-gray-900 group-hover:text-primary-700 transition-colors">
-                                    {item.title}
-                                </h3>
-                                <p className="text-xs leading-relaxed text-gray-600 sm:text-sm">
-                                    {item.description}
-                                </p>
+                        {/* CTA Button */}
+                        <Link
+                            to="/register-umkm"
+                            data-magnetic="true"
+                            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold transition-all duration-200 bg-white rounded-lg text-brand-700 hover:bg-gray-100 shadow-linear-lg active:scale-95 group"
+                        >
+                            <span>Daftar Gratis</span>
+                            <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                        </Link>
 
-                                {/* Hover indicator */}
-                                <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 rounded-b-lg sm:rounded-b-xl bg-gradient-to-r from-primary-500 to-primary-600 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-300"></div>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* CTA Section - Mobile Optimized */}
-            <section className="relative py-8 overflow-hidden sm:py-12 lg:py-16 bg-gradient-to-br from-primary-600 via-primary-700 to-primary-900">
-                {/* Decorative Elements */}
-                <div className="absolute inset-0 opacity-10">
-                    <div className="absolute bg-white rounded-full top-10 right-10 w-72 h-72 blur-3xl animate-pulse"></div>
-                    <div className="absolute bg-blue-400 rounded-full bottom-10 left-10 w-96 h-96 blur-3xl"></div>
-                </div>
-
-                <div className="relative px-3 mx-auto sm:px-4 max-w-7xl lg:px-8">
-                    <div className="grid items-center gap-6 lg:grid-cols-2 lg:gap-10">
-                        {/* Left: Content */}
-                        <div className="text-center lg:text-left">
-                            {/* Badge */}
-                            <div className="inline-flex items-center gap-1.5 px-3 py-1.5 mb-3 sm:mb-4 rounded-full bg-white/20 backdrop-blur-sm border border-white/30">
-                                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-white" />
-                                <span className="text-[10px] sm:text-xs font-semibold text-white">Untuk Pemilik Bisnis</span>
-                            </div>
-
-                            <h2 className="mb-2 text-2xl font-bold leading-tight text-white sm:mb-3 sm:text-3xl lg:text-4xl">
-                                Punya UMKM?
-                                <br />
-                                <span className="text-blue-200">Bergabung Sekarang!</span>
-                            </h2>
-
-                            <p className="max-w-xl px-2 mx-auto mb-4 text-xs leading-relaxed text-blue-100 lg:mx-0 sm:mb-6 sm:text-sm lg:text-base">
-                                Tingkatkan bisnis dengan sistem booking online modern. Kelola reservasi dan pelanggan dengan mudah.
-                            </p>
-
-                            {/* Benefits List */}
-                            <div className="grid grid-cols-1 gap-2 mb-4 sm:grid-cols-2 sm:gap-3 sm:mb-6">
-                                {CTA_BENEFITS.map((item, idx) => (
-                                    <div key={idx} className="flex items-center gap-2 sm:gap-2.5 p-2.5 sm:p-3 rounded-lg sm:rounded-xl bg-white/10 backdrop-blur-sm border border-white/20">
-                                        <div className="flex items-center justify-center flex-shrink-0 rounded-md w-7 h-7 sm:w-8 sm:h-8 sm:rounded-lg bg-white/20">
-                                            <item.icon className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white" />
-                                        </div>
-                                        <span className="text-[11px] sm:text-xs font-medium text-white">{item.text}</span>
-                                    </div>
-                                ))}
-                            </div>
-
-                            {/* CTA Button */}
-                            <Link
-                                to="/register-umkm"
-                                className="inline-flex items-center justify-center gap-2 px-5 sm:px-6 lg:px-8 py-3 sm:py-3.5 lg:py-4 text-sm sm:text-base font-bold transition-all duration-300 shadow-xl text-primary-700 bg-white rounded-xl sm:rounded-2xl hover:scale-105 active:scale-95 group w-full sm:w-auto"
-                            >
-                                <span>Daftar Gratis</span>
-                                <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
-                            </Link>
-
-                            <p className="mt-3 text-[10px] sm:text-xs text-blue-200">
-                                ✨ Tanpa biaya • Tanpa kartu kredit
-                            </p>
+                        <p className="mt-4 text-sm text-white/70">
+                            ✨ Tanpa biaya • Tanpa kartu kredit
+                        </p>
                         </div>
 
                         {/* Right: Visual/Stats */}
@@ -781,7 +731,7 @@ return (
                                     <div className="relative space-y-6">
                                         {/* Mock Dashboard Preview */}
                                         <div className="flex items-center gap-4 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-primary-600">
+                                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-brand-600">
                                                 <Store className="w-6 h-6 text-white" />
                                             </div>
                                             <div className="flex-1">

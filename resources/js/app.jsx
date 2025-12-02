@@ -17,6 +17,10 @@ import UmkmSettings from '@/Pages/Umkm/Settings';
 import useUmkmStore from '@/Stores/useUmkmStore';
 import UmkmPage from '@/Pages/Admin/Umkm';
 import { ThemeProvider } from '@/Components/ThemeProvider';
+import Reservations from '@/Pages/Umkm/Reservations';
+import Services from '@/Pages/Umkm/Services';
+import Customers from '@/Pages/Umkm/Customers';
+import Finance from '@/Pages/Umkm/Finance';
 
 function App() {
     const token = localStorage.getItem('token');
@@ -59,6 +63,10 @@ function App() {
           {['umkm_admin', 'user'].includes(parsedUser.role) && (
             <>
               <Route path="/umkm/dashboard" element={<UmkmDashboard />} />
+              <Route path="/umkm/reservations" element={<Reservations />} />
+              <Route path="/umkm/services" element={<Services />} />
+              <Route path="/umkm/customers" element={<Customers />} />
+              <Route path="/umkm/finance" element={<Finance />} />
               <Route path="/umkm/formbuilder" element={<FormBuilder />} />
               <Route path="/umkm/settings" element={<UmkmSettings />} />
               <Route path="*" element={<Navigate to="/umkm/dashboard" replace />} />

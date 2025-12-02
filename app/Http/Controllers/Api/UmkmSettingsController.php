@@ -80,4 +80,35 @@ class UmkmSettingsController extends Controller
             'data' => $umkm->fresh()
         ]);
     }
+
+    public function deleteImage(Request $request)
+    {
+        $user = $request->user();
+        $umkm = $user->umkm;
+
+        if (!$umkm) {
+            return response()->json(['message' => 'UMKM not found'], 404);
+        }
+
+        $type = $request->input('type'); // logo, banner, qris_image
+
+        if (!in_array($type, ['logo', 'banner', 'qris_image'])) {
+            return response()->json(['message' => 'Invalid image type'], 400);
+        }
+
+        if ($umkm->$type) {
+            if (Storage::exists('public/' . $umkm->$type)) {
+                Storage::delete('public/' . $umkm->$type);
+            }
+
+            $umkm->$type = null;
+            $umkm->save();
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Image deleted successfully',
+            'data' => $umkm->fresh()
+        ]);
+    }
 }

@@ -44,6 +44,10 @@ Route::middleware(['auth', 'role:superadmin'])->prefix('superadmin')->name('supe
 Route::middleware(['auth', 'role:umkm_admin'])->prefix('umkm')->name('umkm.')->group(function () {
     Route::get('/dashboard', [UmkmController::class, 'dashboard'])->name('dashboard');
     Route::get('/formbuilder', [UmkmController::class, 'formbuilder'])->name('formbuilder');
+    Route::get('/reservations', [UmkmController::class, 'reservations'])->name('reservations');
+    Route::get('/services', [UmkmController::class, 'services'])->name('services');
+    Route::get('/customers', [UmkmController::class, 'customers'])->name('customers');
+    Route::get('/finance', [UmkmController::class, 'finance'])->name('finance');
     Route::get('/settings', [UmkmController::class, 'settings'])->name('settings');
 });
 

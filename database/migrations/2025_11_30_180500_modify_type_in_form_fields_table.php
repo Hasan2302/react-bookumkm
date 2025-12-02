@@ -3,6 +3,7 @@
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration
 {
@@ -11,10 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // migration
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->json('customer_data')->nullable();
-        });
+        DB::statement("ALTER TABLE form_fields MODIFY COLUMN type ENUM('text', 'email', 'phone', 'select', 'radio', 'checkbox', 'textarea', 'number', 'date', 'time')");
     }
 
     /**
@@ -22,8 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('bookings', function (Blueprint $table) {
-            //
-        });
+        DB::statement("ALTER TABLE form_fields MODIFY COLUMN type ENUM('text', 'email', 'phone', 'select', 'radio', 'checkbox', 'textarea')");
     }
 };

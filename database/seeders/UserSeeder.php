@@ -13,20 +13,20 @@ class UserSeeder extends Seeder
         $users = [
             [
                 'name' => 'Super Admin',
-                'email' => 'admin@example.com',
-                'password' => Hash::make('password123'),
+                'email' => 'admin@gmail.com',
+                'password' => Hash::make('12345678'),
                 'role' => 'superadmin',
             ],
             [
                 'name' => 'UMKM Owner',
-                'email' => 'owner@salonbudi.com',
-                'password' => Hash::make('password123'),
+                'email' => 'umkm@gmail.com',
+                'password' => Hash::make('12345678'),
                 'role' => 'umkm_admin',
             ],
             [
                 'name' => 'Pelanggan Biasa',
                 'email' => 'user@gmail.com',
-                'password' => Hash::make('password123'),
+                'password' => Hash::make('12345678'),
                 'role' => 'user',
             ],
         ];

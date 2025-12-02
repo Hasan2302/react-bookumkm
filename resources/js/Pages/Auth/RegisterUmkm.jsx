@@ -26,7 +26,7 @@ export default function RegisterUmkm() {
 
     const categories = [
         'Salon', 'Laundry', 'Bengkel', 'Klinik Kecantikan',
-        'Tukang Cukur', 'Spa', 'Lainnya'
+        'Barbershop', 'Spa', 'Lainnya'
     ];
 
     const handleSubmit = async (e) => {
@@ -79,18 +79,18 @@ export default function RegisterUmkm() {
             <div className="flex items-center justify-center flex-1 p-6 bg-white lg:p-12">
                 <div className="w-full max-w-md">
                     {/* Back Button */}
-                    <Link to="/" className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-primary-600 hover:text-primary-800">
+                    <Link to="/" className="inline-flex items-center gap-2 mb-6 text-sm font-medium text-brand-600 hover:text-brand-800">
                         <ArrowLeft className="w-4 h-4" /> Kembali ke Beranda
                     </Link>
 
                     {/* Logo & Title */}
                     <div className="mb-8 text-center">
                         <div className="flex items-center justify-center mb-4">
-                            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl">
+                            <div className="flex items-center justify-center w-14 h-14 bg-gradient-to-r from-brand-500 to-brand-600 rounded-xl">
                                 <Store className="w-8 h-8 text-white" />
                             </div>
                         </div>
-                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-600 to-primary-600">
+                        <h1 className="text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-brand-600 to-brand-600">
                             Daftar UMKM
                         </h1>
                         <p className="mt-2 text-sm text-gray-600">Gratis selamanya • Tanpa biaya</p>
@@ -110,14 +110,14 @@ export default function RegisterUmkm() {
                                 <label className="block mb-2 text-sm font-semibold text-gray-700">Nama Pemilik *</label>
                                 <input required type="text" placeholder="Nama lengkap" value={form.name}
                                     onChange={e => setForm({ ...form, name: e.target.value })}
-                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                 {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name[0]}</p>}
                             </div>
                             <div>
                                 <label className="block mb-2 text-sm font-semibold text-gray-700">Email *</label>
                                 <input required type="email" placeholder="email@contoh.com" value={form.email}
                                     onChange={e => setForm({ ...form, email: e.target.value })}
-                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                 {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email[0]}</p>}
                             </div>
                         </div>
@@ -128,14 +128,14 @@ export default function RegisterUmkm() {
                                 <label className="block mb-2 text-sm font-semibold text-gray-700">Nama UMKM *</label>
                                 <input required type="text" placeholder="Contoh: Salon Budi" value={form.umkm_name}
                                     onChange={e => setForm({ ...form, umkm_name: e.target.value })}
-                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                 {errors.umkm_name && <p className="mt-1 text-xs text-red-600">{errors.umkm_name[0]}</p>}
                             </div>
                             <div>
                                 <label className="block mb-2 text-sm font-semibold text-gray-700">WhatsApp *</label>
                                 <input required type="tel" placeholder="628123456789" value={form.phone}
                                     onChange={e => setForm({ ...form, phone: e.target.value })}
-                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                    className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                 {errors.phone && <p className="mt-1 text-xs text-ment-600">{errors.phone[0]}</p>}
                             </div>
                         </div>
@@ -145,7 +145,7 @@ export default function RegisterUmkm() {
                             <label className="block mb-2 text-sm font-semibold text-gray-700">Alamat Lengkap *</label>
                             <textarea required rows={3} placeholder="Jl. Contoh No.123, Jakarta" value={form.address}
                                 onChange={e => setForm({ ...form, address: e.target.value })}
-                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg resize-none focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg resize-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                             {errors.address && <p className="mt-1 text-xs text-red-600">{errors.address[0]}</p>}
                         </div>
 
@@ -153,7 +153,7 @@ export default function RegisterUmkm() {
                             <label className="block mb-2 text-sm font-semibold text-gray-700">Kategori Usaha *</label>
                             <select required value={form.category}
                                 onChange={e => setForm({ ...form, category: e.target.value })}
-                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100">
+                                className="w-full px-4 py-3 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100">
                                 <option value="">Pilih kategori</option>
                                 {categories.map(cat => (
                                     <option key={cat} value={cat}>{cat}</option>
@@ -169,7 +169,7 @@ export default function RegisterUmkm() {
                                 <div className="relative">
                                     <input required type={showPassword ? 'text' : 'password'} placeholder="Min. 8 karakter" value={form.password}
                                         onChange={e => setForm({ ...form, password: e.target.value })}
-                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                     <button type="button" onClick={() => setShowPassword(!showPassword)}
                                         className="absolute inset-y-0 flex items-center text-gray-500 right-3">
                                         {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -182,7 +182,7 @@ export default function RegisterUmkm() {
                                 <div className="relative">
                                     <input required type={showConfirmPassword ? 'text' : 'password'} placeholder="Ulangi password" value={form.password_confirmation}
                                         onChange={e => setForm({ ...form, password_confirmation: e.target.value })}
-                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-primary-500 focus:ring-2 focus:ring-primary-100" />
+                                        className="w-full px-4 py-3 pr-10 text-sm transition border-2 border-gray-200 rounded-lg focus:border-brand-500 focus:ring-2 focus:ring-brand-100" />
                                     <button type="button" onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                                         className="absolute inset-y-0 flex items-center text-gray-500 right-3">
                                         {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -193,7 +193,7 @@ export default function RegisterUmkm() {
 
                         {/* Submit Button */}
                         <button type="submit" disabled={loading}
-                            className="flex items-center justify-center w-full gap-3 py-4 mt-6 text-lg font-bold text-white transition-all rounded-xl bg-gradient-to-r from-primary-600 to-primary-600 hover:from-primary-700 hover:to-primary-700 disabled:opacity-70">
+                            className="flex items-center justify-center w-full gap-3 py-4 mt-6 text-lg font-bold text-white transition-all rounded-xl bg-gradient-to-r from-brand-600 to-brand-600 hover:from-brand-700 hover:to-brand-700 disabled:opacity-70">
                             {loading ? (
                                 <> <Loader2 className="w-6 h-6 animate-spin" /> Mendaftarkan... </>
                             ) : (
@@ -205,7 +205,7 @@ export default function RegisterUmkm() {
                     <div className="mt-8 text-center">
                         <p className="text-sm text-gray-600">
                             Sudah punya akun?{' '}
-                            <Link to="/login" className="font-bold text-primary-600 hover:underline">
+                            <Link to="/login" className="font-bold text-brand-600 hover:underline">
                                 Masuk di sini
                             </Link>
                         </p>
@@ -214,10 +214,10 @@ export default function RegisterUmkm() {
             </div>
 
             {/* RIGHT SIDE — HERO (Desktop Only) */}
-            <div className="flex-1 hidden bg-gradient-to-br from-primary-600 to-primary-700 lg:flex lg:items-center lg:justify-center">
+            <div className="flex-1 hidden bg-gradient-to-br from-brand-600 to-brand-700 lg:flex lg:items-center lg:justify-center">
                 <div className="max-w-md p-8 text-white">
                     <h2 className="mb-6 text-4xl font-bold">Mulai Digitalisasi Bisnis Anda</h2>
-                    <p className="mb-8 text-lg text-primary-100">
+                    <p className="mb-8 text-lg text-brand-100">
                         Kelola booking, notifikasi WhatsApp, dan dashboard analitik — semuanya dalam satu tempat.
                     </p>
                     <div className="space-y-5 text-lg">

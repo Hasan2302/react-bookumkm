@@ -6,7 +6,6 @@ import * as THREE from 'three';
 // Floating booking card 3D
 function BookingCard({ position, rotation, color }) {
     const meshRef = useRef();
-
     useFrame((state) => {
         if (meshRef.current) {
             meshRef.current.rotation.y = state.clock.elapsedTime * 0.2;
@@ -43,7 +42,6 @@ function BookingCard({ position, rotation, color }) {
 // Calendar icon 3D
 function CalendarIcon({ position }) {
     const groupRef = useRef();
-
     useFrame((state) => {
         if (groupRef.current) {
             groupRef.current.rotation.y = Math.sin(state.clock.elapsedTime * 0.5) * 0.3;
@@ -67,7 +65,6 @@ function CalendarIcon({ position }) {
                         metalness={0.7}
                     />
                 </RoundedBox>
-
                 {/* Calendar header */}
                 <Box args={[1, 0.25, 0.16]} position={[0, 0.48, 0]}>
                     <meshStandardMaterial
@@ -85,7 +82,6 @@ function CalendarIcon({ position }) {
 function ClockIcon({ position }) {
     const hourRef = useRef();
     const minuteRef = useRef();
-
     useFrame((state) => {
         if (hourRef.current) {
             hourRef.current.rotation.z = -state.clock.elapsedTime * 0.5;
@@ -112,7 +108,6 @@ function ClockIcon({ position }) {
                         metalness={0.8}
                     />
                 </Sphere>
-
                 {/* Hour hand */}
                 <Box
                     ref={hourRef}
@@ -121,7 +116,6 @@ function ClockIcon({ position }) {
                 >
                     <meshStandardMaterial color="#1e3a8a" />
                 </Box>
-
                 {/* Minute hand */}
                 <Box
                     ref={minuteRef}
@@ -138,7 +132,6 @@ function ClockIcon({ position }) {
 // Particles
 function Particles() {
     const particlesRef = useRef();
-
     const particles = useMemo(() => {
         const temp = [];
         for (let i = 0; i < 100; i++) {

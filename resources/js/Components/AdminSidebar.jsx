@@ -36,19 +36,7 @@ export default function AdminSidebar() {
 
   const menus = [
     { icon: LayoutDashboard, label: 'Overview', path: '/superadmin/dashboard' },
-    {
-      icon: Building2,
-      label: 'Umkm',
-      id: 'umkm',
-      submenus: [
-        { label: 'Umkm List', path: '/superadmin/umkm' },
-        { label: 'Drafts', path: '/drafts', badge: 3 },
-        { label: 'Released', path: '/released' },
-        { label: 'Scheduled', path: '/scheduled', badge: 8 },
-      ]
-    },
-    { icon: Users, label: 'Customers', path: '/customers' },
-    { icon: ShoppingBag, label: 'Shop', path: '/shop' },
+    { icon: Building2, label: 'Umkm', path: '/superadmin/umkm' },
   ];
 
   const sidebarContent = (

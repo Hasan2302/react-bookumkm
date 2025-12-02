@@ -1,7 +1,7 @@
 import { MapPin, Star, Clock, Eye } from 'lucide-react';
 
 export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail }) {
-    const storageUrl = 'http://127.0.0.1:8000/storage/umkm/';
+    const storageUrl = '/storage';
 
     // Default images berdasarkan kategori
     const getDefaultBanner = (category) => {
@@ -46,8 +46,8 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
         if (onClick) onClick(umkm);
     };
 
-    const bannerUrl = `${storageUrl}/banner/${umkm.banner}` ? umkm.banner : getDefaultBanner(umkm.category);
-    const logoUrl = `${storageUrl}/logo/${umkm.logo}` ? umkm.logo : getDefaultLogo(umkm.category);
+    const bannerUrl = umkm.banner ? `${storageUrl}/${umkm.banner}` : getDefaultBanner(umkm.category);
+    const logoUrl = umkm.logo ? `${storageUrl}/${umkm.logo}` : getDefaultLogo(umkm.category);
 
     if (featured) {
         return (
@@ -110,11 +110,11 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
 
                         <div className="mb-6 space-y-3">
                             <div className="flex items-start space-x-3">
-                                <MapPin className="flex-shrink-0 w-5 h-5 mt-1 text-primary-600" />
+                                <MapPin className="flex-shrink-0 w-5 h-5 mt-1 text-brand-600" />
                                 <span className="text-gray-700">{umkm.address}</span>
                             </div>
                             <div className="flex items-start space-x-3">
-                                <Clock className="flex-shrink-0 w-5 h-5 mt-1 text-primary-600" />
+                                <Clock className="flex-shrink-0 w-5 h-5 mt-1 text-brand-600" />
                                 <span className="text-gray-700">
                                     Senin - Jumat: 09:00 - 17:00
                                 </span>
@@ -123,11 +123,9 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
 
                         <button
                             onClick={() => onClick(umkm)}
-                            className="relative w-full px-8 py-4 overflow-hidden text-lg font-bold text-white transition-all duration-300 group shadow-glass bg-gradient-primary rounded-xl hover:scale-105 hover:shadow-glass-lg"
+                            className="relative w-full px-8 py-4 overflow-hidden text-lg font-bold text-white transition-all duration-300 rounded-full group shadow-linear bg-brand-600 hover:bg-brand-700 hover:scale-105 hover:shadow-linear-lg"
                         >
                             <span className="relative z-10">Book Sekarang</span>
-                            <div className="absolute inset-0 transition-transform duration-300 scale-x-0 bg-gradient-to-r from-primary-600 to-primary-800 group-hover:scale-x-100" />
-                            <div className="absolute inset-0 transition-opacity duration-300 opacity-0 bg-white/10 group-hover:opacity-100" />
                         </button>
                     </div>
                 </div>
@@ -136,14 +134,14 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
     }
 
     return (
-        <div className="relative overflow-hidden transition-all duration-300 bg-white border border-gray-200 rounded-lg shadow-sm group sm:rounded-xl md:rounded-2xl sm:shadow-md hover:shadow-lg">
+        <div className="relative overflow-hidden transition-all duration-300 bg-white border border-gray-200 group rounded-2xl hover:shadow-xl hover:-translate-y-1">
         <div className="cursor-default">
         {/* Banner Image */}
         <div className="relative h-32 overflow-hidden sm:h-40 md:h-48">
             <img
                 src={bannerUrl}
                 alt={umkm.name}
-                className="object-cover w-full h-full transition group-hover:scale-110"
+                className="object-cover w-full h-full transition duration-500 group-hover:scale-110"
                 onError={(e) => {
                     e.target.src = getDefaultBanner(umkm.category);
                 }}
@@ -154,7 +152,7 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
             <div className="absolute top-2 right-2 sm:top-3 sm:right-3 flex items-start gap-1.5 sm:gap-2 z-10">
                 {/* Distance Badge */}
                 {umkm.distance && (
-                    <span className="px-2 py-1 text-[10px] sm:text-xs font-bold text-dark bg-white rounded-full shadow-lg">
+                    <span className="px-2.5 py-1 text-[10px] sm:text-xs font-bold text-gray-800 bg-white/90 backdrop-blur-sm rounded-full shadow-sm">
                         📍 {parseFloat(umkm.distance).toFixed(1)} km
                     </span>
                 )}
@@ -162,15 +160,15 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
                 {/* View Detail Button */}
                 <button
                     onClick={handleViewDetail}
-                    className="p-2 sm:p-2.5 bg-white/90 backdrop-blur-sm rounded-lg shadow-md hover:bg-white hover:shadow-lg transition-all duration-200 active:scale-95 group/btn"
+                    className="p-2 transition-all duration-200 rounded-full shadow-sm bg-white/90 backdrop-blur-sm hover:bg-white hover:shadow-md active:scale-95 group/btn"
                     title="Lihat Detail"
                 >
-                    <Eye className="w-4 h-4 sm:w-5 sm:h-5 text-primary-600 group-hover/btn:text-primary-700" />
+                    <Eye className="w-4 h-4 text-gray-600 group-hover/btn:text-brand-600" />
                 </button>
             </div>
 
             {/* Logo */}
-            <div className="absolute w-10 h-10 overflow-hidden bg-white border-2 border-white rounded-md shadow-md sm:w-12 sm:h-12 md:w-14 md:h-14 sm:border-3 bottom-2 left-2 sm:bottom-3 sm:left-3 md:bottom-4 md:left-4 sm:rounded-lg md:rounded-xl">
+            <div className="absolute w-10 h-10 overflow-hidden bg-white border-2 border-white shadow-md sm:w-12 sm:h-12 md:w-14 md:h-14 bottom-3 left-3 sm:bottom-4 sm:left-4 rounded-2xl">
                 <img
                     src={logoUrl}
                     alt="logo"
@@ -183,42 +181,39 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
         </div>
 
         {/* Content */}
-        <div className="p-2.5 sm:p-3.5 md:p-4">
-            <h3 className="mb-1 sm:mb-1.5 md:mb-2 text-sm sm:text-base md:text-lg font-bold text-gray-900 line-clamp-1">
-                {umkm.name}
-            </h3>
-
-            <div className="flex items-center mb-1.5 sm:mb-2 md:mb-2.5 space-x-1">
-                <div className="flex items-center space-x-0.5">
-                    {[...Array(5)].map((_, i) => (
-                        <Star key={i} className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-3.5 md:h-3.5 text-yellow-400 fill-current" />
-                    ))}
+        <div className="p-4 sm:p-5">
+            <div className="flex items-start justify-between mb-2">
+                <h3 className="text-base font-bold text-gray-900 sm:text-lg line-clamp-1">
+                    {umkm.name}
+                </h3>
+                <div className="flex items-center gap-1 shrink-0">
+                    <Star className="w-3.5 h-3.5 text-yellow-400 fill-current" />
+                    <span className="text-xs font-bold text-gray-700">4.9</span>
                 </div>
-                <span className="text-[10px] sm:text-xs md:text-sm font-medium text-gray-600">4,9</span>
             </div>
 
-            <div className="flex items-start mb-2 sm:mb-3 md:mb-3.5 space-x-1 sm:space-x-1.5 text-[10px] sm:text-xs md:text-sm text-gray-600">
-                <MapPin className="flex-shrink-0 w-3 h-3 sm:w-3.5 sm:h-3.5 md:w-4 md:h-4 mt-0.5 text-primary-600" />
-                <span className="line-clamp-2">{umkm.address}</span>
+            <div className="flex items-start mb-3 space-x-1.5 text-xs sm:text-sm text-gray-500">
+                <MapPin className="flex-shrink-0 w-3.5 h-3.5 mt-0.5" />
+                <span className="line-clamp-1">{umkm.address}</span>
             </div>
 
             {umkm.category && (
-                <span className="inline-block px-2 py-0.5 sm:px-2.5 sm:py-1 mb-2 sm:mb-3 text-[9px] sm:text-[10px] md:text-xs font-medium rounded-md sm:rounded-lg text-primary-700 bg-primary-50">
+                <span className="inline-block px-3 py-1 mb-4 text-[10px] sm:text-xs font-medium rounded-full text-brand-700 bg-brand-50">
                     {umkm.category}
                 </span>
             )}
 
             {/* Action Buttons */}
-            <div className="flex gap-2">
+            <div className="flex gap-2.5">
                 <button
                     onClick={handleViewDetail}
-                    className="flex-1 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base font-bold text-primary-700 bg-primary-50 rounded-md sm:rounded-lg md:rounded-xl hover:bg-primary-100 transition-all duration-200 active:scale-95"
+                    className="flex-1 py-2.5 text-xs sm:text-sm font-bold text-gray-700 transition-all duration-200 bg-gray-50 rounded-full hover:bg-gray-100 active:scale-95"
                 >
                     Detail
                 </button>
                 <button
                     onClick={handleBooking}
-                    className="flex-1 py-2 sm:py-2.5 md:py-3 text-xs sm:text-sm md:text-base font-bold text-white bg-gradient-primary rounded-md sm:rounded-lg md:rounded-xl hover:shadow-lg transition-all duration-200 active:scale-95"
+                    className="flex-1 py-2.5 text-xs sm:text-sm font-bold text-white transition-all duration-200 bg-brand-600 rounded-full hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 active:scale-95"
                 >
                     Booking
                 </button>

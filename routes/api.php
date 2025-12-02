@@ -32,6 +32,7 @@ Route::post('/bookings', [BookingController::class, 'store']);
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/dashboard/stats', [DashboardController::class, 'stats']);
     Route::get('/bookings/recent', [DashboardController::class, 'recentBookings']);
+    Route::get('/dashboard/queue', [DashboardController::class, 'queue']);
     Route::post('/bookings/confirm-all', [BookingController::class, 'confirmAll']);
     Route::post('/bookings/{id}/confirm', [BookingController::class, 'confirm']);
     Route::post('/bookings/{id}/reject', [BookingController::class, 'reject']);
@@ -42,6 +43,7 @@ Route::middleware('auth:sanctum')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/umkm/me', [UmkmSettingsController::class, 'me']);
     Route::match(['post', 'put'], '/umkm/settings', [UmkmSettingsController::class, 'update']);
+    Route::delete('/umkm/settings/image', [UmkmSettingsController::class, 'deleteImage']);
 });
 
 Route::middleware('auth:sanctum')->group(function () {
@@ -52,6 +54,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+// FORM BUILDER — INI YANG WAJIB ADA!
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/formbuilder', [FormBuilderController::class, 'index']);
     Route::post('/formbuilder', [FormBuilderController::class, 'store']);

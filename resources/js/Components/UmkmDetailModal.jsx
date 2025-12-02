@@ -2,7 +2,7 @@ import { X, MapPin, Star, Clock, Phone, Mail, Calendar, Info } from 'lucide-reac
 import { useEffect } from 'react';
 
 // Constants
-const STORAGE_URL = 'http://127.0.0.1:8000/storage/';
+const STORAGE_URL = '/storage/';
 const DEFAULT_RATING = 4.9;
 const RATING_STARS = 5;
 const DEFAULT_SCHEDULE = 'Senin - Jumat: 09:00 - 17:00';
@@ -128,7 +128,7 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                                     </h2>
 
                                     {umkm.category && (
-                                        <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full sm:text-sm bg-primary-100 text-primary-700">
+                                        <span className="inline-block px-3 py-1 text-xs font-semibold rounded-full sm:text-sm bg-brand-100 text-brand-700">
                                             {umkm.category}
                                         </span>
                                     )}
@@ -151,7 +151,7 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                         {umkm.description && (
                             <div className="mb-6">
                                 <div className="flex items-center gap-2 mb-3">
-                                    <Info className="w-5 h-5 text-primary-600" />
+                                    <Info className="w-5 h-5 text-brand-600" />
                                     <h3 className="text-lg font-bold text-gray-900 sm:text-xl">Tentang</h3>
                                 </div>
                                 <p className="text-sm leading-relaxed text-gray-700 sm:text-base">
@@ -165,8 +165,8 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             {/* Address */}
                             <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-primary-100">
-                                        <MapPin className="w-5 h-5 text-primary-600" />
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                        <MapPin className="w-5 h-5 text-brand-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h4 className="mb-1 text-sm font-semibold text-gray-900">Alamat</h4>
@@ -180,8 +180,8 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             {/* Schedule */}
                             <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                 <div className="flex items-start gap-3">
-                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-primary-100">
-                                        <Clock className="w-5 h-5 text-primary-600" />
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                        <Clock className="w-5 h-5 text-brand-600" />
                                     </div>
                                     <div className="flex-1 min-w-0">
                                         <h4 className="mb-1 text-sm font-semibold text-gray-900">Jam Operasional</h4>
@@ -196,14 +196,14 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             {umkm.phone && (
                                 <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-primary-100">
-                                            <Phone className="w-5 h-5 text-primary-600" />
+                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                            <Phone className="w-5 h-5 text-brand-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h4 className="mb-1 text-sm font-semibold text-gray-900">Telepon</h4>
                                             <a
                                                 href={`tel:${umkm.phone}`}
-                                                className="text-xs font-medium sm:text-sm text-primary-600 hover:text-primary-700"
+                                                className="text-xs font-medium sm:text-sm text-brand-600 hover:text-brand-700"
                                             >
                                                 {umkm.phone}
                                             </a>
@@ -216,14 +216,14 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                             {umkm.email && (
                                 <div className="p-4 border border-gray-200 bg-gray-50 rounded-xl">
                                     <div className="flex items-start gap-3">
-                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-primary-100">
-                                            <Mail className="w-5 h-5 text-primary-600" />
+                                        <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 rounded-lg bg-brand-100">
+                                            <Mail className="w-5 h-5 text-brand-600" />
                                         </div>
                                         <div className="flex-1 min-w-0">
                                             <h4 className="mb-1 text-sm font-semibold text-gray-900">Email</h4>
                                             <a
                                                 href={`mailto:${umkm.email}`}
-                                                className="text-xs font-medium break-all sm:text-sm text-primary-600 hover:text-primary-700"
+                                                className="text-xs font-medium break-all sm:text-sm text-brand-600 hover:text-brand-700"
                                             >
                                                 {umkm.email}
                                             </a>
@@ -246,7 +246,7 @@ export default function UmkmDetailModal({ isOpen, umkm, onClose, onBooking }) {
                                     onClose();
                                     onBooking(umkm);
                                 }}
-                                className="flex-1 px-6 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white bg-gradient-to-r from-primary-600 to-primary-700 rounded-xl hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
+                                className="flex-1 px-6 py-3 sm:py-3.5 text-sm sm:text-base font-bold text-white bg-gradient-to-r from-brand-600 to-brand-700 rounded-xl hover:shadow-lg transition-all duration-200 active:scale-95 flex items-center justify-center gap-2"
                             >
                                 <Calendar className="w-5 h-5" />
                                 <span>Booking Sekarang</span>
