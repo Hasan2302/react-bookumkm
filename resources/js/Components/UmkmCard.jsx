@@ -1,7 +1,7 @@
 import { MapPin, Star, Clock, Eye } from 'lucide-react';
 
 export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail }) {
-    const storageUrl = '/storage/umkm/';
+    const storageUrl = '/storage';
 
     // Default images berdasarkan kategori
     const getDefaultBanner = (category) => {
@@ -46,8 +46,8 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
         if (onClick) onClick(umkm);
     };
 
-    const bannerUrl = `${storageUrl}/banner/${umkm.banner}` ? umkm.banner : getDefaultBanner(umkm.category);
-    const logoUrl = `${storageUrl}/logo/${umkm.logo}` ? umkm.logo : getDefaultLogo(umkm.category);
+    const bannerUrl = umkm.banner ? `${storageUrl}/${umkm.banner}` : getDefaultBanner(umkm.category);
+    const logoUrl = umkm.logo ? `${storageUrl}/${umkm.logo}` : getDefaultLogo(umkm.category);
 
     if (featured) {
         return (

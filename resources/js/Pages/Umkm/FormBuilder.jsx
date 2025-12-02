@@ -260,7 +260,7 @@ export default function FormBuilder() {
               price: parseInt(o.price) || 0,
               type: o.type || null
             }))
-          : null,
+          : [],
         sort_order: index,
       }));
 
