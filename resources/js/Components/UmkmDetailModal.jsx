@@ -2,7 +2,7 @@ import { X, MapPin, Star, Clock, Phone, Mail, Calendar, Info } from 'lucide-reac
 import { useEffect } from 'react';
 
 // Constants
-const STORAGE_URL = '/storage/';
+const STORAGE_URL = '/storage';
 const DEFAULT_RATING = 4.9;
 const RATING_STARS = 5;
 const DEFAULT_SCHEDULE = 'Senin - Jumat: 09:00 - 17:00';
@@ -53,7 +53,10 @@ const getDefaultLogo = (category) => {
 };
 
 const getImageUrl = (imagePath, category, type = 'banner') => {
-    if (imagePath) return `${STORAGE_URL}${imagePath}`;
+    if (imagePath) {
+        if (imagePath.startsWith('http')) return imagePath;
+        return `${STORAGE_URL}${imagePath}`;
+    }
     return type === 'banner' ? getDefaultBanner(category) : getDefaultLogo(category);
 };
 

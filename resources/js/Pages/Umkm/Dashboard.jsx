@@ -112,6 +112,21 @@ export default function UmkmDashboard() {
         }
     };
 
+    const hasBookingOnDate = (date) => {
+        if (!bookings.diterima || bookings.diterima.length === 0) return false;
+
+        const dateStr = date.format('YYYY-MM-DD');
+
+        return bookings.diterima.some(booking => {
+            // Asumsi format waktu: "25 Des 2025, 14:00" atau "25 Des 2025"
+            const parts = booking.waktu.split(', ');
+            if (!parts[0]) return false;
+
+            const bookingDate = dayjs(parts[0], 'D MMM YYYY');
+            return bookingDate.isValid() && bookingDate.format('YYYY-MM-DD') === dateStr;
+        });
+    };
+
     useEffect(() => {
         loadData();
         fetchQueue(dayjs()); // Load queue hari ini
@@ -583,34 +598,57 @@ export default function UmkmDashboard() {
 
                             {/* Calendar Header */}
                             <div className="flex items-center justify-between p-2 mb-4 rounded-lg bg-white/10">
-                                <button onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))} className="p-1 rounded hover:bg-white/10">
+                                <button
+                                    onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))}
+                                    className="p-1 transition rounded hover:bg-white/10"
+                                >
                                     <ChevronLeft className="w-4 h-4" />
                                 </button>
                                 <span className="text-sm font-bold">{currentDate.format('MMMM YYYY')}</span>
-                                <button onClick={() => setCurrentDate(currentDate.add(1, 'month'))} className="p-1 rounded hover:bg-white/10">
+                                <button
+                                    onClick={() => setCurrentDate(currentDate.add(1, 'month'))}
+                                    className="p-1 transition rounded hover:bg-white/10"
+                                >
                                     <ChevronRight className="w-4 h-4" />
                                 </button>
                             </div>
 
-                            {/* Calendar Grid */}
+                            {/* Week Days */}
                             <div className="grid grid-cols-7 gap-1 mb-2 text-center">
-                                {weekDays.map(d => (
-                                    <div key={d} className="text-[10px] font-medium text-white/60 uppercase">{d}</div>
+                                {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(d => (
+                                    <div key={d} className="text-[10px] font-medium text-white/60 uppercase tracking-wider">{d}</div>
                                 ))}
                             </div>
+
+                            {/* Calendar Grid */}
                             <div className="grid grid-cols-7 gap-1 text-center">
                                 {calendarDays.map((date, i) => (
-                                    <div key={i} className="flex items-center justify-center aspect-square">
+                                    <div key={i} className="relative flex items-center justify-center aspect-square">
                                         {date && (
                                             <button
                                                 onClick={() => setSelectedDate(date)}
-                                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
-                                                    date.isSame(selectedDate, 'day')
-                                                        ? 'bg-white text-primary font-bold shadow-md'
-                                                        : 'hover:bg-white/10 text-white'
-                                                }`}
+                                                className={`
+                                                    relative w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200
+                                                    ${date.isSame(selectedDate, 'day')
+                                                        ? 'bg-white text-primary shadow-lg shadow-white/30 scale-110 font-bold'
+                                                        : ''
+                                                    }
+                                                    ${date.isSame(dayjs(), 'day')
+                                                        ? '!bg-blue-500 !text-white font-bold ring-2 ring-blue-300'
+                                                        : ''
+                                                    }
+                                                    ${hasBookingOnDate(date) && !date.isSame(selectedDate, 'day')
+                                                        ? 'bg-orange-500 text-white font-bold shadow-orange-500/30'
+                                                        : date.isSame(selectedDate, 'day') ? '' : 'hover:bg-white/20 text-white/90'
+                                                    }
+                                                `}
                                             >
                                                 {date.date()}
+
+                                                {/* Titik indikator kecil kalau ada booking */}
+                                                {hasBookingOnDate(date) && !date.isSame(selectedDate, 'day') && !date.isSame(dayjs(), 'day') && (
+                                                    <span className="absolute bottom-1 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                                                )}
                                             </button>
                                         )}
                                     </div>

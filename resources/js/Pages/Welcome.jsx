@@ -126,7 +126,7 @@ const CATEGORIES = [
         image: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=400&h=300&fit=crop'
     },
     {
-        id: 'barbershop',
+        id: 'barbershop' ?? 'Tukang Cukur',
         name: 'Barbershop',
         icon: Scissors,
         color: 'from-brand-500 to-brand-600',

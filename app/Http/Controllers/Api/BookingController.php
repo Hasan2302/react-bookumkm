@@ -59,13 +59,9 @@ class BookingController extends Controller
 
     public function confirm(Request $request, $id)
     {
-        $umkmId = $this->getUmkmId($request);
-        if (!$umkmId) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 403);
-        }
 
         $booking = Booking::where('id', $id)
-            ->where('umkm_id', $umkmId)
+            ->where('umkm_id', $request->user()->umkm->id)
             ->where('status', 'pending')
             ->first();
 
@@ -87,33 +83,13 @@ class BookingController extends Controller
 
     public function reject(Request $request, $id)
     {
-        $umkmId = $this->getUmkmId($request);
-
-        if (!$umkmId) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 403);
-        }
-
-        // Find booking first
-        $booking = Booking::find($id);
+        $booking = Booking::where('id', $id)
+            ->where('umkm_id', $request->user()->umkm->id)
+            ->whereIn('status', ['pending', 'confirmed'])
+            ->first();
 
         if (!$booking) {
             return response()->json(['message' => 'Booking tidak ditemukan'], 404);
-        }
-
-        // Check ownership
-        if ($booking->umkm_id != $umkmId) {
-            \Illuminate\Support\Facades\Log::warning('Reject Booking Unauthorized:', [
-                'user_id' => $request->user()->id,
-                'booking_id' => $id,
-                'booking_umkm_id' => $booking->umkm_id,
-                'user_umkm_id' => $umkmId
-            ]);
-            return response()->json(['message' => 'Anda tidak memiliki akses ke booking ini'], 403);
-        }
-
-        // Check status
-        if (!in_array($booking->status, ['pending', 'confirmed'])) {
-            return response()->json(['message' => 'Status booking tidak valid untuk ditolak'], 400);
         }
 
         $booking->update([
@@ -129,13 +105,9 @@ class BookingController extends Controller
 
     public function confirmAll(Request $request)
     {
-        $umkmId = $this->getUmkmId($request);
-        if (!$umkmId) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 403);
-        }
 
         $updated = \DB::table('bookings')
-            ->where('umkm_id', $umkmId)
+            ->where('umkm_id', $request->user()->umkm->id)
             ->where('status', 'pending')
             ->update([
                 'status' => 'confirmed',
@@ -152,13 +124,9 @@ class BookingController extends Controller
 
     public function markAsServed(Request $request, $id)
     {
-        $umkmId = $this->getUmkmId($request);
-        if (!$umkmId) {
-            return response()->json(['message' => 'UMKM tidak ditemukan'], 403);
-        }
 
         $booking = Booking::where('id', $id)
-            ->where('umkm_id', $umkmId)
+            ->where('umkm_id', $request->user()->umkm->id)
             ->where('status', 'confirmed')
             ->firstOrFail();
 

@@ -46,8 +46,12 @@ export default function UmkmCard({ umkm, onClick, featured = false, onViewDetail
         if (onClick) onClick(umkm);
     };
 
-    const bannerUrl = umkm.banner ? `${storageUrl}/${umkm.banner}` : getDefaultBanner(umkm.category);
-    const logoUrl = umkm.logo ? `${storageUrl}/${umkm.logo}` : getDefaultLogo(umkm.category);
+    const bannerUrl = umkm.banner
+        ? (umkm.banner.startsWith('http') ? umkm.banner : `${storageUrl}/${umkm.banner}`)
+        : getDefaultBanner(umkm.category);
+    const logoUrl = umkm.logo
+        ? (umkm.logo.startsWith('http') ? umkm.logo : `${storageUrl}/${umkm.logo}`)
+        : getDefaultLogo(umkm.category);
 
     if (featured) {
         return (

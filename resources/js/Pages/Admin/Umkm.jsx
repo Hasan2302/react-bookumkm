@@ -280,7 +280,7 @@ export default function Umkm() {
                                         <div className="flex items-center gap-4">
                                         <div className="w-16 h-16 overflow-hidden border-2 border-gray-200 rounded-xl dark:border-gray-700">
                                             <img
-                                            src={umkm.logo ? `/umkm/logo/${umkm.logo.split('/').pop()}` : '/placeholder.svg'}
+                                            src={umkm.logo ? `/storage/umkm/logo/${umkm.logo.split('/').pop()}` : '/placeholder.svg'}
                                             alt={umkm.name}
                                             className="object-cover w-full h-full"
                                             />
@@ -373,7 +373,7 @@ export default function Umkm() {
                                     </td>
                                     <td className="px-6 py-4">
                                         <div className="flex items-center gap-3">
-                                        <img src={umkm.logo ? `/umkm/logo/${umkm.logo.split('/').pop()}` : '/placeholder.svg'} className="object-cover w-10 h-10 rounded-lg"/>
+                                        <img src={umkm.logo ? `/storage/umkm/logo/${umkm.logo.split('/').pop()}` : '/placeholder.svg'} className="object-cover w-10 h-10 rounded-lg"/>
                                         <div>
                                             <p className="font-medium">{umkm.name}</p>
                                             <p className="text-xs text-gray-500">{umkm.subdomain}.bookumkm.id</p>

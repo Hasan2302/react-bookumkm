@@ -141,4 +141,43 @@ class DashboardController extends Controller
             return response()->json(['message' => 'Server error'], 500);
         }
     }
+
+    public function queue(Request $request)
+    {
+        try {
+            $user = $request->user();
+            if (!$user || !$user->umkm) {
+                return response()->json(['message' => 'UMKM tidak ditemukan'], 404);
+            }
+
+            $date = $request->query('date', Carbon::today()->toDateString());
+            $umkmId = $user->umkm->id;
+
+            $bookings = \DB::table('bookings')
+                ->where('umkm_id', $umkmId)
+                ->whereDate('date', $date)
+                ->whereIn('status', ['confirmed', 'served']) // Tampilkan yang confirmed & served
+                ->orderBy('time', 'asc')
+                ->get()
+                ->map(function ($b) {
+                    return [
+                        'id'            => $b->id,
+                        'customer_name' => $b->customer_name,
+                        'service_name'  => $b->service_name,
+                        'waktu'         => Carbon::parse($b->date)->format('d M Y') . ', ' . substr($b->time, 0, 5),
+                        'status'        => $b->status,
+                        'time_only'     => substr($b->time, 0, 5)
+                    ];
+                });
+
+            return response()->json([
+                'success' => true,
+                'data'    => $bookings
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Queue error: ' . $e->getMessage());
+            return response()->json(['message' => 'Server error'], 500);
+        }
+    }
 }
