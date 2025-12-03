@@ -14,19 +14,19 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'email' => 'admin@gmail.com',
-                'password' => Hash::make('12345678'),
+                'password' => Hash::make('password'),
                 'role' => 'superadmin',
             ],
             [
                 'name' => 'UMKM Owner',
                 'email' => 'umkm@gmail.com',
-                'password' => Hash::make('12345678'),
+                'password' => Hash::make('password'),
                 'role' => 'umkm_admin',
             ],
             [
                 'name' => 'Pelanggan Biasa',
                 'email' => 'user@gmail.com',
-                'password' => Hash::make('12345678'),
+                'password' => Hash::make('password'),
                 'role' => 'user',
             ],
         ];

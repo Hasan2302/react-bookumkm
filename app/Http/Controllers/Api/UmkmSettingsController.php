@@ -42,6 +42,7 @@ class UmkmSettingsController extends Controller
             'opening_hours' => 'nullable|json',
             'logo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'banner' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'qris_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
         // Upload logo
@@ -54,6 +55,12 @@ class UmkmSettingsController extends Controller
         if ($request->hasFile('banner')) {
             if ($umkm->banner) Storage::delete('public/' . $umkm->banner);
             $validated['banner'] = $request->file('banner')->store('umkm/banner', 'public');
+        }
+
+        // Upload QRIS
+        if ($request->hasFile('qris_image')) {
+            if ($umkm->qris_image) Storage::delete('public/' . $umkm->qris_image);
+            $validated['qris_image'] = $request->file('qris_image')->store('umkm/qris', 'public');
         }
 
         // Parse JSON

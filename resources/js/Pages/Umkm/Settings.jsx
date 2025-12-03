@@ -188,12 +188,12 @@ export default function UmkmSettings() {
         <MetronicLayout title="Settings" breadcrumbs={['Profile']}>
             {/* TOMBOL SIMPAN FLOATING */}
             <button onClick={handleSubmit} disabled={loading}
-                className="fixed z-50 flex items-center gap-3 px-6 py-4 text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-10 right-10 hover:bg-primary-active hover:shadow-xl">
-                <Save className="w-5 h-5" /> {loading ? 'Saving...' : 'SAVE CHANGES'}
+                className="fixed z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-6 sm:bottom-10 right-6 sm:right-10 hover:bg-primary-active hover:shadow-xl">
+                <Save className="w-4 h-4 sm:w-5 sm:h-5" /> <span className="hidden sm:inline">{loading ? 'Saving...' : 'SAVE CHANGES'}</span><span className="sm:hidden">{loading ? 'Saving...' : 'SAVE'}</span>
             </button>
 
-            <div className="space-y-8">
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8">
                     {/* KIRI: FOTO + INFO DASAR */}
                     <div className="space-y-8">
                         {/* LOGO & BANNER */}
@@ -216,17 +216,28 @@ export default function UmkmSettings() {
                                             )}
                                         </div>
                                         <label className="block cursor-pointer group">
-                                            <div className="relative overflow-hidden border border-dashed border-gray-300 rounded-xl w-full aspect-square bg-gray-50 group-hover:border-primary transition-colors">
+                                            <div className="relative overflow-hidden border-2 border-dashed border-gray-300 rounded-xl w-40 h-40 mx-auto bg-gray-50 group-hover:border-primary transition-colors">
                                                 {logoPreview ? (
                                                     <img src={logoPreview} alt="Logo" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <Upload className="w-6 h-6 mb-2" />
                                                         <span className="text-xs font-medium">Upload Logo</span>
+                                                        <span className="text-[10px] text-gray-400 mt-1">Max 2MB</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="logo" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
-                                                    onChange={(e) => e.target.files[0] && setLogoPreview(URL.createObjectURL(e.target.files[0]))} />
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                alert('File logo terlalu besar! Maksimal 2MB.');
+                                                                e.target.value = null;
+                                                            } else {
+                                                                setLogoPreview(URL.createObjectURL(file));
+                                                            }
+                                                        }
+                                                    }} />
                                             </div>
                                         </label>
                                     </div>
@@ -240,17 +251,28 @@ export default function UmkmSettings() {
                                             )}
                                         </div>
                                         <label className="block cursor-pointer group">
-                                            <div className="relative overflow-hidden border border-dashed border-gray-300 rounded-xl w-full aspect-square bg-gray-50 group-hover:border-primary transition-colors">
+                                            <div className="relative overflow-hidden border-2 border-dashed border-gray-300 rounded-xl w-full aspect-video max-h-48 bg-gray-50 group-hover:border-primary transition-colors">
                                                 {bannerPreview ? (
                                                     <img src={bannerPreview} alt="Banner" className="object-cover w-full h-full rounded-xl" />
                                                 ) : (
                                                     <div className="flex flex-col items-center justify-center h-full text-gray-400">
-                                                        <Upload className="w-8 h-8 mb-2" />
+                                                        <Upload className="w-6 h-6 mb-2" />
                                                         <span className="text-xs font-medium">Upload Banner</span>
+                                                        <span className="text-[10px] text-gray-400 mt-1">16:9 • Max 2MB</span>
                                                     </div>
                                                 )}
                                                 <input type="file" id="banner" accept="image/*" className="absolute inset-0 opacity-0 cursor-pointer"
-                                                    onChange={(e) => e.target.files[0] && setBannerPreview(URL.createObjectURL(e.target.files[0]))} />
+                                                    onChange={(e) => {
+                                                        const file = e.target.files[0];
+                                                        if (file) {
+                                                            if (file.size > 2 * 1024 * 1024) {
+                                                                alert('File banner terlalu besar! Maksimal 2MB.');
+                                                                e.target.value = null;
+                                                            } else {
+                                                                setBannerPreview(URL.createObjectURL(file));
+                                                            }
+                                                        }
+                                                    }} />
                                             </div>
                                         </label>
                                     </div>
@@ -260,34 +282,34 @@ export default function UmkmSettings() {
 
                         {/* INFORMASI DASAR */}
                         <div className="bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div className="px-6 py-5 border-b border-gray-100">
-                                <h3 className="text-lg font-bold text-gray-900">Basic Info</h3>
+                            <div className="px-4 sm:px-6 py-4 sm:py-5 border-b border-gray-100">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900">Basic Info</h3>
                             </div>
-                            <div className="p-6 space-y-5">
+                            <div className="p-4 sm:p-6 space-y-4 sm:space-y-5">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">UMKM Name</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">UMKM Name</label>
                                     <input type="text" placeholder="Nama UMKM" value={form.name} onChange={e => setForm({...form, name: e.target.value})}
-                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" required />
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" required />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">WhatsApp Number</label>
                                     <input type="text" placeholder="No. WhatsApp" value={form.phone} onChange={e => setForm({...form, phone: e.target.value})}
-                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Category</label>
                                     <input type="text" placeholder="Kategori (contoh: Salon, Laundry)" value={form.category} onChange={e => setForm({...form, category: e.target.value})}
-                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Address</label>
                                     <textarea rows="3" placeholder="Alamat Lengkap" value={form.address} onChange={e => setForm({...form, address: e.target.value})}
-                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                    <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-2">Description</label>
                                     <textarea rows="4" placeholder="Deskripsi singkat tentang UMKM Anda..." value={form.description} onChange={e => setForm({...form, description: e.target.value})}
-                                        className="w-full px-4 py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
+                                        className="w-full px-3 sm:px-4 py-2 sm:py-3 text-sm font-medium bg-gray-50 border-transparent rounded-lg resize-none focus:bg-white focus:border-primary focus:ring-0 transition-colors" />
                                 </div>
                             </div>
                         </div>
@@ -307,14 +329,14 @@ export default function UmkmSettings() {
                                 </span>
                             </div>
 
-                            <div className="p-6 space-y-6">
-                                <div className="p-6 border border-dashed border-gray-300 rounded-xl bg-gray-50 hover:border-primary hover:bg-primary/5 transition-all group relative">
+                            <div className="p-4 sm:p-6 space-y-4">
+                                <div className="p-4 border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 hover:border-primary hover:bg-primary/5 transition-all group relative">
                                     {qrisPreview && (
-                                        <button onClick={() => handleDeleteImage('qris_image')} className="absolute top-2 right-2 p-2 bg-white rounded-full shadow-sm text-danger hover:bg-danger/10 z-10" title="Delete QRIS">
-                                            <Trash2 className="w-4 h-4" />
+                                        <button onClick={() => handleDeleteImage('qris_image')} className="absolute top-2 right-2 p-1.5 bg-white rounded-full shadow-sm text-danger hover:bg-danger/10 z-10" title="Delete QRIS">
+                                            <Trash2 className="w-3.5 h-3.5" />
                                         </button>
                                     )}
-                                    <p className="mb-4 text-sm font-medium text-gray-600 text-center">
+                                    <p className="mb-3 text-xs sm:text-sm font-medium text-gray-600 text-center">
                                         Upload your QRIS image here
                                     </p>
 
@@ -325,16 +347,22 @@ export default function UmkmSettings() {
                                             accept="image/*"
                                             className="hidden"
                                             onChange={(e) => {
-                                                if (e.target.files[0]) {
-                                                    setQrisPreview(URL.createObjectURL(e.target.files[0]));
+                                                const file = e.target.files[0];
+                                                if (file) {
+                                                    if (file.size > 2 * 1024 * 1024) {
+                                                        alert('File QRIS terlalu besar! Maksimal 2MB.');
+                                                        e.target.value = null;
+                                                    } else {
+                                                        setQrisPreview(URL.createObjectURL(file));
+                                                    }
                                                 }
                                             }}
                                         />
                                         <div className="flex flex-col items-center justify-center">
                                             {qrisPreview ? (
-                                                <div className="space-y-4 text-center w-full">
-                                                    <img src={qrisPreview} alt="QRIS" className="mx-auto shadow-lg rounded-lg max-h-64 object-contain" />
-                                                    <p className="text-sm font-bold text-success">QRIS Ready!</p>
+                                                <div className="space-y-3 text-center w-full">
+                                                    <img src={qrisPreview} alt="QRIS" className="mx-auto shadow-lg rounded-lg max-h-44 object-contain" />
+                                                    <p className="text-xs sm:text-sm font-bold text-success">QRIS Ready!</p>
                                                     <p className="text-xs text-gray-400">Click to replace</p>
                                                 </div>
                                             ) : (

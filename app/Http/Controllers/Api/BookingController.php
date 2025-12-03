@@ -34,7 +34,7 @@ class BookingController extends Controller
 
         $booking = Booking::create([
             'umkm_id'        => $request->umkm_id,
-            'user_id'        => null,
+            'user_id'        => $request->user('sanctum')?->id,
             'date'           => $request->date,
             'time'           => $request->time . ':00',
             'payment_method' => $request->payment_method,

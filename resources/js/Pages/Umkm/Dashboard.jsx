@@ -75,6 +75,11 @@ export default function UmkmDashboard() {
 
     const [queue, setQueue] = useState([]);
     const [loadingQueue, setLoadingQueue] = useState(false);
+    
+    // Payment Proof Modal State
+    const [showPaymentProofModal, setShowPaymentProofModal] = useState(false);
+    const [selectedPaymentProof, setSelectedPaymentProof] = useState(null);
+    const [selectedBookingInfo, setSelectedBookingInfo] = useState(null);
 
     const loadData = async () => {
         try {
@@ -126,8 +131,11 @@ export default function UmkmDashboard() {
         if (confirm('Apakah Anda yakin ingin menerima booking ini?')) {
             try {
                 await api.post(`/bookings/${bookingId}/confirm`);
-                loadData();
-                fetchQueue(selectedDate); // Refresh queue
+                // Only reload if modal is not open
+                if (!showPaymentProofModal) {
+                    loadData();
+                    fetchQueue(selectedDate);
+                }
             } catch (error) {
                 alert('Gagal mengonfirmasi booking');
             }
@@ -138,8 +146,11 @@ export default function UmkmDashboard() {
         if (confirm('Apakah Anda yakin ingin menolak booking ini?')) {
             try {
                 await api.post(`/bookings/${bookingId}/reject`);
-                loadData();
-                fetchQueue(selectedDate); // Refresh queue
+                // Only reload if modal is not open
+                if (!showPaymentProofModal) {
+                    loadData();
+                    fetchQueue(selectedDate);
+                }
             } catch (error) {
                 alert(error.response?.data?.message || 'Gagal menolak booking');
             }
@@ -330,91 +341,94 @@ export default function UmkmDashboard() {
 
     return (
         <MetronicLayout title="Dashboard" breadcrumbs={['Overview']}>
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 md:space-y-8">
                 {/* Header Section */}
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Halo, {user.umkm_name || user.name || 'UMKM'}!</h1>
-                        <p className="text-sm text-gray-500">Pantau bisnis kamu hari ini</p>
+                        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Halo, {user.umkm_name || user.name || 'UMKM'}!</h1>
+                        <p className="text-xs sm:text-sm text-gray-500">Pantau bisnis kamu hari ini</p>
                     </div>
-                    <Link to="/umkm/formbuilder" className="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white transition-all rounded-lg bg-primary hover:bg-primary-active shadow-lg shadow-primary/30">
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Edit Form Booking
+                    <Link to="/umkm/formbuilder" className="inline-flex items-center justify-center px-3 py-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-bold text-white transition-all rounded-lg bg-primary hover:bg-primary-active shadow-lg shadow-primary/30">
+                        <Pencil className="w-3 h-3 sm:w-4 sm:h-4 mr-1.5 sm:mr-2" />
+                        <span className="hidden sm:inline">Edit Form Booking</span>
+                        <span className="sm:hidden">Edit Form</span>
                     </Link>
                 </div>
 
                 {/* Hero Stats Card - Compact Dark */}
-                <div className="relative overflow-hidden bg-[#1e1e2d] rounded-xl p-5 shadow-lg">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 relative z-10">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl backdrop-blur-sm">
-                                <Clock className="w-6 h-6 text-white" />
+                <div className="relative overflow-hidden bg-[#1e1e2d] rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 shadow-lg">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 relative z-10">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-lg sm:rounded-xl backdrop-blur-sm">
+                                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-white">{stats.status.pending}</span>
-                                    <span className="text-sm font-medium text-white/80">Menunggu Konfirmasi</span>
+                                <div className="flex items-baseline gap-1.5 sm:gap-2">
+                                    <span className="text-2xl sm:text-3xl font-bold text-white">{stats.status.pending}</span>
+                                    <span className="text-xs sm:text-sm font-medium text-white/80">Menunggu Konfirmasi</span>
                                 </div>
-                                <p className="text-xs text-white/50">Segera konfirmasi pesanan masuk.</p>
+                                <p className="text-[10px] sm:text-xs text-white/50">Segera konfirmasi pesanan masuk.</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
                             <button 
                                 onClick={handleAcceptAll}
-                                className="px-4 py-2 text-xs font-bold text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-1.5"
                             >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
-                                Terima Semua
+                                <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
+                                <span className="hidden sm:inline">Terima Semua</span>
+                                <span className="sm:hidden">Terima</span>
                             </button>
                             <button 
                                 onClick={scrollToBookings}
-                                className="px-4 py-2 text-xs font-bold text-white bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm flex items-center gap-1.5"
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold text-white bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm flex items-center justify-center gap-1.5"
                             >
-                                Lihat Detail
-                                <ArrowUpRight className="w-3.5 h-3.5" />
+                                <span className="hidden sm:inline">Lihat Detail</span>
+                                <span className="sm:hidden">Detail</span>
+                                <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4 lg:grid-cols-4">
                     {[
                         { label: 'Booking Hari Ini', value: stats.todayBookings, icon: CalendarIcon, color: 'text-primary', bg: 'bg-primary/10' },
                         { label: 'Total Diterima', value: stats.status.confirmed, icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
                         { label: 'Pending', value: stats.status.pending, icon: Clock, color: 'text-warning', bg: 'bg-warning/10' },
                         { label: 'Dibatalkan', value: stats.status.cancelled, icon: XCircle, color: 'text-danger', bg: 'bg-danger/10' },
                     ].map((stat, i) => (
-                        <div key={i} className="bg-white rounded-xl p-5 shadow-sm border border-gray-100 flex items-center justify-between">
+                        <div key={i} className="bg-white rounded-lg sm:rounded-xl p-3 sm:p-4 md:p-5 shadow-sm border border-gray-100 flex items-center justify-between">
                             <div>
-                                <p className="text-xs font-medium text-gray-500 mb-1">{stat.label}</p>
-                                <h3 className={`text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
+                                <p className="text-[10px] sm:text-xs font-medium text-gray-500 mb-1">{stat.label}</p>
+                                <h3 className={`text-xl sm:text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
                             </div>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stat.bg}`}>
-                                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${stat.bg}`}>
+                                <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
                     {/* Left Column: Chart & Recent Bookings */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Revenue Chart */}
-                        <div className="bg-white border border-gray-100 shadow-sm rounded-xl p-6">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-bold text-gray-900">Trend Booking 7 Hari</h3>
+                    <div className="lg:col-span-2 space-y-4 sm:space-y-6 md:space-y-8">
+                        {/* Revenue Chart - Hidden on Mobile */}
+                        <div className="hidden md:block bg-white border border-gray-100 shadow-sm rounded-xl p-4 sm:p-6">
+                            <div className="flex items-center justify-between mb-4 sm:mb-6">
+                                <h3 className="text-base sm:text-lg font-bold text-gray-900">Trend Booking 7 Hari</h3>
                             </div>
-                            <div className="h-72">
+                            <div className="h-64 sm:h-72">
                                 <Line data={revenueData} options={chartOptions} />
                             </div>
                         </div>
 
                         {/* Recent Bookings Table */}
-                        <div id="recent-bookings-table" className="bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div className="px-5 py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                                <h3 className="text-base font-bold text-gray-900">Booking Terbaru</h3>
-                                <div className="flex p-1 bg-gray-100 rounded-lg">
+                        <div id="recent-bookings-table" className="bg-white border border-gray-100 shadow-sm rounded-lg sm:rounded-xl">
+                            <div className="px-3 sm:px-4 md:px-5 py-3 sm:py-4 border-b border-gray-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
+                                <h3 className="text-sm sm:text-base font-bold text-gray-900">Booking Terbaru</h3>
+                                <div className="flex p-1 bg-gray-100 rounded-lg overflow-x-auto">
                                     {['diterima', 'pending', 'cancelled'].map((tab) => (
                                         <button
                                             key={tab}
@@ -443,31 +457,33 @@ export default function UmkmDashboard() {
                                 <table className="w-full">
                                     <thead className="bg-gray-50/50">
                                         <tr>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">ID</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">Pelanggan</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">Layanan</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">Harga</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">Waktu</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-left text-gray-400 uppercase">Status</th>
-                                            <th className="px-5 py-3 text-xs font-bold text-right text-gray-400 uppercase">Aksi</th>
+                                            <th className="hidden sm:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">ID</th>
+                                            <th className="px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">Pelanggan</th>
+                                            <th className="hidden md:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">Layanan</th>
+                                            <th className="px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">Harga</th>
+                                            <th className="hidden lg:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">Waktu</th>
+                                            <th className="hidden sm:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-left text-gray-400 uppercase">Status</th>
+                                            <th className="px-3 sm:px-5 py-2 sm:py-3 text-xs font-bold text-right text-gray-400 uppercase">Aksi</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-100">
                                         {currentTabBookings.length > 0 ? (
                                             currentTabBookings.map((booking) => (
                                                 <tr key={booking.id} className="hover:bg-gray-50/50 transition-colors">
-                                                    <td className="px-5 py-3 text-xs font-bold text-gray-500">#{booking.id}</td>
-                                                    <td className="px-5 py-3">
-                                                        <div className="text-sm font-bold text-gray-900">{booking.customer_name}</div>
+                                                    <td className="hidden sm:table-cell px-3 sm:px-5 py-2 sm:py-3 text-[10px] sm:text-xs font-bold text-gray-500">#{booking.id}</td>
+                                                    <td className="px-3 sm:px-5 py-2 sm:py-3">
+                                                        <div className="text-xs sm:text-sm font-bold text-gray-900">{booking.customer_name}</div>
+                                                        <div className="sm:hidden text-[10px] text-gray-500 mt-0.5">#{booking.id}</div>
                                                     </td>
-                                                    <td className="px-5 py-3 text-xs text-gray-600">{booking.service_name}</td>
-                                                    <td className="px-5 py-3 text-xs font-bold text-success">
+                                                    <td className="hidden md:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs text-gray-600">{booking.service_name}</td>
+                                                    <td className="px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-bold text-success">
+                                                        <div className="md:hidden text-[10px] text-gray-500 mb-0.5">{booking.service_name}</div>
                                                         Rp {Number(booking.total_price).toLocaleString('id-ID')}
                                                     </td>
-                                                    <td className="px-5 py-3 text-xs text-gray-600">{booking.waktu}</td>
-                                                    <td className="px-5 py-3">
-                                                        <div className="flex items-center gap-2">
-                                                            <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold ${
+                                                    <td className="hidden lg:table-cell px-3 sm:px-5 py-2 sm:py-3 text-xs text-gray-600">{booking.waktu}</td>
+                                                    <td className="hidden sm:table-cell px-3 sm:px-5 py-2 sm:py-3">
+                                                        <div className="flex items-center gap-1.5 sm:gap-2">
+                                                            <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold ${
                                                                 activeTab === 'diterima' ? 'bg-success text-white' :
                                                                 activeTab === 'pending' ? 'bg-warning text-white' :
                                                                 'bg-danger text-white'
@@ -476,78 +492,76 @@ export default function UmkmDashboard() {
                                                                  activeTab === 'pending' ? 'Pending' : 'Dibatalkan'}
                                                             </span>
                                                             {(booking.payment_method === 'cash' || booking.payment_method === 'offline') && (
-                                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500 text-white">
+                                                                <span className="hidden lg:inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[10px] sm:text-xs font-bold bg-blue-500 text-white">
                                                                     Cash
                                                                 </span>
                                                             )}
                                                         </div>
                                                     </td>
-                                                    <td className="px-6 py-4 text-right">
-                                                        <div className="flex items-center justify-end gap-2">
+                                                    <td className="px-3 sm:px-6 py-2 sm:py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-1 sm:gap-2">
                                                             {activeTab === 'pending' && (
                                                                 <>
                                                                     <button 
                                                                         onClick={() => handleConfirm(booking.id)}
-                                                                        className="p-2 text-success bg-success/10 rounded hover:bg-success hover:text-white transition-colors"
+                                                                        className="p-1.5 sm:p-2 text-success bg-success/10 rounded hover:bg-success hover:text-white transition-colors"
                                                                         title="Terima"
                                                                     >
-                                                                        <CheckCircle2 className="w-4 h-4" />
+                                                                        <CheckCircle2 className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                     </button>
                                                                     <button 
                                                                         onClick={() => handleReject(booking.id)}
-                                                                        className="p-2 text-danger bg-danger/10 rounded hover:bg-danger hover:text-white transition-colors"
+                                                                        className="p-1.5 sm:p-2 text-danger bg-danger/10 rounded hover:bg-danger hover:text-white transition-colors"
                                                                         title="Tolak"
                                                                     >
-                                                                        <XCircle className="w-4 h-4" />
+                                                                        <XCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                     </button>
                                                                 </>
                                                             )}
                                                             {activeTab === 'diterima' && (
                                                                 <button 
                                                                     onClick={() => openWhatsApp(booking)}
-                                                                    className="p-2 text-success bg-success/10 rounded hover:bg-success hover:text-white transition-colors"
+                                                                    className="p-1.5 sm:p-2 text-success bg-success/10 rounded hover:bg-success hover:text-white transition-colors"
                                                                     title="WhatsApp"
                                                                 >
-                                                                    <MessageCircle className="w-4 h-4" />
+                                                                    <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                 </button>
                                                             )}
                                                             <Dropdown>
                                                                 <Dropdown.Trigger>
-                                                                    <button className="p-2 text-gray-400 hover:text-gray-600">
-                                                                        <MoreVertical className="w-4 h-4" />
+                                                                    <button className="p-1.5 sm:p-2 text-gray-400 hover:text-gray-600">
+                                                                        <MoreVertical className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                                                     </button>
                                                                 </Dropdown.Trigger>
                                                                 <Dropdown.Content width="48" align="right">
-                                                                    <Dropdown.Link onClick={() => alert(`Detail Booking #${booking.id}\nPelanggan: ${booking.customer_name}\nLayanan: ${booking.service_name}`)}>
+                                                                    <Dropdown.Button onClick={() => alert(`Detail Booking #${booking.id}\nPelanggan: ${booking.customer_name}\nLayanan: ${booking.service_name}`)}>
                                                                         Lihat Detail
-                                                                    </Dropdown.Link>
+                                                                    </Dropdown.Button>
                                                                     
-                                                                    {booking.status === 'confirmed' && (
-                                                                        <Dropdown.Link onClick={() => openWhatsApp(booking)}>
-                                                                            Hubungi via WhatsApp
-                                                                        </Dropdown.Link>
-                                                                    )}
+                                                                    <Dropdown.Button onClick={() => {
+                                                                        if (booking.payment_method === 'cash' || booking.payment_method === 'offline') {
+                                                                            alert('Pembayaran Cash tidak memerlukan bukti transfer');
+                                                                        } else if (booking.payment_proof) {
+                                                                            setSelectedPaymentProof(booking.payment_proof);
+                                                                            setSelectedBookingInfo({
+                                                                                id: booking.id,
+                                                                                customer_name: booking.customer_name,
+                                                                                service_name: booking.service_name,
+                                                                                total_price: booking.total_price,
+                                                                                date: booking.tanggal,
+                                                                                time: booking.waktu
+                                                                            });
+                                                                            setShowPaymentProofModal(true);
+                                                                        } else {
+                                                                            alert('Belum ada bukti pembayaran yang diunggah pelanggan');
+                                                                        }
+                                                                    }}>
+                                                                        Lihat Bukti Pembayaran
+                                                                    </Dropdown.Button>
 
-                                                                    {booking.payment_proof && (
-                                                                        <Dropdown.Link onClick={() => window.open(`/storage/${booking.payment_proof}`, '_blank')}>
-                                                                            Lihat Bukti Pembayaran
-                                                                        </Dropdown.Link>
-                                                                    )}
-
-                                                                    {booking.status === 'pending' && (
-                                                                        <>
-                                                                            <Dropdown.Link onClick={() => handleConfirm(booking.id)}>
-                                                                                Terima Booking
-                                                                            </Dropdown.Link>
-                                                                            <Dropdown.Link onClick={() => handleReject(booking.id)} className="text-red-600 hover:bg-red-50">
-                                                                                Tolak Booking
-                                                                            </Dropdown.Link>
-                                                                        </>
-                                                                    )}
-
-                                                                    <Dropdown.Link onClick={() => alert('Fitur edit booking akan segera hadir')}>
+                                                                    <Dropdown.Button onClick={() => alert('Fitur edit booking akan segera hadir')}>
                                                                         Edit Booking
-                                                                    </Dropdown.Link>
+                                                                    </Dropdown.Button>
                                                                 </Dropdown.Content>
                                                             </Dropdown>
                                                         </div>
@@ -568,43 +582,43 @@ export default function UmkmDashboard() {
                     </div>
 
                     {/* Right Column: Calendar & Queue */}
-                    <div className="space-y-8">
+                    <div className="space-y-4 sm:space-y-6 md:space-y-8">
                         {/* Calendar Widget */}
-                        <div className="bg-primary rounded-2xl p-6 text-white shadow-lg shadow-primary/20">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="bg-primary rounded-xl sm:rounded-2xl p-4 sm:p-5 md:p-6 text-white shadow-lg shadow-primary/20">
+                            <div className="flex items-center justify-between mb-4 sm:mb-6">
                                 <div>
-                                    <h3 className="text-lg font-bold">Antrian</h3>
-                                    <p className="text-xs text-white/70">{selectedDate.format('dddd, D MMM YYYY')}</p>
+                                    <h3 className="text-base sm:text-lg font-bold">Antrian</h3>
+                                    <p className="text-[10px] sm:text-xs text-white/70">{selectedDate.format('dddd, D MMM YYYY')}</p>
                                 </div>
-                                <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center text-sm font-bold">
+                                <div className="w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-white/20 flex items-center justify-center text-xs sm:text-sm font-bold">
                                     {queue.length}
                                 </div>
                             </div>
 
                             {/* Calendar Header */}
-                            <div className="flex items-center justify-between mb-4 bg-white/10 rounded-lg p-2">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4 bg-white/10 rounded-lg p-1.5 sm:p-2">
                                 <button onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))} className="p-1 hover:bg-white/10 rounded">
-                                    <ChevronLeft className="w-4 h-4" />
+                                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
-                                <span className="text-sm font-bold">{currentDate.format('MMMM YYYY')}</span>
+                                <span className="text-xs sm:text-sm font-bold">{currentDate.format('MMMM YYYY')}</span>
                                 <button onClick={() => setCurrentDate(currentDate.add(1, 'month'))} className="p-1 hover:bg-white/10 rounded">
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
                             </div>
 
                             {/* Calendar Grid */}
-                            <div className="grid grid-cols-7 gap-1 text-center mb-2">
+                            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center mb-2">
                                 {weekDays.map(d => (
-                                    <div key={d} className="text-[10px] font-medium text-white/60 uppercase">{d}</div>
+                                    <div key={d} className="text-[9px] sm:text-[10px] font-medium text-white/60 uppercase">{d}</div>
                                 ))}
                             </div>
-                            <div className="grid grid-cols-7 gap-1 text-center">
+                            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center">
                                 {calendarDays.map((date, i) => (
                                     <div key={i} className="aspect-square flex items-center justify-center">
                                         {date && (
                                             <button
                                                 onClick={() => setSelectedDate(date)}
-                                                className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
+                                                className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs font-medium transition-all ${
                                                     date.isSame(selectedDate, 'day')
                                                         ? 'bg-white text-primary font-bold shadow-md'
                                                         : 'hover:bg-white/10 text-white'
@@ -691,6 +705,100 @@ export default function UmkmDashboard() {
                     </div>
                 </div>
             </div>
+            
+            {/* Payment Proof Modal */}
+            {showPaymentProofModal && selectedPaymentProof && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm" onClick={() => setShowPaymentProofModal(false)}>
+                <div className="relative w-full max-w-4xl bg-white rounded-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                    {/* Header */}
+                    <div className="flex items-center justify-between p-4 sm:p-6 border-b border-gray-200">
+                        <div>
+                            <h3 className="text-lg sm:text-xl font-bold text-gray-900">Bukti Pembayaran</h3>
+                            {selectedBookingInfo && (
+                                <p className="mt-1 text-sm text-gray-600">
+                                    Booking #{selectedBookingInfo.id} - {selectedBookingInfo.customer_name}
+                                </p>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setShowPaymentProofModal(false)}
+                            className="p-2 text-gray-400 transition-colors rounded-lg hover:bg-gray-100 hover:text-gray-600"
+                        >
+                            <X className="w-5 h-5" />
+                        </button>
+                    </div>
+
+                    {/* Booking Info */}
+                    {selectedBookingInfo && (
+                        <div className="px-4 py-3 sm:px-6 sm:py-4 bg-gray-50 border-b border-gray-200">
+                            <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+                                <div>
+                                    <p className="text-xs text-gray-500">Layanan</p>
+                                    <p className="font-semibold text-gray-900 text-sm">{selectedBookingInfo.service_name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Total</p>
+                                    <p className="font-semibold text-success text-sm">Rp {Number(selectedBookingInfo.total_price).toLocaleString('id-ID')}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Tanggal</p>
+                                    <p className="font-semibold text-gray-900 text-sm">{selectedBookingInfo.date}</p>
+                                </div>
+                                <div>
+                                    <p className="text-xs text-gray-500">Waktu</p>
+                                    <p className="font-semibold text-gray-900 text-sm">{selectedBookingInfo.time}</p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Image Preview */}
+                    <div className="p-4 sm:p-6 max-h-[60vh] overflow-auto">
+                        <div className="flex items-center justify-center bg-gray-100 rounded-lg">
+                            <img
+                                src={`/storage/${selectedPaymentProof}`}
+                                alt="Bukti Pembayaran"
+                                className="object-contain w-full max-h-[50vh] rounded-lg"
+                                onError={(e) => {
+                                    e.target.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="400" height="300"%3E%3Crect fill="%23f3f4f6" width="400" height="300"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif" font-size="18"%3EGambar tidak dapat dimuat%3C/text%3E%3C/svg%3E';
+                                }}
+                            />
+                        </div>
+                    </div>
+
+                    {/* Footer */}
+                    <div className="flex items-center justify-end gap-3 p-4 sm:p-6 border-t border-gray-200 bg-gray-50 rounded-b-2xl">
+                        <a
+                            href={`/storage/${selectedPaymentProof}`}
+                            download
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            Download
+                        </a>
+                        <a
+                            href={`/storage/${selectedPaymentProof}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-semibold text-white transition-colors rounded-lg bg-primary hover:bg-primary-active"
+                        >
+                            <Eye className="w-4 h-4" />
+                            Buka di Tab Baru
+                        </a>
+                        <button
+                            onClick={() => setShowPaymentProofModal(false)}
+                            className="px-4 py-2 text-sm font-semibold text-gray-700 transition-colors bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                        >
+                            Tutup
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
         </MetronicLayout>
     );
 }

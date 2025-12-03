@@ -319,14 +319,14 @@ export default function FormBuilder() {
       {/* FLOATING SAVE BUTTON */}
       {fields.length > 0 && (
         <button onClick={handleSave}
-          className="fixed z-50 flex items-center gap-3 px-6 py-4 text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-10 right-10 hover:bg-primary-active hover:shadow-xl">
-          <Save className="w-5 h-5" /> SAVE FORM
+          className="fixed z-50 flex items-center gap-2 sm:gap-3 px-4 sm:px-6 py-3 sm:py-4 text-xs sm:text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary bottom-6 sm:bottom-10 right-6 sm:right-10 hover:bg-primary-active hover:shadow-xl">
+          <Save className="w-4 h-4 sm:w-5 sm:h-5" /> <span className="hidden sm:inline">SAVE FORM</span><span className="sm:hidden">SAVE</span>
         </button>
       )}
 
-      <div className="space-y-8">
+      <div className="space-y-4 sm:space-y-6 md:space-y-8">
           {!previewMode && (
-            <div className="grid grid-cols-1 gap-8 lg:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 sm:gap-6 md:gap-8 lg:grid-cols-4">
                 {/* TOOLBOX KIRI */}
                 <div className="space-y-6">
 

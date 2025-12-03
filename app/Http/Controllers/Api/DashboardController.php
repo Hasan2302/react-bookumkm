@@ -106,7 +106,7 @@ class DashboardController extends Controller
 
             $query = DB::table('bookings')
                 ->where('umkm_id', $umkmId)
-                ->select('id', 'customer_name', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
+                ->select('id', 'customer_name', 'customer_phone', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
                 ->latest('created_at');
 
             $diterima = $query->clone()->where('status', 'confirmed')->take(10)->get();
@@ -117,6 +117,7 @@ class DashboardController extends Controller
                 return [
                     'id' => $b->id,
                     'customer_name' => $b->customer_name ?? 'Pelanggan',
+                    'customer_phone' => $b->customer_phone,
                     'service_name' => $b->service_name ?? 'Layanan Booking',
                     'total_price' => $b->total_price ?? 0,
                     'payment_method' => $b->payment_method ?? 'offline',

@@ -5,7 +5,7 @@ import UmkmCard from '@/Components/UmkmCard';
 import BookingModal from '@/Components/BookingModal';
 import usePublicUmkmStore from '@/Stores/usePublicUmkmStore';
 import UmkmDetailModal from '@/Components/UmkmDetailModal';
-import MagneticCursor from '@/Components/MagneticCursor';
+
 import {
     Search, Scissors, Coffee, Wrench, Heart, Store, Calendar,
     TrendingUp, Star, Clock, MapPin, Phone, Shield, Award, Users, Zap,
@@ -24,6 +24,9 @@ export default function Welcome({ canLogin, canRegister, userLocation }) {
     const [locationError, setLocationError] = useState(null);
     const [showLocationDropdown, setShowLocationDropdown] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [showToast, setShowToast] = useState(false);
+    const [toastMessage, setToastMessage] = useState('');
+    const [toastType, setToastType] = useState('success'); // 'success' | 'error' | 'info'
 
     const locationDropdownRef = useRef(null);
     const locationDropdownDesktopRef = useRef(null);
@@ -249,6 +252,18 @@ const handleToggleLocationDropdown = () => {
     setShowLocationDropdown(!showLocationDropdown);
 };
 
+// Toast notification helper
+const showToastNotification = (message, type = 'success') => {
+    setToastMessage(message);
+    setToastType(type);
+    setShowToast(true);
+    
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+        setShowToast(false);
+    }, 4000);
+};
+
 const handleGetLocation = () => {
     if (!navigator.geolocation) {
         setLocationError('Browser tidak mendukung geolocation');
@@ -261,27 +276,120 @@ const handleGetLocation = () => {
     navigator.geolocation.getCurrentPosition(
         async (position) => {
             const { latitude, longitude } = position.coords;
-
-            // LANGSUNG UPDATE STORE TANPA RELOAD HALAMAN!
-            await fetchUmkms({ lat: latitude, lng: longitude, radius: 10 });
-            setMyLocation({ lat: latitude, lng: longitude });
-            setIsLocating(false);
+            
+            try {
+                // LANGSUNG UPDATE STORE TANPA RELOAD HALAMAN!
+                const response = await fetchUmkms({ lat: latitude, lng: longitude, radius: 10 });
+                setMyLocation({ lat: latitude, lng: longitude });
+                setLocationError(null);
+                
+                // Show success toast with UMKM count
+                const umkmCount = filteredUmkms.length;
+                if (umkmCount > 0) {
+                    showToastNotification(`✅ Lokasi berhasil di-set! Ditemukan ${umkmCount} UMKM terdekat`, 'success');
+                } else {
+                    showToastNotification('📍 Lokasi berhasil di-set, tapi tidak ada UMKM dalam radius 10 km', 'info');
+                }
+                
+                // Close dropdown after successful location fetch
+                setShowLocationDropdown(false);
+                
+                // Optional: Scroll to UMKM list to show results
+                setTimeout(() => {
+                    document.getElementById('umkm-list')?.scrollIntoView({ behavior: 'smooth' });
+                }, 300);
+            } catch (err) {
+                console.error('Error fetching UMKMs with location:', err);
+                setLocationError('Gagal memuat UMKM berdasarkan lokasi');
+                showToastNotification('❌ Gagal memuat UMKM berdasarkan lokasi', 'error');
+            } finally {
+                setIsLocating(false);
+            }
         },
         (error) => {
             setIsLocating(false);
-            setLocationError('Gagal mengambil lokasi. Pastikan izin diberikan.');
+            
+            // Better error messages based on error code
+            let errorMessage = 'Gagal mengambil lokasi. ';
+            switch(error.code) {
+                case error.PERMISSION_DENIED:
+                    errorMessage += 'Izin lokasi ditolak. Mohon aktifkan izin lokasi di browser Anda.';
+                    break;
+                case error.POSITION_UNAVAILABLE:
+                    errorMessage += 'Informasi lokasi tidak tersedia.';
+                    break;
+                case error.TIMEOUT:
+                    errorMessage += 'Waktu permintaan habis. Coba lagi.';
+                    break;
+                default:
+                    errorMessage += 'Terjadi kesalahan yang tidak diketahui.';
+            }
+            setLocationError(errorMessage);
+            console.error('Geolocation error:', error);
         },
-        { enableHighAccuracy: true, timeout: 10000 }
+        { 
+            enableHighAccuracy: true, 
+            timeout: 15000,  // Increased timeout to 15 seconds
+            maximumAge: 0  // Don't use cached position
+        }
     );
 };
 
 const handleClearLocation = () => {
-    window.location.href = '/';
+    setMyLocation(null);
+    setLocationError(null);
+    setShowLocationDropdown(false);
+    // Reload all UMKMs without location filter
+    fetchUmkms();
 };
 
 return (
     <PublicLayout canLogin={canLogin} canRegister={canRegister}>
-        <MagneticCursor />
+        
+        {/* Toast Notification */}
+        {showToast && (
+            <div className="fixed top-4 right-4 z-[9999] animate-slide-in-right">
+                <div className={`flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg backdrop-blur-md border ${
+                    toastType === 'success' ? 'bg-emerald-50/95 border-emerald-200 text-emerald-800' :
+                    toastType === 'error' ? 'bg-red-50/95 border-red-200 text-red-800' :
+                    'bg-blue-50/95 border-blue-200 text-blue-800'
+                }`}>
+                    <div className="flex items-center gap-2">
+                        {toastType === 'success' && (
+                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100">
+                                <svg className="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                            </div>
+                        )}
+                        {toastType === 'error' && (
+                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-red-100">
+                                <svg className="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </div>
+                        )}
+                        {toastType === 'info' && (
+                            <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-100">
+                                <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </div>
+                        )}
+                        <p className="text-sm font-medium">{toastMessage}</p>
+                    </div>
+                    <button
+                        onClick={() => setShowToast(false)}
+                        className="ml-2 text-gray-400 hover:text-gray-600 transition-colors"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        )}
+
         {/* Hero Section - Linear Style Light Mode */}
         <section className="relative pt-24 pb-20 overflow-hidden bg-white sm:pt-32 lg:pt-40 sm:pb-28 lg:pb-32">
             {/* Metronic Grid Background */}
@@ -346,7 +454,7 @@ return (
                 {/* Hero Text */}
                 <div className="mb-8 text-center sm:mb-16">
                     {/* Badge - Linear style */}
-                    <div data-magnetic="true" className="relative inline-flex p-[1px] mb-6 overflow-hidden transition-all duration-300 rounded-full group hover:scale-105 hover:shadow-lg">
+                    <div className="relative inline-flex p-[1px] mb-6 overflow-hidden transition-all duration-300 rounded-full group hover:scale-105 hover:shadow-lg">
                         <div className="absolute inset-0 transition-opacity duration-300 bg-gradient-to-r from-brand-500 via-white to-brand-500 animate-gradient-x opacity-100" />
                         <div className="relative inline-flex items-center gap-2 px-4 py-2 bg-white/90 backdrop-blur-md rounded-full">
                             <span className="relative flex w-2.5 h-2.5">
@@ -382,16 +490,20 @@ return (
                         {/* Location Button */}
                         <div ref={locationDropdownRef} className="relative">
                             <button
-                                data-magnetic="true"
+                               
                                 onClick={handleToggleLocationDropdown}
                                 disabled={isLocating}
                                 className={`flex items-center justify-center w-[52px] h-[52px] rounded-full transition-all border-2 ${
                                     myLocation
-                                        ? 'bg-white text-gray-900 border-red-100 shadow-sm'
+                                        ? 'bg-emerald-50 text-emerald-700 border-emerald-200 shadow-sm'
                                         : 'bg-white text-gray-700 border-gray-200 hover:border-gray-300'
-                                } disabled:opacity-50`}
+                                } disabled:opacity-50 disabled:cursor-not-allowed`}
                             >
-                                <MapPin className={`w-5 h-5 ${myLocation ? 'text-red-500' : 'text-gray-500'}`} />
+                                {isLocating ? (
+                                    <div className="w-5 h-5 border-2 border-gray-300 border-t-brand-600 rounded-full animate-spin"></div>
+                                ) : (
+                                    <MapPin className={`w-5 h-5 ${myLocation ? 'text-emerald-600' : 'text-gray-500'}`} />
+                                )}
                             </button>
 
                             {/* Dropdown Menu */}
@@ -446,7 +558,7 @@ return (
                                 className="w-full py-3.5 pl-12 pr-24 text-base font-medium text-gray-900 placeholder-gray-400 transition-all duration-200 bg-white border-2 border-gray-200 rounded-full focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500"
                             />
                             <button
-                                data-magnetic="true"
+                               
                                 onClick={scrollToUmkmList}
                                 className="absolute right-2 top-1/2 -translate-y-1/2 px-4 py-2 text-sm font-semibold text-white transition-all duration-200 bg-brand-600 rounded-full hover:bg-brand-700 active:scale-95"
                             >
@@ -548,7 +660,7 @@ return (
                 <div className="flex flex-wrap items-center justify-between gap-4 mb-8 md:flex-nowrap">
                     {/* Popular Dropdown */}
                     <div className="relative order-1 shrink-0">
-                        <button data-magnetic="true" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
+                        <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
                             <span>Terpopuler</span>
                             <ChevronDown className="w-4 h-4 text-gray-500" />
                         </button>
@@ -558,7 +670,7 @@ return (
                     <div className="order-3 w-full min-w-0 md:order-2 md:w-auto md:flex-1">
                         <div className="flex gap-2 overflow-x-auto pb-2 -mb-2 scrollbar-hide mask-linear-fade md:justify-center">
                             <button
-                                data-magnetic="true"
+                               
                                 onClick={() => {
                                     setSelectedCategory('');
                                     scrollToUmkmList();
@@ -574,7 +686,7 @@ return (
                             {CATEGORIES.map((category) => (
                                 <button
                                     key={category.id}
-                                    data-magnetic="true"
+                                   
                                     onClick={() => {
                                         setSelectedCategory(category.id);
                                         scrollToUmkmList();
@@ -593,7 +705,7 @@ return (
 
                     {/* Filter Button */}
                     <div className="order-2 shrink-0 md:order-3">
-                        <button data-magnetic="true" className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
+                        <button className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-full hover:border-gray-300 transition-colors">
                             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                 <line x1="4" y1="21" x2="4" y2="14"></line>
                                 <line x1="4" y1="10" x2="4" y2="3"></line>
@@ -644,34 +756,34 @@ return (
             </section>
 
         {/* Features Section - Linear Style */}
-        <section id="keunggulan" className="relative py-16 overflow-hidden border-t sm:py-20 bg-gray-50 border-gray-100">
-            <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
+        <section id="keunggulan" className="relative py-8 sm:py-12 md:py-16 lg:py-20 overflow-hidden border-t bg-gray-50 border-gray-100">
+            <div className="relative px-3 sm:px-4 mx-auto max-w-7xl lg:px-8">
                 {/* Header */}
-                <div className="mb-12 text-center sm:mb-16">
-                    <h2 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl">
+                <div className="mb-6 sm:mb-10 md:mb-12 lg:mb-16 text-center">
+                    <h2 className="mb-2 sm:mb-3 md:mb-4 text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900">
                         Kenapa Pilih Book UMKM?
                     </h2>
-                    <p className="max-w-2xl mx-auto text-base text-gray-600 sm:text-lg">
+                    <p className="max-w-2xl mx-auto text-sm sm:text-base md:text-lg text-gray-600">
                         Solusi booking terlengkap untuk kemudahan Anda
                     </p>
                 </div>
 
-                {/* Features Grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Features Grid - 2 columns on mobile, 4 on desktop */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-5 lg:gap-6 md:grid-cols-2 lg:grid-cols-4">
                     {FEATURES.map((item, idx) => (
                         <div
                             key={idx}
-                            className="p-6 transition-all duration-200 bg-white group rounded-xl shadow-linear hover:shadow-linear-md hover:scale-[1.02]"
+                            className="p-3 sm:p-4 md:p-5 lg:p-6 transition-all duration-200 bg-white group rounded-lg sm:rounded-xl shadow-linear hover:shadow-linear-md hover:scale-[1.02]"
                         >
                             {/* Icon */}
-                            <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-brand-50">
-                                <item.icon className="w-6 h-6 text-brand-600" />
+                            <div className="inline-flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 mb-2 sm:mb-3 md:mb-4 rounded-lg bg-brand-50">
+                                <item.icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-brand-600" />
                             </div>
 
-                            <h3 className="mb-2 text-lg font-bold text-gray-900">
+                            <h3 className="mb-1 sm:mb-1.5 md:mb-2 text-sm sm:text-base md:text-lg font-bold text-gray-900">
                                 {item.title}
                             </h3>
-                            <p className="text-sm leading-relaxed text-gray-600">
+                            <p className="text-xs sm:text-sm leading-relaxed text-gray-600">
                                 {item.description}
                             </p>
                         </div>
@@ -680,111 +792,166 @@ return (
             </div>
         </section>
 
-        {/* CTA Section - Linear Purple */}
-        <section id="cara-kerja" className="relative py-20 overflow-hidden border-t sm:py-24 lg:py-32 bg-gradient-primary border-gray-100">
+        {/* CTA Section - Modern Dark Premium Style */}
+        <section id="cara-kerja" className="relative py-24 overflow-hidden bg-gray-900 sm:py-32 isolate">
+            {/* Background Effects */}
+            <div className="absolute inset-0 -z-10">
+                {/* Dark Gradient Base */}
+                <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-900 to-brand-950"></div>
+                
+                {/* Animated Mesh Gradients */}
+                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-[800px] h-[800px] bg-brand-500/30 rounded-full blur-3xl opacity-50 animate-pulse"></div>
+                <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-[600px] h-[600px] bg-blue-600/20 rounded-full blur-3xl opacity-50"></div>
+                
+                {/* Grid Pattern Overlay */}
+                <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-soft-light"></div>
+                <div className="absolute inset-0 bg-[size:40px_40px] bg-[linear-gradient(to_right,rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.05)_1px,transparent_1px)] [mask-image:radial-gradient(ellipse_at_center,black_60%,transparent_100%)]"></div>
+            </div>
+
             <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
-                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
-                    {/* Left: Content */}
-                    <div className="text-center lg:text-left">
-                        <h2 className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-                            Punya UMKM?
-                            <br />
-                            Bergabung Sekarang!
+                <div className="grid items-center gap-16 lg:grid-cols-2 lg:gap-24">
+                    {/* Left Content */}
+                    <div className="max-w-2xl text-center lg:text-left">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-8 text-sm font-medium text-brand-300 border border-brand-500/30 bg-brand-500/10 rounded-full backdrop-blur-sm shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                            <Sparkles className="w-4 h-4 animate-pulse" />
+                            <span>Revolusi Bisnis UMKM Anda</span>
+                        </div>
+
+                        <h2 className="mb-6 text-4xl font-bold tracking-tight text-white sm:text-5xl lg:text-6xl">
+                            Tingkatkan Omset <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-300 via-white to-brand-300 animate-gradient-x">
+                                Tanpa Batas
+                            </span>
                         </h2>
 
-                        <p className="max-w-xl mx-auto mb-8 text-lg leading-relaxed lg:mx-0 text-white/90">
-                            Tingkatkan bisnis dengan sistem booking online modern. Kelola reservasi dan pelanggan dengan mudah.
+                        <p className="mb-10 text-lg leading-relaxed text-gray-300 lg:text-xl">
+                            Platform all-in-one untuk mengelola booking, pelanggan, dan pembayaran. 
+                            Bergabunglah dengan 10.000+ UMKM yang telah go digital.
                         </p>
 
-                        {/* Benefits List */}
-                        <div className="grid grid-cols-1 gap-3 mb-8 sm:grid-cols-2">
+                        {/* Glass Cards Benefits */}
+                        <div className="grid grid-cols-1 gap-4 mb-10 sm:grid-cols-2">
                             {CTA_BENEFITS.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg bg-white/10 border-white/20">
-                                    <item.icon className="w-5 h-5 text-white" />
-                                    <span className="text-sm font-medium text-white">{item.text}</span>
+                                <div key={idx} className="group flex items-center gap-4 p-4 transition-all duration-300 border border-white/10 rounded-2xl bg-white/5 hover:bg-white/10 hover:border-brand-500/50 hover:shadow-[0_0_20px_rgba(16,185,129,0.15)] backdrop-blur-sm">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-brand-500 to-brand-600 text-white shadow-lg group-hover:scale-110 transition-transform">
+                                        <item.icon className="w-5 h-5" />
+                                    </div>
+                                    <span className="font-medium text-white group-hover:text-brand-200 transition-colors">{item.text}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* CTA Button */}
-                        <Link
-                            to="/register-umkm"
-                            data-magnetic="true"
-                            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold transition-all duration-200 bg-white rounded-lg text-brand-700 hover:bg-gray-100 shadow-linear-lg active:scale-95 group"
-                        >
-                            <span>Daftar Gratis</span>
-                            <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                        </Link>
-
-                        <p className="mt-4 text-sm text-white/70">
-                            ✨ Tanpa biaya • Tanpa kartu kredit
-                        </p>
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col items-center gap-6 sm:flex-row lg:justify-start">
+                            <Link
+                                to="/register-umkm"
+                                className="relative inline-flex items-center justify-center w-full sm:w-auto px-8 py-4 text-base font-bold text-white transition-all duration-300 bg-brand-600 rounded-xl hover:bg-brand-500 shadow-[0_0_20px_rgba(16,185,129,0.4)] hover:shadow-[0_0_30px_rgba(16,185,129,0.6)] hover:-translate-y-1 overflow-hidden group"
+                            >
+                                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-shimmer"></div>
+                                <span>Mulai Gratis Sekarang</span>
+                                <ChevronRight className="w-5 h-5 ml-2 transition-transform group-hover:translate-x-1" />
+                            </Link>
+                            
+                            <div className="flex items-center gap-4 text-sm text-gray-400">
+                                <div className="flex -space-x-2">
+                                    {[1,2,3].map(i => (
+                                        <div key={i} className="w-8 h-8 border-2 border-gray-900 rounded-full bg-gray-700"></div>
+                                    ))}
+                                </div>
+                                <span>Gabung 500+ Partner</span>
+                            </div>
                         </div>
+                    </div>
 
-                        {/* Right: Visual/Stats */}
-                        <div className="hidden lg:block">
-                            <div className="relative">
-                                {/* Main Card */}
-                                <div className="relative p-6 border shadow-2xl lg:p-8 bg-white/10 backdrop-blur-xl border-white/20 rounded-3xl">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
+                    {/* Right Visual - Floating Glass Dashboard */}
+                    <div className="relative hidden lg:block perspective-1000">
+                        <div className="relative transform rotate-y-[-12deg] rotate-x-[5deg] transition-transform duration-500 hover:rotate-0">
+                            {/* Glow Behind */}
+                            <div className="absolute inset-0 bg-brand-500/20 blur-[100px] -z-10"></div>
 
-                                    <div className="relative space-y-6">
-                                        {/* Mock Dashboard Preview */}
-                                        <div className="flex items-center gap-4 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-brand-600">
-                                                <Store className="w-6 h-6 text-white" />
+                            {/* Main Glass Card */}
+                            <div className="relative p-6 border border-white/20 rounded-3xl bg-gray-900/60 backdrop-blur-xl shadow-2xl">
+                                {/* Header */}
+                                <div className="flex items-center justify-between mb-8">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    </div>
+                                    <div className="px-3 py-1 text-xs font-medium text-brand-300 bg-brand-500/20 rounded-full border border-brand-500/30">
+                                        Live Dashboard
+                                    </div>
+                                </div>
+
+                                {/* Content Grid */}
+                                <div className="grid grid-cols-2 gap-4 mb-6">
+                                    {/* Stat Card 1 */}
+                                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="p-2 rounded-lg bg-blue-500/20 text-blue-400">
+                                                <Users className="w-4 h-4" />
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="text-sm font-semibold text-white">Dashboard UMKM</div>
-                                                <div className="text-xs text-blue-200">Kelola bisnis Anda</div>
+                                            <span className="text-sm text-gray-400">Total Booking</span>
+                                        </div>
+                                        <div className="text-2xl font-bold text-white">1,248</div>
+                                        <div className="text-xs text-green-400 flex items-center gap-1 mt-1">
+                                            <TrendingUp className="w-3 h-3" /> +12.5%
+                                        </div>
+                                    </div>
+
+                                    {/* Stat Card 2 */}
+                                    <div className="p-4 rounded-2xl bg-white/5 border border-white/10">
+                                        <div className="flex items-center gap-3 mb-2">
+                                            <div className="p-2 rounded-lg bg-brand-500/20 text-brand-400">
+                                                <Award className="w-4 h-4" />
                                             </div>
+                                            <span className="text-sm text-gray-400">Revenue</span>
                                         </div>
-
-                                        {/* Stats Grid */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {[
-                                                { label: 'Booking Hari Ini', value: '24', icon: Calendar },
-                                                { label: 'Total Revenue', value: '5.2M', icon: TrendingUp },
-                                                { label: 'Pelanggan Aktif', value: '156', icon: Users },
-                                                { label: 'Rating', value: '4.9', icon: Star }
-                                            ].map((stat, idx) => (
-                                                <div key={idx} className="p-4 border bg-white/20 backdrop-blur-sm rounded-xl border-white/30">
-                                                    <stat.icon className="w-5 h-5 mb-2 text-blue-200" />
-                                                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                                                    <div className="text-xs text-blue-200">{stat.label}</div>
-                                                </div>
-                                            ))}
-                                        </div>
-
-                                        {/* Feature Highlights */}
-                                        <div className="space-y-3">
-                                            {[
-                                                'Form booking kustom',
-                                                'Notifikasi WhatsApp otomatis',
-                                                'Laporan analitik lengkap'
-                                            ].map((feature, idx) => (
-                                                <div key={idx} className="flex items-center gap-3 text-sm text-white">
-                                                    <div className="flex items-center justify-center flex-shrink-0 w-5 h-5 bg-green-400 rounded-full">
-                                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </div>
-                                                    <span>{feature}</span>
-                                                </div>
-                                            ))}
+                                        <div className="text-2xl font-bold text-white">Rp 45.2jt</div>
+                                        <div className="text-xs text-green-400 flex items-center gap-1 mt-1">
+                                            <TrendingUp className="w-3 h-3" /> +8.2%
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Floating Badge */}
-                                <div className="absolute px-4 py-2 rounded-full shadow-xl -top-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500">
-                                    <span className="text-sm font-bold text-white">🚀 Gratis!</span>
+                                {/* Chart Placeholder */}
+                                <div className="p-4 rounded-2xl bg-white/5 border border-white/10 h-32 flex items-end justify-between gap-2">
+                                    {[40, 65, 45, 80, 55, 90, 70].map((h, i) => (
+                                        <div key={i} className="w-full bg-gradient-to-t from-brand-600/50 to-brand-400/50 rounded-t-sm hover:bg-brand-500 transition-colors" style={{ height: `${h}%` }}></div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            {/* Floating Elements */}
+                            <div className="absolute -right-10 top-20 p-4 rounded-2xl bg-gray-800/80 backdrop-blur-md border border-white/10 shadow-xl animate-float">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center text-white">
+                                        <Calendar className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-bold text-white">Booking Baru!</div>
+                                        <div className="text-xs text-gray-400">Baru saja</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="absolute -left-8 bottom-20 p-4 rounded-2xl bg-gray-800/80 backdrop-blur-md border border-white/10 shadow-xl animate-float-slow">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-white">
+                                        <Star className="w-5 h-5 fill-current" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-bold text-white">Ulasan Bintang 5</div>
+                                        <div className="text-xs text-gray-400">Dari Budi Santoso</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
+
 
         {/* Detail Modal */}
         {showDetailModal && selectedUmkm && (

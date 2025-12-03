@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Link } from "@inertiajs/react";
+import { Link } from "react-router-dom";
 import {
     Menu,
     X,
@@ -38,7 +38,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                 <div className="px-6 mx-auto max-w-7xl lg:px-8">
                     <div className="flex items-center justify-between h-12">
                         {/* Logo - Minimalist */}
-                        <Link href="/" className="group">
+                        <Link to="/" className="group">
                             <span className="text-xl font-bold tracking-tighter text-gray-900 transition-colors duration-300 group-hover:text-brand-600">
                                 BookUMKM
                             </span>
@@ -49,7 +49,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             {['UMKM', 'Keunggulan', 'Cara Kerja'].map((item) => (
                                 <a
                                     key={item}
-                                    href={`#${item.toLowerCase().replace(' ', '-')}`}
+                                    to={`#${item.toLowerCase().replace(' ', '-')}`}
                                     onClick={(e) => {
                                         e.preventDefault();
                                         const id = item.toLowerCase().replace(' ', '-');
@@ -66,14 +66,14 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                         {/* Right Menu - Modern Actions */}
                         <div className="items-center hidden gap-4 md:flex">
                             <Link
-                                href="/login"
+                                to="/login"
                                 className="px-5 py-2 text-sm font-medium text-gray-700 transition-all duration-200 border-2 border-gray-200 rounded-full hover:border-gray-300 hover:bg-gray-50 hover:text-gray-900"
                             >
                                 Log in
                             </Link>
                             {canRegister && (
                                 <Link
-                                    href="/register"
+                                    to="/register-umkm"
                                     className="px-6 py-2.5 text-sm font-medium text-white transition-all duration-300 bg-brand-600 rounded-full hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 active:scale-95"
                                 >
                                     Daftar Sekarang
@@ -102,7 +102,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             {['UMKM', 'Keunggulan', 'Cara Kerja'].map((item) => (
                                 <a
                                     key={item}
-                                    href={`#${item.toLowerCase().replace(' ', '-')}`}
+                                    to={`#${item.toLowerCase().replace(' ', '-')}`}
                                     onClick={(e) => {
                                         e.preventDefault();
                                         const id = item.toLowerCase().replace(' ', '-');
@@ -118,14 +118,14 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
 
                             <div className="pt-4 mt-2 space-y-2 border-t border-gray-100">
                                 <Link
-                                    href="/login"
+                                    to="/login"
                                     className="block px-4 py-3 text-sm font-medium text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-50 hover:text-gray-900"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
                                     Log in
                                 </Link>
                                 <Link
-                                    href="/register"
+                                    to="/register-umkm"
                                     className="block w-full px-4 py-3 text-sm font-medium text-center text-white transition-all duration-300 bg-brand-600 rounded-full hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 active:scale-95"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
@@ -160,21 +160,21 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             {/* Social Media - Minimalist */}
                             <div className="flex gap-3">
                                 <a
-                                    href="#"
+                                    to="#"
                                     className="flex items-center justify-center text-gray-600 transition bg-white border border-gray-200 rounded-lg w-9 h-9 sm:w-10 sm:h-10 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                                     aria-label="Facebook"
                                 >
                                     <Facebook className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </a>
                                 <a
-                                    href="#"
+                                    to="#"
                                     className="flex items-center justify-center text-gray-600 transition bg-white border border-gray-200 rounded-lg w-9 h-9 sm:w-10 sm:h-10 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                                     aria-label="Instagram"
                                 >
                                     <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
                                 </a>
                                 <a
-                                    href="#"
+                                    to="#"
                                     className="flex items-center justify-center text-gray-600 transition bg-white border border-gray-200 rounded-lg w-9 h-9 sm:w-10 sm:h-10 hover:bg-brand-50 hover:text-brand-600 hover:border-brand-200"
                                     aria-label="Twitter"
                                 >
@@ -191,7 +191,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             <ul className="space-y-2.5">
                                 <li>
                                     <Link
-                                        href="/"
+                                        to="/"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Cari UMKM
@@ -199,7 +199,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="/#umkm-list"
+                                        to="/#umkm-list"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Kategori
@@ -207,7 +207,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="/login"
+                                        to="/login"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Login
@@ -215,7 +215,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="#"
+                                        to="#"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Bantuan
@@ -232,7 +232,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                             <ul className="space-y-2.5">
                                 <li>
                                     <Link
-                                        href="/register"
+                                        to="/register-umkm"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Daftar UMKM
@@ -240,7 +240,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="/login"
+                                        to="/login"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Login Dashboard
@@ -248,7 +248,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="#"
+                                        to="#"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Fitur & Harga
@@ -256,7 +256,7 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </li>
                                 <li>
                                     <Link
-                                        href="#"
+                                        to="#"
                                         className="text-sm text-gray-600 transition hover:text-brand-600"
                                     >
                                         Tutorial
@@ -274,14 +274,14 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                         </p>
                         <div className="flex flex-wrap items-center justify-center gap-4 text-xs sm:gap-6 sm:text-sm">
                             <Link
-                                href="#"
+                                to="#"
                                 className="text-gray-500 transition hover:text-gray-900"
                             >
                                 Syarat & Ketentuan
                             </Link>
                             <span className="text-gray-300">•</span>
                             <Link
-                                href="#"
+                                to="#"
                                 className="text-gray-500 transition hover:text-gray-900"
                             >
                                 Kebijakan Privasi
