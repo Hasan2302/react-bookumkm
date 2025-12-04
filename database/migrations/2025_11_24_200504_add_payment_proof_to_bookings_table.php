@@ -6,19 +6,17 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
+   public function up(): void
     {
         Schema::table('bookings', function (Blueprint $table) {
-            $table->string('payment_proof')->nullable()->after('total_price'); // Path ke bukti transfer
-            $table->string('payment_method')->nullable()->change(); // Biar bisa null kalau offline
-            $table->decimal('total_price', 15, 2)->default(0)->change(); // Biar lebih akurat
-        });
-    }
+            // Cek dulu: hanya buat kolom jika belum ada
+            if (!Schema::hasColumn('bookings', 'payment_proof')) {
+                $table->string('payment_proof')->nullable()->after('total_price');
+            }
 
-    public function down(): void
-    {
-        Schema::table('bookings', function (Blueprint $table) {
-            $table->dropColumn('payment_proof');
+            // Modifikasi kolom yang sudah ada (tetap jalankan ini)
+            $table->string('payment_method')->nullable()->change();
+            $table->decimal('total_price', 15, 2)->default(0)->change();
         });
-    }
+    } 
 };
