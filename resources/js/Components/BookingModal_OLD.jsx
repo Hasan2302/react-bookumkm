@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { router } from '@inertiajs/react';
-import { 
-    X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User, 
+import {
+    X, ChevronLeft, ChevronRight, Calendar as CalendarIcon, Clock, User,
     Loader2, CheckCircle, FileText, CreditCard, Upload, QrCode, Building2, Wallet,
     Check, AlertCircle
 } from 'lucide-react';
@@ -30,7 +30,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
         if (isOpen && umkm) {
             setLoadingFields(true);
             axios
-                .get(`http://127.0.0.1:8000/api/umkms/${umkm.id}/form-fields`)
+                .get(`https://kelompokfwd4-sibm3.karyakreasi.id'api/umkms/${umkm.id}/form-fields`)
                 .then((res) => {
                     const fields = res.data.data || [];
                     setFormFields(fields);
@@ -56,13 +56,13 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             alert('Pilih tanggal terlebih dahulu!');
             return;
         }
-        
+
         // Step 2: Pilih Jam
         if (step === 2 && !selectedTime) {
             alert('Pilih jam terlebih dahulu!');
             return;
         }
-        
+
         // Step 3: Validasi Form Customer
         if (step === 3) {
             const requiredFields = formFields.filter(f => f.required);
@@ -72,13 +72,13 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                 return;
             }
         }
-        
+
         // Step 4: Pilih Metode Pembayaran
         if (step === 4 && !paymentMethod) {
             alert('Pilih metode pembayaran terlebih dahulu!');
             return;
         }
-        
+
         // Step 5: Upload Bukti Pembayaran & Submit
         if (step === 5) {
             if (!paymentProof) {
@@ -88,7 +88,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             handleSubmit();
             return;
         }
-        
+
         setStep((prev) => prev + 1);
     };
 
@@ -114,12 +114,12 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             formData.append('time', selectedTime);
             formData.append('customer_data', JSON.stringify(customerData));
             formData.append('payment_method', paymentMethod);
-            
+
             if (paymentProof) {
                 formData.append('payment_proof', paymentProof);
             }
 
-            const response = await axios.post('http://127.0.0.1:8000/api/bookings', formData, {
+            const response = await axios.post('https://kelompokfwd4-sibm3.karyakreasi.id'api/bookings', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
@@ -155,7 +155,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-md">
-            <div className="relative w-full max-w-4xl overflow-hidden shadow-glass-xl rounded-3xl bg-white/90 backdrop-blur-2xl border border-white/20 animate-fade-in">
+            <div className="relative w-full max-w-4xl overflow-hidden border shadow-glass-xl rounded-3xl bg-white/90 backdrop-blur-2xl border-white/20 animate-fade-in">
                 <div className="absolute inset-0 bg-gradient-glass opacity-30" />
                 {/* Header */}
                 <div className="relative flex items-center justify-between p-6 border-b bg-gradient-to-r from-primary-50/80 to-blue-50/80 backdrop-blur-xl border-white/20">
@@ -189,7 +189,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                                 {i === 1 && <CalendarIcon className="w-5 h-5" />}
                                 {i === 2 && <Clock className="w-5 h-5" />}
                                 {i === 3 && <User className="w-5 h-5" />}
-                                
+
                                 {step > i && (
                                     <div className="absolute inset-0 flex items-center justify-center">
                                         <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -236,7 +236,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                                         setSelectedDate(newDate);
                                     }}
                                     min={formatDate(new Date())}
-                                    className="w-full px-4 py-4 text-lg font-semibold transition-all duration-300 border-2 shadow-glass bg-white/80 backdrop-blur-sm border-gray-200 rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 focus:bg-white focus:shadow-glass-lg hover:bg-white hover:border-primary-300"
+                                    className="w-full px-4 py-4 text-lg font-semibold transition-all duration-300 border-2 border-gray-200 shadow-glass bg-white/80 backdrop-blur-sm rounded-xl focus:ring-4 focus:ring-primary-200 focus:border-primary-500 focus:bg-white focus:shadow-glass-lg hover:bg-white hover:border-primary-300"
                                 />
                                 {selectedDate && (
                                     <div className="p-4 mt-4 border-2 border-dashed rounded-xl bg-primary-50/50 border-primary-300">
@@ -295,10 +295,10 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                                     </button>
                                 ))}
                             </div>
-                            
+
                             {/* Helpful message */}
                             {!selectedTime && (
-                                <div className="p-4 text-center border-2 border-dashed rounded-xl bg-blue-50/50 border-blue-300">
+                                <div className="p-4 text-center border-2 border-blue-300 border-dashed rounded-xl bg-blue-50/50">
                                     <p className="text-sm text-blue-700">
                                         💡 <strong>Tip:</strong> Klik salah satu jam di atas untuk melanjutkan
                                     </p>

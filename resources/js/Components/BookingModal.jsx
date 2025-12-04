@@ -68,7 +68,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
         if (isOpen && umkm) {
             setLoadingFields(true);
             axios
-                .get(`http://127.0.0.1:8000/api/umkms/${umkm.id}/form-fields`)
+                .get(`https://kelompokfwd4-sibm3.karyakreasi.id'api/umkms/${umkm.id}/form-fields`)
                 .then((res) => {
                     const fields = res.data.data || [];
                     setFormFields(fields);
@@ -87,7 +87,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             setBookedTimes([]);
             setSelectedTime('');
 
-            axios.get(`http://127.0.0.1:8000/api/umkms/${umkm.id}/booked-times`, {
+            axios.get(`https://kelompokfwd4-sibm3.karyakreasi.id'api/umkms/${umkm.id}/booked-times`, {
                 params: {
                     date: formatDate(selectedDate)
                 }
