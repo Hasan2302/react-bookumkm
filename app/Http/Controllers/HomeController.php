@@ -11,7 +11,7 @@ class HomeController extends Controller
 {
     public function index()
     {
-        $umkms = UMKM::where('status', 'active')
+        $umkms = Umkm::where('status', 'active')
         ->with('formFields')
         ->get()
         ->map(function ($umkm) {

@@ -12,8 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        // Modify ENUM to include 'rejected', 'served', 'no_show'
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'confirmed', 'cancelled', 'rejected', 'served', 'no_show') DEFAULT 'pending'");
+        // Ubah ke VARCHAR seperti di DB, untuk fleksibilitas (bisa add value baru tanpa alter)
+        DB::statement("ALTER TABLE bookings MODIFY COLUMN status VARCHAR(20) DEFAULT 'pending'");
     }
 
     /**
@@ -21,7 +21,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // Revert to original ENUM (Warning: this might fail if data exists with new statuses)
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN status ENUM('pending', 'confirmed', 'cancelled') DEFAULT 'pending'");
+        // Revert to VARCHAR jika perlu, atau adjust sesuai kebutuhan
+        DB::statement("ALTER TABLE bookings MODIFY COLUMN status VARCHAR(20) DEFAULT 'pending'");
     }
 };

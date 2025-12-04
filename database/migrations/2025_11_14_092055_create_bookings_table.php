@@ -14,27 +14,28 @@ return new class extends Migration
         Schema::create('bookings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('umkm_id')->constrained('umkms')->onDelete('cascade');
-            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
-            
+            $table->foreignId('user_id')->nullable()->constrained('users')->onDelete('set null');
+
             // Customer Info
             $table->string('customer_name')->nullable();
-            $table->string('customer_phone')->nullable();
-            $table->string('customer_email')->nullable();
+            $table->string('customer_phone', 20)->nullable();
 
             // Service Info
             $table->string('service_name')->nullable();
-            $table->decimal('service_price', 15, 2)->default(0);
 
             $table->date('date');
             $table->time('time');
-            
+
             // Transaction
-            $table->decimal('total_price', 15, 2)->default(0);
-            $table->enum('payment_method', ['online', 'cod', 'qris', 'transfer']);
+            $table->decimal('total_price', 15, 2)->default(0.00);
+            $table->string('payment_method')->nullable();
             $table->string('payment_proof')->nullable();
-            
-            $table->enum('status', ['pending', 'confirmed', 'cancelled'])->default('pending');
+
+            $table->string('status', 20)->default('pending');
             $table->timestamps();
+            $table->dateTime('served_at')->nullable();
+            $table->boolean('reminded')->default(0);
+            $table->json('customer_data')->nullable();
         });
     }
 

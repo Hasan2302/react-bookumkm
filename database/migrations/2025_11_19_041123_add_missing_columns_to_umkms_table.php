@@ -22,16 +22,14 @@ return new class extends Migration
             if (!Schema::hasColumn('umkms', 'category')) {
                 $table->string('category')->nullable()->after('address');
             }
-            if (!Schema::hasColumn('umkms', 'status')) {
-                $table->enum('status', ['active', 'inactive', 'pending'])->default('pending')->after('slug');
-            }
+            // Hapus add status, pindah ke add_complete untuk match order setelah slug
         });
     }
 
     public function down()
     {
         Schema::table('umkms', function (Blueprint $table) {
-            $table->dropColumn(['user_id', 'phone', 'address', 'category', 'status']);
+            $table->dropColumn(['user_id', 'phone', 'address', 'category']);
         });
     }
 };

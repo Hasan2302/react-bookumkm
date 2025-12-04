@@ -13,6 +13,7 @@ return new class extends Migration
     {
         Schema::create('umkms', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->string('name');
             $table->string('subdomain')->unique();
             $table->enum('status', ['active', 'suspended'])->default('active');

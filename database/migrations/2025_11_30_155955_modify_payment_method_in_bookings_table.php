@@ -12,7 +12,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_method ENUM('online', 'cod', 'qris', 'transfer', 'offline', 'cash', 'ewallet') NOT NULL");
+        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_method VARCHAR(255) DEFAULT NULL");
     }
 
     /**
@@ -20,7 +20,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        // We keep the new values in down() to prevent data truncation during rollback if data exists
-        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_method ENUM('online', 'cod', 'qris', 'transfer', 'offline', 'cash', 'ewallet') NOT NULL");
+        DB::statement("ALTER TABLE bookings MODIFY COLUMN payment_method VARCHAR(255) DEFAULT NULL");
     }
 };

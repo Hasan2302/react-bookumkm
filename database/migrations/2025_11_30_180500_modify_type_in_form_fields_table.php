@@ -12,7 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::statement("ALTER TABLE form_fields MODIFY COLUMN type ENUM('text', 'email', 'phone', 'select', 'radio', 'checkbox', 'textarea', 'number', 'date', 'time')");
+        // Comment atau skip jika tidak ingin add (match DB sekarang)
+        // DB::statement("ALTER TABLE form_fields MODIFY COLUMN type ENUM('text', 'email', 'phone', 'select', 'radio', 'checkbox', 'textarea', 'number', 'date', 'time')");
     }
 
     /**

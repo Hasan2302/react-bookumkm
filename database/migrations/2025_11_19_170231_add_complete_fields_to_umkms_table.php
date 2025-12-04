@@ -9,7 +9,7 @@ return new class extends Migration
     public function up()
     {
         Schema::table('umkms', function (Blueprint $table) {
-            // Pastikan kolom-kolom ini BELUM ADA
+            // Pastikan kolom-kolom ini BELUM ADA, baru tambah
             if (!Schema::hasColumn('umkms', 'logo')) {
                 $table->string('logo')->nullable()->after('category');
             }
@@ -26,11 +26,15 @@ return new class extends Migration
                 $table->string('banner')->nullable()->after('opening_hours');
             }
             // Pastikan slug & subdomain ada
+            if (!Schema::hasColumn('umkms', 'subdomain')) {
+                $table->string('subdomain')->unique()->after('category');
+            }
             if (!Schema::hasColumn('umkms', 'slug')) {
                 $table->string('slug')->unique()->after('subdomain');
             }
-            if (!Schema::hasColumn('umkms', 'subdomain')) {
-                $table->string('subdomain')->unique()->after('category');
+            // Tambah status di sini untuk match order setelah slug
+            if (!Schema::hasColumn('umkms', 'status')) {
+                $table->enum('status', ['active', 'suspended'])->default('active')->after('slug');
             }
         });
     }
@@ -38,7 +42,7 @@ return new class extends Migration
     public function down()
     {
         Schema::table('umkms', function (Blueprint $table) {
-            $table->dropColumn(['logo', 'description', 'services', 'opening_hours', 'banner', 'slug', 'subdomain']);
+            $table->dropColumn(['logo', 'description', 'services', 'opening_hours', 'banner', 'slug', 'subdomain', 'status']);
         });
     }
 };
