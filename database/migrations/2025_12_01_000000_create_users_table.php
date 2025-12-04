@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
-            $table->foreignId('umkm_id')->nullable()->constrained('umkms')->onDelete('set null');
+            $table->unsignedBigInteger('umkm_id')->nullable();
         });
     }
 
