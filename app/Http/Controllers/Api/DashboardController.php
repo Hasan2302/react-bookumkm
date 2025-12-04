@@ -106,18 +106,45 @@ class DashboardController extends Controller
 
             $query = DB::table('bookings')
                 ->where('umkm_id', $umkmId)
-                ->select('id', 'customer_name', 'customer_phone', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
+                ->select('id', 'customer_name', 'customer_phone', 'customer_data', 'service_name', 'date', 'time', 'status', 'total_price', 'payment_method', 'payment_proof')
                 ->latest('created_at');
 
             $diterima = $query->clone()->where('status', 'confirmed')->take(10)->get();
             $pending = $query->clone()->where('status', 'pending')->take(10)->get();
             $cancelled = $query->clone()->whereIn('status', ['cancelled', 'rejected', 'no_show'])->take(10)->get();
 
-            $format = function($b) {
+            // Helper function untuk extract phone number dengan fallback ke customer_data
+            $getPhoneNumber = function($booking) {
+                // Prioritas: gunakan customer_phone jika ada
+                if (!empty($booking->customer_phone)) {
+                    return $booking->customer_phone;
+                }
+                
+                // Fallback: cari di customer_data JSON
+                if (!empty($booking->customer_data)) {
+                    $customerData = is_string($booking->customer_data) 
+                        ? json_decode($booking->customer_data, true) 
+                        : $booking->customer_data;
+                        
+                    if (is_array($customerData)) {
+                        // Coba beberapa kemungkinan key
+                        $possibleKeys = ['No. WhatsApp', 'WhatsApp', 'Nomor HP', 'No HP', 'Phone', 'Telepon'];
+                        foreach ($possibleKeys as $key) {
+                            if (!empty($customerData[$key])) {
+                                return $customerData[$key];
+                            }
+                        }
+                    }
+                }
+                
+                return null; // Return null jika tidak ada nomor
+            };
+
+            $format = function($b) use ($getPhoneNumber) {
                 return [
                     'id' => $b->id,
                     'customer_name' => $b->customer_name ?? 'Pelanggan',
-                    'customer_phone' => $b->customer_phone,
+                    'customer_phone' => $getPhoneNumber($b),
                     'service_name' => $b->service_name ?? 'Layanan Booking',
                     'total_price' => $b->total_price ?? 0,
                     'payment_method' => $b->payment_method ?? 'offline',
