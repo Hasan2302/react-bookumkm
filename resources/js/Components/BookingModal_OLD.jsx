@@ -30,7 +30,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
         if (isOpen && umkm) {
             setLoadingFields(true);
             axios
-                .get(`https://kelompokfwd4-sibm3.karyakreasi.id'api/umkms/${umkm.id}/form-fields`)
+                .get(`https://kelompokfwd4-sibm3.karyakreasi.idapi/umkms/${umkm.id}/form-fields`)
                 .then((res) => {
                     const fields = res.data.data || [];
                     setFormFields(fields);
@@ -119,7 +119,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                 formData.append('payment_proof', paymentProof);
             }
 
-            const response = await axios.post('https://kelompokfwd4-sibm3.karyakreasi.id'api/bookings', formData, {
+            const response = await axios.post('https://kelompokfwd4-sibm3.karyakreasi.idapi/bookings', formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
