@@ -23,7 +23,7 @@ export default function Login() {
             // Ensure email is set for superadmin
             const payload = {
                 ...form,
-                email: form.role === 'superadmin' ? 'admin@gmail.com' : form.email
+                email: form.role === 'superadmin' ? 'admin@example.com' : form.email
             };
 
             const response = await api.post('/login', payload);
