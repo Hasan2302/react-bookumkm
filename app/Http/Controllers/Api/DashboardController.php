@@ -128,7 +128,7 @@ class DashboardController extends Controller
                         
                     if (is_array($customerData)) {
                         // Coba beberapa kemungkinan key
-                        $possibleKeys = ['No. WhatsApp', 'WhatsApp', 'Nomor HP', 'No HP', 'Phone', 'Telepon'];
+                        $possibleKeys = ['No WhatsApp', 'No. WhatsApp', 'WhatsApp', 'Nomor HP', 'No HP', 'Phone', 'Telepon'];
                         foreach ($possibleKeys as $key) {
                             if (!empty($customerData[$key])) {
                                 return $customerData[$key];
