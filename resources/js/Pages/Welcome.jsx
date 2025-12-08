@@ -644,34 +644,34 @@ return (
             </section>
 
         {/* Features Section - Linear Style */}
-        <section id="keunggulan" className="relative py-16 overflow-hidden border-t border-gray-100 sm:py-20 bg-gray-50">
+        <section id="keunggulan" className="relative py-12 overflow-hidden border-t border-gray-100 sm:py-16 lg:py-20 bg-gray-50">
             <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
                 {/* Header */}
-                <div className="mb-12 text-center sm:mb-16">
-                    <h2 className="mb-4 text-2xl font-bold text-gray-900 sm:text-3xl lg:text-4xl">
+                <div className="mb-8 text-center sm:mb-12 lg:mb-16">
+                    <h2 className="mb-2 text-xl font-bold text-gray-900 sm:mb-4 sm:text-3xl lg:text-4xl">
                         Kenapa Pilih Book UMKM?
                     </h2>
-                    <p className="max-w-2xl mx-auto text-base text-gray-600 sm:text-lg">
+                    <p className="max-w-2xl mx-auto text-sm text-gray-600 sm:text-base lg:text-lg">
                         Solusi booking terlengkap untuk kemudahan Anda
                     </p>
                 </div>
 
-                {/* Features Grid */}
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {/* Features Grid - 2 cols on mobile, 4 cols on desktop */}
+                <div className="grid grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:grid-cols-4">
                     {FEATURES.map((item, idx) => (
                         <div
                             key={idx}
-                            className="p-6 transition-all duration-200 bg-white group rounded-xl shadow-linear hover:shadow-linear-md hover:scale-[1.02]"
+                            className="p-3 sm:p-4 lg:p-6 transition-all duration-200 bg-white group rounded-xl shadow-sm hover:shadow-md hover:scale-[1.02]"
                         >
-                            {/* Icon */}
-                            <div className="inline-flex items-center justify-center w-12 h-12 mb-4 rounded-lg bg-brand-50">
-                                <item.icon className="w-6 h-6 text-brand-600" />
+                            {/* Icon - smaller on mobile */}
+                            <div className="inline-flex items-center justify-center w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 mb-2 sm:mb-3 lg:mb-4 rounded-lg bg-brand-50">
+                                <item.icon className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6 text-brand-600" />
                             </div>
 
-                            <h3 className="mb-2 text-lg font-bold text-gray-900">
+                            <h3 className="mb-1 text-sm font-bold text-gray-900 sm:text-base lg:text-lg sm:mb-2">
                                 {item.title}
                             </h3>
-                            <p className="text-sm leading-relaxed text-gray-600">
+                            <p className="text-xs leading-relaxed text-gray-600 sm:text-sm line-clamp-2 sm:line-clamp-none">
                                 {item.description}
                             </p>
                         </div>
@@ -680,111 +680,170 @@ return (
             </div>
         </section>
 
-        {/* CTA Section - Linear Purple */}
-        <section id="cara-kerja" className="relative py-20 overflow-hidden border-t border-gray-100 sm:py-24 lg:py-32 bg-gradient-primary">
+        {/* CTA Section - Dark Navy Blue Theme */}
+        <section id="cara-kerja" className="relative py-20 overflow-hidden sm:py-28 lg:py-36 bg-gradient-to-br from-[#0f172a] via-[#1e293b] to-[#0f172a]">
+            {/* Background Elements */}
+            <div className="absolute inset-0 bg-[size:60px_60px] bg-[linear-gradient(to_right,rgba(255,255,255,0.02)_1px,transparent_1px),linear-gradient(to_bottom,rgba(255,255,255,0.02)_1px,transparent_1px)]"></div>
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-900/10 to-transparent"></div>
+            
+            {/* Decorative Glow */}
+            <div className="absolute top-0 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl"></div>
+
             <div className="relative px-4 mx-auto sm:px-6 max-w-7xl lg:px-8">
-                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-16">
+                <div className="grid items-center gap-12 lg:grid-cols-2 lg:gap-20">
                     {/* Left: Content */}
                     <div className="text-center lg:text-left">
-                        <h2 className="mb-6 text-3xl font-bold leading-tight text-white sm:text-4xl lg:text-5xl">
-                            Punya UMKM?
+                        {/* Badge */}
+                        <div className="inline-flex items-center gap-2 px-4 py-2 mb-6 border rounded-full bg-white/5 border-white/10 backdrop-blur-sm">
+                            <Sparkles className="w-4 h-4 text-cyan-400" />
+                            <span className="text-sm font-semibold text-cyan-300">Revolusi Bisnis UMKM Anda</span>
+                        </div>
+
+                        <h2 className="mb-6 text-4xl font-bold leading-tight text-white sm:text-5xl lg:text-6xl">
+                            Tingkatkan Omset
                             <br />
-                            Bergabung Sekarang!
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-400 to-cyan-400">
+                                Tanpa Batas
+                            </span>
                         </h2>
 
-                        <p className="max-w-xl mx-auto mb-8 text-lg leading-relaxed lg:mx-0 text-white/90">
-                            Tingkatkan bisnis dengan sistem booking online modern. Kelola reservasi dan pelanggan dengan mudah.
+                        <p className="max-w-xl mx-auto mb-10 text-lg leading-relaxed text-slate-300 lg:mx-0">
+                            Platform all-in-one untuk mengelola booking, pelanggan, dan pembayaran. Bergabunglah dengan 10.000+ UMKM yang telah go digital.
                         </p>
 
-                        {/* Benefits List */}
-                        <div className="grid grid-cols-1 gap-3 mb-8 sm:grid-cols-2">
+                        {/* Benefits List - Dark Cards */}
+                        <div className="grid grid-cols-2 gap-3 mb-10">
                             {CTA_BENEFITS.map((item, idx) => (
-                                <div key={idx} className="flex items-center gap-3 p-3 border rounded-lg bg-white/10 border-white/20">
-                                    <item.icon className="w-5 h-5 text-white" />
+                                <div key={idx} className="flex items-center gap-3 p-4 transition-all duration-200 border group rounded-xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20">
+                                    <div className="flex items-center justify-center flex-shrink-0 w-10 h-10 transition-colors rounded-lg bg-gradient-to-br from-cyan-500/20 to-blue-500/20 group-hover:from-cyan-500/30 group-hover:to-blue-500/30">
+                                        <item.icon className="w-5 h-5 text-cyan-400" />
+                                    </div>
                                     <span className="text-sm font-medium text-white">{item.text}</span>
                                 </div>
                             ))}
                         </div>
 
-                        {/* CTA Button */}
-                        <Link
-                            to="/register-umkm"
-                            data-magnetic="true"
-                            className="inline-flex items-center justify-center gap-2 px-8 py-4 text-base font-bold transition-all duration-200 bg-white rounded-lg text-brand-700 hover:bg-gray-100 shadow-linear-lg active:scale-95 group"
-                        >
-                            <span>Daftar Gratis</span>
-                            <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                        </Link>
-
-                        <p className="mt-4 text-sm text-white/70">
-                            ✨ Tanpa biaya • Tanpa kartu kredit
-                        </p>
+                        {/* CTA Buttons */}
+                        <div className="flex flex-col items-center gap-4 sm:flex-row lg:justify-start">
+                            <Link
+                                to="/register-umkm"
+                                data-magnetic="true"
+                                className="inline-flex items-center justify-center w-full gap-2 px-8 py-4 text-base font-bold text-slate-900 transition-all duration-300 shadow-lg sm:w-auto bg-gradient-to-r from-cyan-400 to-blue-400 rounded-xl hover:from-cyan-300 hover:to-blue-300 hover:shadow-xl hover:shadow-cyan-500/25 active:scale-95 group"
+                            >
+                                <span>Daftar Sekarang</span>
+                                <ChevronRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                            </Link>
                         </div>
 
-                        {/* Right: Visual/Stats */}
-                        <div className="hidden lg:block">
-                            <div className="relative">
-                                {/* Main Card */}
-                                <div className="relative p-6 border shadow-2xl lg:p-8 bg-white/10 backdrop-blur-xl border-white/20 rounded-3xl">
-                                    <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent rounded-3xl"></div>
+                        {/* Social Proof */}
+                        <div className="flex items-center justify-center gap-4 mt-8 lg:justify-start">
+                            <div className="flex -space-x-2">
+                                {[1, 2, 3].map((i) => (
+                                    <div key={i} className="w-8 h-8 border-2 rounded-full bg-slate-600 border-slate-800"></div>
+                                ))}
+                            </div>
+                            <span className="text-sm text-slate-400">Gabung <span className="font-semibold text-white">500+</span> Partner</span>
+                        </div>
+                    </div>
 
-                                    <div className="relative space-y-6">
-                                        {/* Mock Dashboard Preview */}
-                                        <div className="flex items-center gap-4 p-4 bg-white/20 rounded-2xl backdrop-blur-sm">
-                                            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-br from-blue-400 to-brand-600">
-                                                <Store className="w-6 h-6 text-white" />
+                    {/* Right: Visual - Dark Dashboard Mockup */}
+                    <div className="hidden lg:block relative">
+                        <div className="relative">
+                            {/* Main Dashboard Card */}
+                            <div className="relative overflow-hidden border shadow-2xl bg-slate-800/80 backdrop-blur-xl border-white/10 rounded-2xl">
+                                {/* Header */}
+                                <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+                                    <div className="flex gap-2">
+                                        <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                                    </div>
+                                    <div className="px-3 py-1 text-xs font-medium text-emerald-400 border rounded-full bg-emerald-500/10 border-emerald-500/20">
+                                        Live Dashboard
+                                    </div>
+                                </div>
+
+                                <div className="p-5">
+                                    {/* Stats Row */}
+                                    <div className="grid grid-cols-2 gap-4 mb-5">
+                                        {/* Total Booking */}
+                                        <div className="p-4 border rounded-xl bg-slate-700/50 border-white/5">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-blue-500/20">
+                                                    <Calendar className="w-4 h-4 text-blue-400" />
+                                                </div>
+                                                <span className="text-xs text-slate-400">Total Booking</span>
                                             </div>
-                                            <div className="flex-1">
-                                                <div className="text-sm font-semibold text-white">Dashboard UMKM</div>
-                                                <div className="text-xs text-blue-200">Kelola bisnis Anda</div>
+                                            <div className="text-2xl font-bold text-white">1,248</div>
+                                            <div className="flex items-center gap-1 mt-1">
+                                                <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                <span className="text-xs text-emerald-400">+12.5%</span>
                                             </div>
                                         </div>
 
-                                        {/* Stats Grid */}
-                                        <div className="grid grid-cols-2 gap-4">
-                                            {[
-                                                { label: 'Booking Hari Ini', value: '24', icon: Calendar },
-                                                { label: 'Total Revenue', value: '5.2M', icon: TrendingUp },
-                                                { label: 'Pelanggan Aktif', value: '156', icon: Users },
-                                                { label: 'Rating', value: '4.9', icon: Star }
-                                            ].map((stat, idx) => (
-                                                <div key={idx} className="p-4 border bg-white/20 backdrop-blur-sm rounded-xl border-white/30">
-                                                    <stat.icon className="w-5 h-5 mb-2 text-blue-200" />
-                                                    <div className="text-2xl font-bold text-white">{stat.value}</div>
-                                                    <div className="text-xs text-blue-200">{stat.label}</div>
+                                        {/* Revenue */}
+                                        <div className="p-4 border rounded-xl bg-slate-700/50 border-white/5">
+                                            <div className="flex items-center gap-2 mb-3">
+                                                <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-purple-500/20">
+                                                    <TrendingUp className="w-4 h-4 text-purple-400" />
                                                 </div>
-                                            ))}
+                                                <span className="text-xs text-slate-400">Revenue</span>
+                                            </div>
+                                            <div className="text-2xl font-bold text-white">Rp 45.2jt</div>
+                                            <div className="flex items-center gap-1 mt-1">
+                                                <TrendingUp className="w-3 h-3 text-emerald-400" />
+                                                <span className="text-xs text-emerald-400">+8.2%</span>
+                                            </div>
                                         </div>
+                                    </div>
 
-                                        {/* Feature Highlights */}
-                                        <div className="space-y-3">
-                                            {[
-                                                'Form booking kustom',
-                                                'Notifikasi WhatsApp otomatis',
-                                                'Laporan analitik lengkap'
-                                            ].map((feature, idx) => (
-                                                <div key={idx} className="flex items-center gap-3 text-sm text-white">
-                                                    <div className="flex items-center justify-center flex-shrink-0 w-5 h-5 bg-green-400 rounded-full">
-                                                        <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                                                        </svg>
-                                                    </div>
-                                                    <span>{feature}</span>
-                                                </div>
+                                    {/* Chart Area */}
+                                    <div className="p-4 border rounded-xl bg-slate-700/50 border-white/5">
+                                        {/* Bar Chart */}
+                                        <div className="flex items-end justify-between h-28 gap-2">
+                                            {[40, 60, 35, 80, 55, 90, 70].map((height, idx) => (
+                                                <div
+                                                    key={idx}
+                                                    className="flex-1 transition-all duration-300 rounded-t-md bg-gradient-to-t from-cyan-500 to-blue-500 hover:from-cyan-400 hover:to-blue-400"
+                                                    style={{ height: `${height}%` }}
+                                                ></div>
                                             ))}
                                         </div>
                                     </div>
                                 </div>
+                            </div>
 
-                                {/* Floating Badge */}
-                                <div className="absolute px-4 py-2 rounded-full shadow-xl -top-4 -right-4 bg-gradient-to-r from-green-400 to-emerald-500">
-                                    <span className="text-sm font-bold text-white">🚀 Gratis!</span>
+                            {/* Floating Notification - Booking Baru */}
+                            <div className="absolute px-4 py-3 border shadow-xl top-20 -right-6 bg-slate-800 border-white/10 rounded-xl animate-float">
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500 to-purple-500">
+                                        <Calendar className="w-5 h-5 text-white" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-semibold text-white">Booking Baru!</div>
+                                        <div className="text-xs text-slate-400">Baru saja</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Floating Badge - Ulasan Bintang 5 */}
+                            <div className="absolute px-4 py-3 border shadow-xl -bottom-4 -left-6 bg-slate-800 border-white/10 rounded-xl animate-float" style={{ animationDelay: '1s' }}>
+                                <div className="flex items-center gap-3">
+                                    <div className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500">
+                                        <Star className="w-5 h-5 text-white fill-white" />
+                                    </div>
+                                    <div>
+                                        <div className="text-sm font-semibold text-white">Ulasan Bintang 5</div>
+                                        <div className="text-xs text-slate-400">Dari Budi Santoso</div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
         {/* Detail Modal */}
         {showDetailModal && selectedUmkm && (

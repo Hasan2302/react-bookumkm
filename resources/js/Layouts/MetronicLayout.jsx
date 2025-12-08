@@ -37,10 +37,10 @@ export default function MetronicLayout({ children, title = 'Dashboard', breadcru
     const menuItems = [
         { name: 'Dashboard', path: '/umkm/dashboard', icon: LayoutDashboard },
         { name: 'Reservations', path: '/umkm/reservations', icon: CalendarDays, badge: 3 },
-        { name: 'Services', path: '/umkm/services', icon: Briefcase },
-        { name: 'Customers', path: '/umkm/customers', icon: Users },
+        // { name: 'Services', path: '/umkm/services', icon: Briefcase }, // Hidden - not yet functional
+        // { name: 'Customers', path: '/umkm/customers', icon: Users }, // Hidden - not yet functional
         { name: 'Form Builder', path: '/umkm/formbuilder', icon: FileText },
-        { name: 'Finance', path: '/umkm/finance', icon: Wallet },
+        // { name: 'Finance', path: '/umkm/finance', icon: Wallet }, // Hidden - not yet functional
         { name: 'Settings', path: '/umkm/settings', icon: Settings },
     ];
 

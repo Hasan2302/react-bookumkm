@@ -116,26 +116,15 @@ export default function PublicLayout({ children, canLogin, canRegister }) {
                                 </a>
                             ))}
 
-                            {canLogin && (
-                                <div className="pt-4 mt-2 space-y-2 border-t border-gray-100">
-                                    <Link
-                                        to="/login"
-                                        className="block px-4 py-3 text-sm font-medium text-gray-600 transition-colors duration-200 rounded-lg hover:bg-gray-50 hover:text-gray-900"
-                                        onClick={() => setMobileMenuOpen(false)}
-                                    >
-                                        Log in
-                                    </Link>
-                                    {canRegister && (
-                                        <Link
-                                            to="/register"
-                                            className="block w-full px-4 py-3 text-sm font-medium text-center text-white transition-all duration-300 rounded-full bg-brand-600 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 active:scale-95"
-                                            onClick={() => setMobileMenuOpen(false)}
-                                        >
-                                            Daftar Sekarang
-                                        </Link>
-                                    )}
-                                </div>
-                            )}
+                            <div className="pt-4 mt-2 space-y-2 border-t border-gray-100">
+                                <Link
+                                    to="/login"
+                                    className="block px-4 py-3 text-sm font-medium text-center text-white transition-all duration-300 rounded-full bg-brand-600 hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-600/20 active:scale-95"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    Log in
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 )}

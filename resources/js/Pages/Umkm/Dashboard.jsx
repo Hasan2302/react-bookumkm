@@ -345,109 +345,109 @@ export default function UmkmDashboard() {
 
     return (
         <MetronicLayout title="Dashboard" breadcrumbs={['Overview']}>
-            <div className="space-y-8">
+            <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                 {/* Header Section */}
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-900">Halo, {user.umkm_name || user.name || 'UMKM'}!</h1>
-                        <p className="text-sm text-gray-500">Pantau bisnis kamu hari ini</p>
+                        <h1 className="text-lg font-bold text-gray-900 sm:text-xl lg:text-2xl">Halo, {user.umkm_name || user.name || 'UMKM'}!</h1>
+                        <p className="text-xs text-gray-500 sm:text-sm">Pantau bisnis kamu hari ini</p>
                     </div>
-                    <Link to="/umkm/formbuilder" className="inline-flex items-center justify-center px-4 py-2 text-sm font-bold text-white transition-all rounded-lg shadow-lg bg-primary hover:bg-primary-active shadow-primary/30">
-                        <Pencil className="w-4 h-4 mr-2" />
-                        Edit Form Booking
+                    <Link to="/umkm/formbuilder" className="inline-flex items-center justify-center px-3 py-2 text-xs font-bold text-white transition-all rounded-lg shadow-lg sm:px-4 sm:text-sm bg-primary hover:bg-primary-active shadow-primary/30">
+                        <Pencil className="w-3.5 h-3.5 mr-1.5 sm:w-4 sm:h-4 sm:mr-2" />
+                        Edit Form
                     </Link>
                 </div>
 
                 {/* Hero Stats Card - Compact Dark */}
-                <div className="relative overflow-hidden bg-[#1e1e2d] rounded-xl p-5 shadow-lg">
-                    <div className="relative z-10 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-                        <div className="flex items-center gap-4">
-                            <div className="flex items-center justify-center w-12 h-12 bg-white/10 rounded-xl backdrop-blur-sm">
-                                <Clock className="w-6 h-6 text-white" />
+                <div className="relative overflow-hidden bg-[#1e1e2d] rounded-xl p-3 sm:p-4 lg:p-5 shadow-lg">
+                    <div className="relative z-10 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+                        <div className="flex items-center gap-3">
+                            <div className="flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-xl backdrop-blur-sm">
+                                <Clock className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                             </div>
                             <div>
-                                <div className="flex items-baseline gap-2">
-                                    <span className="text-3xl font-bold text-white">{stats.status.pending}</span>
-                                    <span className="text-sm font-medium text-white/80">Menunggu Konfirmasi</span>
+                                <div className="flex items-baseline gap-1.5 sm:gap-2">
+                                    <span className="text-2xl font-bold text-white sm:text-3xl">{stats.status.pending}</span>
+                                    <span className="text-xs font-medium sm:text-sm text-white/80">Menunggu</span>
                                 </div>
-                                <p className="text-xs text-white/50">Segera konfirmasi pesanan masuk.</p>
+                                <p className="text-[10px] sm:text-xs text-white/50">Segera konfirmasi pesanan masuk.</p>
                             </div>
                         </div>
                         <div className="flex gap-2">
                             <button
                                 onClick={handleAcceptAll}
-                                className="px-4 py-2 text-xs font-bold text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors flex items-center gap-1.5"
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold text-gray-900 bg-white rounded-lg hover:bg-gray-100 transition-colors flex items-center justify-center gap-1"
                             >
-                                <CheckCircle2 className="w-3.5 h-3.5 text-primary" />
+                                <CheckCircle2 className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-primary" />
                                 Terima Semua
                             </button>
                             <button
                                 onClick={scrollToBookings}
-                                className="px-4 py-2 text-xs font-bold text-white bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm flex items-center gap-1.5"
+                                className="flex-1 sm:flex-none px-3 sm:px-4 py-2 text-[10px] sm:text-xs font-bold text-white bg-white/10 rounded-lg hover:bg-white/20 transition-colors backdrop-blur-sm flex items-center justify-center gap-1"
                             >
-                                Lihat Detail
-                                <ArrowUpRight className="w-3.5 h-3.5" />
+                                Detail
+                                <ArrowUpRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
                             </button>
                         </div>
                     </div>
                 </div>
 
                 {/* Stats Grid */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid grid-cols-2 gap-2 sm:gap-3 lg:gap-4 lg:grid-cols-4">
                     {[
                         { label: 'Booking Hari Ini', value: stats.todayBookings, icon: CalendarIcon, color: 'text-primary', bg: 'bg-primary/10' },
                         { label: 'Total Diterima', value: stats.status.confirmed, icon: CheckCircle2, color: 'text-success', bg: 'bg-success/10' },
                         { label: 'Pending', value: stats.status.pending, icon: Clock, color: 'text-warning', bg: 'bg-warning/10' },
                         { label: 'Dibatalkan', value: stats.status.cancelled, icon: XCircle, color: 'text-danger', bg: 'bg-danger/10' },
                     ].map((stat, i) => (
-                        <div key={i} className="flex items-center justify-between p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
+                        <div key={i} className="flex items-center justify-between p-3 sm:p-4 lg:p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             <div>
-                                <p className="mb-1 text-xs font-medium text-gray-500">{stat.label}</p>
-                                <h3 className={`text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
+                                <p className="mb-0.5 sm:mb-1 text-[10px] sm:text-xs font-medium text-gray-500">{stat.label}</p>
+                                <h3 className={`text-xl sm:text-2xl font-bold ${stat.color}`}>{stat.value}</h3>
                             </div>
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center ${stat.bg}`}>
-                                <stat.icon className={`w-5 h-5 ${stat.color}`} />
+                            <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full flex items-center justify-center ${stat.bg}`}>
+                                <stat.icon className={`w-4 h-4 sm:w-5 sm:h-5 ${stat.color}`} />
                             </div>
                         </div>
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+                <div className="grid grid-cols-1 gap-4 sm:gap-6 lg:gap-8 lg:grid-cols-3">
                     {/* Left Column: Chart & Recent Bookings */}
-                    <div className="space-y-8 lg:col-span-2">
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8 lg:col-span-2">
                         {/* Revenue Chart */}
-                        <div className="p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div className="flex items-center justify-between mb-6">
-                                <h3 className="text-lg font-bold text-gray-900">Trend Booking 7 Hari</h3>
+                        <div className="p-3 sm:p-4 lg:p-6 bg-white border border-gray-100 shadow-sm rounded-xl">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
+                                <h3 className="text-sm font-bold text-gray-900 sm:text-base lg:text-lg">Trend Booking 7 Hari</h3>
                             </div>
-                            <div className="h-72">
+                            <div className="h-48 sm:h-60 lg:h-72">
                                 <Line data={revenueData} options={chartOptions} />
                             </div>
                         </div>
 
                         {/* Recent Bookings Table */}
                         <div id="recent-bookings-table" className="bg-white border border-gray-100 shadow-sm rounded-xl">
-                            <div className="flex flex-col justify-between gap-4 px-5 py-4 border-b border-gray-100 sm:flex-row sm:items-center">
-                                <h3 className="text-base font-bold text-gray-900">Booking Terbaru</h3>
-                                <div className="flex p-1 bg-gray-100 rounded-lg">
+                            <div className="flex flex-col justify-between gap-3 px-3 py-3 border-b border-gray-100 sm:px-5 sm:py-4 sm:flex-row sm:items-center">
+                                <h3 className="text-sm font-bold text-gray-900 sm:text-base">Booking Terbaru</h3>
+                                <div className="flex p-0.5 sm:p-1 bg-gray-100 rounded-lg overflow-x-auto">
                                     {['diterima', 'pending', 'cancelled'].map((tab) => (
                                         <button
                                             key={tab}
                                             onClick={() => setActiveTab(tab)}
-                                            className={`relative px-4 py-2 text-xs font-bold rounded-md capitalize transition-all ${
+                                            className={`relative px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-bold rounded-md capitalize transition-all whitespace-nowrap ${
                                                 activeTab === tab
                                                 ? 'bg-white text-gray-900 shadow-sm'
                                                 : 'text-gray-500 hover:text-gray-700'
                                             }`}
                                         >
-                                            {tab === 'diterima' ? 'Diterima' : tab === 'cancelled' ? 'Dibatalkan' : tab}
-                                            <span className="ml-1 opacity-60">({bookings[tab]?.length || 0})</span>
+                                            {tab === 'diterima' ? 'Diterima' : tab === 'cancelled' ? 'Batal' : 'Pending'}
+                                            <span className="ml-0.5 sm:ml-1 opacity-60">({bookings[tab]?.length || 0})</span>
 
                                             {/* Pending Indicator */}
                                             {tab === 'pending' && bookings.pending.length > 0 && (
-                                                <span className="absolute flex w-2 h-2 top-1 right-1">
+                                                <span className="absolute flex w-1.5 h-1.5 sm:w-2 sm:h-2 top-0.5 right-0.5 sm:top-1 sm:right-1">
                                                     <span className="absolute inline-flex w-full h-full bg-red-400 rounded-full opacity-75 animate-ping"></span>
-                                                    <span className="relative inline-flex w-2 h-2 bg-red-500 rounded-full"></span>
+                                                    <span className="relative inline-flex w-full h-full bg-red-500 rounded-full"></span>
                                                 </span>
                                             )}
                                         </button>
@@ -587,52 +587,52 @@ export default function UmkmDashboard() {
                     </div>
 
                     {/* Right Column: Calendar & Queue */}
-                    <div className="space-y-8">
+                    <div className="space-y-4 sm:space-y-6 lg:space-y-8">
                         {/* Calendar Widget */}
-                        <div className="p-6 text-white shadow-lg bg-primary rounded-2xl shadow-primary/20">
-                            <div className="flex items-center justify-between mb-6">
+                        <div className="p-3 sm:p-4 lg:p-6 text-white shadow-lg bg-primary rounded-xl sm:rounded-2xl shadow-primary/20">
+                            <div className="flex items-center justify-between mb-3 sm:mb-4 lg:mb-6">
                                 <div>
-                                    <h3 className="text-lg font-bold">Antrian</h3>
-                                    <p className="text-xs text-white/70">{selectedDate.format('dddd, D MMM YYYY')}</p>
+                                    <h3 className="text-sm font-bold sm:text-base lg:text-lg">Antrian</h3>
+                                    <p className="text-[10px] sm:text-xs text-white/70">{selectedDate.format('dddd, D MMM YYYY')}</p>
                                 </div>
-                                <div className="flex items-center justify-center w-8 h-8 text-sm font-bold rounded-full bg-white/20">
+                                <div className="flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 text-xs sm:text-sm font-bold rounded-full bg-white/20">
                                     {queue.length}
                                 </div>
                             </div>
 
                             {/* Calendar Header */}
-                            <div className="flex items-center justify-between p-2 mb-4 rounded-lg bg-white/10">
+                            <div className="flex items-center justify-between p-1.5 sm:p-2 mb-3 sm:mb-4 rounded-lg bg-white/10">
                                 <button
                                     onClick={() => setCurrentDate(currentDate.subtract(1, 'month'))}
                                     className="p-1 transition rounded hover:bg-white/10"
                                 >
-                                    <ChevronLeft className="w-4 h-4" />
+                                    <ChevronLeft className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
-                                <span className="text-sm font-bold">{currentDate.format('MMMM YYYY')}</span>
+                                <span className="text-xs font-bold sm:text-sm">{currentDate.format('MMMM YYYY')}</span>
                                 <button
                                     onClick={() => setCurrentDate(currentDate.add(1, 'month'))}
                                     className="p-1 transition rounded hover:bg-white/10"
                                 >
-                                    <ChevronRight className="w-4 h-4" />
+                                    <ChevronRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                 </button>
                             </div>
 
                             {/* Week Days */}
-                            <div className="grid grid-cols-7 gap-1 mb-2 text-center">
+                            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1 sm:mb-2 text-center">
                                 {['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab'].map(d => (
-                                    <div key={d} className="text-[10px] font-medium text-white/60 uppercase tracking-wider">{d}</div>
+                                    <div key={d} className="text-[8px] sm:text-[10px] font-medium text-white/60 uppercase tracking-wider">{d}</div>
                                 ))}
                             </div>
 
                             {/* Calendar Grid */}
-                            <div className="grid grid-cols-7 gap-1 text-center">
+                            <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-center">
                                 {calendarDays.map((date, i) => (
                                     <div key={i} className="relative flex items-center justify-center aspect-square">
                                         {date && (
                                             <button
                                                 onClick={() => setSelectedDate(date)}
                                                 className={`
-                                                    relative w-9 h-9 rounded-full flex items-center justify-center text-xs font-semibold transition-all duration-200
+                                                    relative w-7 h-7 sm:w-8 sm:h-8 lg:w-9 lg:h-9 rounded-full flex items-center justify-center text-[10px] sm:text-xs font-semibold transition-all duration-200
                                                     ${date.isSame(selectedDate, 'day')
                                                         ? 'bg-white text-primary shadow-lg shadow-white/30 scale-110 font-bold'
                                                         : ''
@@ -651,7 +651,7 @@ export default function UmkmDashboard() {
 
                                                 {/* Titik indikator kecil kalau ada booking */}
                                                 {hasBookingOnDate(date) && !date.isSame(selectedDate, 'day') && !date.isSame(dayjs(), 'day') && (
-                                                    <span className="absolute bottom-1 w-1.5 h-1.5 bg-white rounded-full animate-pulse"></span>
+                                                    <span className="absolute bottom-0.5 sm:bottom-1 w-1 h-1 sm:w-1.5 sm:h-1.5 bg-white rounded-full animate-pulse"></span>
                                                 )}
                                             </button>
                                         )}
