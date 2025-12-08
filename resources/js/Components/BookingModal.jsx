@@ -212,6 +212,8 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                 const nama = customerData['Nama Lengkap'] || customerData['Nama'] || 'Pengunjung';
                 const phone =
                 customerData['Nomor Telepon'] ||
+                customerData['No. Whatsapp'] ||
+                customerData['No Whatsapp'] ||
                 customerData['Nomor HP'] ||
                 customerData['WhatsApp'] ||
                 customerData['Phone'] ||
@@ -275,6 +277,8 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             const nama = customerData['Nama Lengkap'] || customerData['Nama'] || 'Pengunjung';
             const phone =
             customerData['Nomor Telepon'] ||
+            customerData['No. Whatsapp'] ||
+            customerData['No Whatsapp'] ||
             customerData['Nomor HP'] ||
             customerData['WhatsApp'] ||
             customerData['Phone'] ||
