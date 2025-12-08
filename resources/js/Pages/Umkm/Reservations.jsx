@@ -17,7 +17,7 @@ import Dropdown from '@/Components/Dropdown';
 dayjs.locale('id');
 
 export default function Reservations() {
-    const [bookings, setBookings] = useState({ diterima: [], pending: [], cancelled: [] });
+    const [bookings, setBookings] = useState({ diterima: [], pending: [], cancelled: [], served: [] });
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [filterStatus, setFilterStatus] = useState('all'); // all, confirmed, pending, cancelled
@@ -26,6 +26,7 @@ export default function Reservations() {
         try {
             const bookingsRes = await api.get('/bookings/recent');
             setBookings({
+                served: bookingsRes.data.served || [],
                 diterima: bookingsRes.data.diterima || [],
                 pending: bookingsRes.data.pending || [],
                 cancelled: bookingsRes.data.cancelled || []
@@ -66,18 +67,19 @@ export default function Reservations() {
     const openWhatsApp = (booking) => {
         const phone = booking.customer_phone;
         if (!phone) return alert('Nomor telepon tidak tersedia');
-        
+
         let formattedPhone = phone.replace(/\D/g, '');
         if (formattedPhone.startsWith('0')) {
             formattedPhone = '62' + formattedPhone.slice(1);
         }
-        
+
         const message = `Halo ${booking.customer_name}, kami dari BarberShop ingin mengonfirmasi booking Anda untuk layanan ${booking.service_name} pada ${booking.waktu}.`;
         window.open(`https://wa.me/${formattedPhone}?text=${encodeURIComponent(message)}`, '_blank');
     };
 
     // Combine and Filter Bookings
     const allRecentBookings = [
+        ...bookings.served.map(b => ({ ...b, status: 'served' })),
         ...bookings.pending.map(b => ({ ...b, status: 'pending' })),
         ...bookings.diterima.map(b => ({ ...b, status: 'confirmed' })),
         ...bookings.cancelled.map(b => ({ ...b, status: 'cancelled' }))
@@ -103,7 +105,7 @@ export default function Reservations() {
         return (
             <MetronicLayout>
                 <div className="flex items-center justify-center h-96">
-                    <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                    <div className="w-8 h-8 border-4 rounded-full border-primary border-t-transparent animate-spin"></div>
                 </div>
             </MetronicLayout>
         );
@@ -113,38 +115,39 @@ export default function Reservations() {
         <MetronicLayout title="Reservations" breadcrumbs={['Reservations']}>
             <div className="space-y-8">
                 {/* Bookings Table (Table Widget) */}
-                <div className="bg-white border border-gray-100 shadow-sm rounded-xl overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between px-6 py-5 border-b border-gray-100 gap-4">
+                <div className="overflow-hidden bg-white border border-gray-100 shadow-sm rounded-xl">
+                    <div className="flex flex-col justify-between gap-4 px-6 py-5 border-b border-gray-100 sm:flex-row sm:items-center">
                         <h3 className="text-lg font-bold text-gray-900">All Reservations</h3>
-                        <div className="flex gap-2 w-full sm:w-auto">
+                        <div className="flex w-full gap-2 sm:w-auto">
                             <div className="relative flex-1 sm:flex-none">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                                <input 
-                                    type="text" 
-                                    placeholder="Search booking..." 
+                                <Search className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                                <input
+                                    type="text"
+                                    placeholder="Search booking..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full sm:w-64 pl-9 pr-4 py-2 bg-gray-50 border-none rounded-lg text-sm focus:ring-1 focus:ring-primary"
+                                    className="w-full py-2 pr-4 text-sm border-none rounded-lg sm:w-64 pl-9 bg-gray-50 focus:ring-1 focus:ring-primary"
                                 />
                             </div>
                             <div className="relative">
                                 <select
                                     value={filterStatus}
                                     onChange={(e) => setFilterStatus(e.target.value)}
-                                    className="pl-3 pr-8 py-2 bg-gray-50 border-none rounded-lg text-sm focus:ring-1 focus:ring-primary appearance-none cursor-pointer"
+                                    className="py-2 pl-3 pr-8 text-sm border-none rounded-lg appearance-none cursor-pointer bg-gray-50 focus:ring-1 focus:ring-primary"
                                 >
                                     <option value="all">All Status</option>
                                     <option value="confirmed">Confirmed</option>
+                                    <option value="served">Served</option>
                                     <option value="pending">Pending</option>
                                     <option value="cancelled">Cancelled</option>
                                 </select>
-                                <Filter className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                <Filter className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 pointer-events-none right-2 top-1/2" />
                             </div>
                         </div>
                     </div>
-                    <div className="overflow-x-auto pb-32">
+                    <div className="pb-32 overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-100">
+                            <thead className="border-b border-gray-100 bg-gray-50">
                                 <tr>
                                     <th className="px-6 py-4 text-xs font-bold tracking-wider text-left text-gray-400 uppercase">Customer</th>
                                     <th className="px-6 py-4 text-xs font-bold tracking-wider text-left text-gray-400 uppercase">Service</th>
@@ -157,14 +160,14 @@ export default function Reservations() {
                             <tbody className="divide-y divide-gray-100">
                                 {allRecentBookings.length > 0 ? (
                                     allRecentBookings.map((booking) => (
-                                        <tr key={booking.id} className="group hover:bg-gray-50/50 transition-colors">
+                                        <tr key={booking.id} className="transition-colors group hover:bg-gray-50/50">
                                             <td className="px-6 py-4 whitespace-nowrap">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="flex items-center justify-center w-10 h-10 font-bold text-primary bg-primary/10 rounded-lg">
+                                                    <div className="flex items-center justify-center w-10 h-10 font-bold rounded-lg text-primary bg-primary/10">
                                                         {booking.customer_name.charAt(0)}
                                                     </div>
                                                     <div>
-                                                        <div className="text-sm font-bold text-gray-800 hover:text-primary cursor-pointer transition-colors">{booking.customer_name}</div>
+                                                        <div className="text-sm font-bold text-gray-800 transition-colors cursor-pointer hover:text-primary">{booking.customer_name}</div>
                                                         <div className="text-xs text-gray-400">Customer</div>
                                                     </div>
                                                 </div>
@@ -175,19 +178,22 @@ export default function Reservations() {
                                                 Rp {Number(booking.total_price).toLocaleString('id-ID')}
                                             </td>
                                             <td className="px-6 py-4 whitespace-nowrap">
-                                                <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-bold ${
-                                                    booking.status === 'confirmed' ? 'bg-success/10 text-success' :
-                                                    booking.status === 'pending' ? 'bg-warning/10 text-warning' :
-                                                    'bg-danger/10 text-danger'
-                                                }`}>
-                                                    {booking.status === 'confirmed' ? 'Confirmed' :
-                                                     booking.status === 'pending' ? 'Pending' : 'Cancelled'}
-                                                </span>
+                                            <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-bold ${
+                                                booking.status === 'confirmed' ? 'bg-success/10 text-success' :
+                                                booking.status === 'pending' ? 'bg-warning/10 text-warning' :
+                                                booking.status === 'served' ? 'bg-primary/10 text-primary' :
+                                                'bg-danger/10 text-danger'
+                                            }`}>
+                                                {booking.status === 'confirmed' ? 'Confirmed' :
+                                                booking.status === 'pending' ? 'Pending' :
+                                                booking.status === 'served' ? 'Served' :
+                                                'Cancelled'}
+                                            </span>
                                             </td>
                                             <td className="px-6 py-4 text-right whitespace-nowrap">
                                                 <Dropdown>
                                                     <Dropdown.Trigger>
-                                                        <button className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                                                        <button className="p-2 text-gray-400 transition-colors rounded-lg hover:text-gray-600 hover:bg-gray-100">
                                                             <MoreVertical className="w-4 h-4" />
                                                         </button>
                                                     </Dropdown.Trigger>
@@ -195,7 +201,7 @@ export default function Reservations() {
                                                         <Dropdown.Link onClick={() => alert(`Detail Booking #${booking.id}\nPelanggan: ${booking.customer_name}\nLayanan: ${booking.service_name}`)}>
                                                             Lihat Detail
                                                         </Dropdown.Link>
-                                                        
+
                                                         {booking.status === 'confirmed' && (
                                                             <Dropdown.Link onClick={() => openWhatsApp(booking)}>
                                                                 Hubungi via WhatsApp

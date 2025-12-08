@@ -665,115 +665,136 @@ export default function UmkmDashboard() {
                             {loadingQueue ? (
                                 <div className="py-8 text-center text-gray-500">Memuat antrian...</div>
                             ) : queue.length > 0 ? (
-                                <>
-                                    {(() => {
-                                        const now = new Date();
-                                        const currentMinutes = now.getHours() * 60 + now.getMinutes();
+                                (() => {
+                                    const now = new Date();
+                                    const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-                                        // Proses semua antrian hari ini
-                                        const processedQueue = queue
-                                            .filter(b => b.status !== 'served')
-                                            .map(b => {
-                                                const [h, m] = b.time_only.split(':').map(Number);
-                                                const bookingMinutes = h * 60 + m;
-                                                const lateBy = currentMinutes - bookingMinutes;
+                                    // Proses semua antrian hari ini (status bukan 'served')
+                                    const processedQueue = queue
+                                        .filter(b => b.status !== 'served') // ambil yang bisa dilayani
+                                        .map(b => {
+                                            const [h, m] = b.time_only.split(':').map(Number);
+                                            const bookingMinutes = h * 60 + m;
+                                            const lateBy = currentMinutes - bookingMinutes;
 
-                                                return {
-                                                    ...b,
-                                                    bookingMinutes,
-                                                    lateBy, // berapa menit telat
-                                                    isLate: lateBy > 15, // telat lebih dari 15 menit
-                                                    shouldBeSkipped: lateBy > 15 && b.status !== 'served'
-                                                };
-                                            })
-                                            .sort((a, b) => {
-                                                // Prioritas: yang belum telat > telat tapi masih bisa > telat banget
-                                                if (a.isLate && !b.isLate) return 1;
-                                                if (!a.isLate && b.isLate) return -1;
-                                                return a.bookingMinutes - b.bookingMinutes;
-                                            });
+                                            return {
+                                                ...b,
+                                                bookingMinutes,
+                                                lateBy,
+                                                isLate: lateBy > 15,
+                                                canBeServed: b.status !== 'served', // tambahkan flag
+                                            };
+                                        })
+                                        .sort((a, b) => a.bookingMinutes - b.bookingMinutes);
 
-                                        // Ambil yang harus jadi nomor 1 sekarang
-                                        const currentCustomer = processedQueue[0];
-                                        const nextCustomers = processedQueue.slice(1);
-
+                                    if (processedQueue.length === 0) {
                                         return (
-                                            <>
-                                                {/* NOMOR 1 — VERSI KOMPAK & CANTIK */}
-                                                <div className={`flex items-center justify-between p-3 rounded-lg border ${currentCustomer.isLate ? 'bg-red-50 border-red-300' : 'bg-primary/5 border-primary/30'}`}>
-                                                    <div className="flex items-center gap-3">
-                                                        {/* Nomor 1 */}
-                                                        <div className={`flex items-center justify-center w-10 h-10 text-xl font-bold text-white rounded-full shadow-md ${currentCustomer.isLate ? 'bg-red-600 animate-pulse' : 'bg-primary'}`}>
-                                                            1
-                                                        </div>
-
-                                                        {/* Info Customer */}
-                                                        <div>
-                                                            <h3 className="text-base font-bold leading-tight text-gray-900">{currentCustomer.customer_name}</h3>
-                                                            <p className="text-xs leading-tight text-gray-600">{currentCustomer.service_name}</p>
-                                                            {currentCustomer.isLate && (
-                                                                <p className="text-xs font-bold text-red-600 mt-0.5">
-                                                                    Telat {currentCustomer.lateBy} menit
-                                                                </p>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {/* Jam + Tombol */}
-                                                    <div className="text-right">
-                                                        <div className="text-xl font-bold text-primary">{currentCustomer.time_only}</div>
-                                                        {currentCustomer.status !== 'served' && (
-                                                            <button
-                                                                onClick={() => handleServed(currentCustomer.id)}
-                                                                className={`px-4 py-1.5 mt-1 text-xs font-bold text-white rounded-full transition shadow-sm ${
-                                                                    currentCustomer.isLate
-                                                                        ? 'bg-red-600 hover:bg-red-700'
-                                                                        : 'bg-success hover:bg-success-active'
-                                                                }`}
-                                                            >
-                                                                {currentCustomer.isLate ? 'Layani' : 'Selesai'}
-                                                            </button>
-                                                        )}
-                                                    </div>
-                                                </div>
-
-                                                {/* ANTRIAN BERIKUTNYA */}
-                                                <div className="pt-4 mt-4 border-t border-gray-100">
-                                                    <h4 className="mb-3 text-xs font-bold text-gray-400 uppercase">Berikutnya</h4>
-                                                    <div className="space-y-3">
-                                                        {nextCustomers.map((booking, i) => (
-                                                            <div
-                                                                key={booking.id}
-                                                                className={`flex items-center justify-between p-3 rounded-lg transition-all ${booking.isLate ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}
-                                                            >
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className={`flex items-center justify-center w-8 h-8 text-xs font-bold rounded-full ${booking.isLate ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-500'}`}>
-                                                                        {i + 2}
-                                                                    </div>
-                                                                    <div>
-                                                                        <div className="text-sm font-bold text-gray-900">{booking.customer_name}</div>
-                                                                        <div className="text-xs text-gray-500">{booking.service_name}</div>
-                                                                        {booking.isLate && (
-                                                                            <div className="text-xs font-bold text-red-600">Telat {booking.lateBy} menit</div>
-                                                                        )}
-                                                                    </div>
-                                                                </div>
-                                                                <div className={`px-3 py-1.5 text-xs font-bold rounded-full ${booking.isLate ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
-                                                                    {booking.time_only}
-                                                                </div>
-                                                            </div>
-                                                        ))}
-                                                        {nextCustomers.length === 0 && (
-                                                            <div className="py-3 text-sm text-center text-gray-400">
-                                                                Tidak ada antrian berikutnya
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                            </>
+                                            <div className="py-12 text-center text-gray-500">
+                                                Semua antrian sudah selesai dilayani
+                                            </div>
                                         );
-                                    })()}
-                                </>
+                                    }
+
+                                    const currentCustomer = processedQueue[0];
+                                    const nextCustomers = processedQueue.slice(1);
+
+                                    return (
+                                        <>
+                                            {/* NOMOR 1 */}
+                                            <div className={`flex items-center justify-between p-3 rounded-lg border ${currentCustomer.isLate ? 'bg-red-50 border-red-300' : 'bg-primary/5 border-primary/30'}`}>
+                                                <div className="flex items-center gap-3">
+                                                    <div className={`flex items-center justify-center w-10 h-10 text-xl font-bold text-white rounded-full shadow-md ${currentCustomer.isLate ? 'bg-red-600 animate-pulse' : 'bg-primary'}`}>
+                                                        1
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-base font-bold leading-tight text-gray-900">{currentCustomer.customer_name}</h3>
+                                                        <p className="text-xs leading-tight text-gray-600">{currentCustomer.service_name}</p>
+                                                        {currentCustomer.isLate && currentCustomer.canBeServed && (
+                                                            <p className="text-xs font-bold text-red-600 mt-0.5">
+                                                                Telat {currentCustomer.lateBy} menit
+                                                            </p>
+                                                        )}
+                                                        {currentCustomer.status === 'served' && (
+                                                            <p className="text-xs font-bold text-primary mt-0.5">Sudah dilayani</p>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Jam + Tombol */}
+                                                <div className="text-right">
+                                                    <div className="text-xl font-bold text-primary">{currentCustomer.time_only}</div>
+                                                    {currentCustomer.canBeServed && (
+                                                        <button
+                                                            onClick={() => handleServed(currentCustomer.id)}
+                                                            className={`px-4 py-1.5 mt-1 text-xs font-bold text-white rounded-full transition shadow-sm ${
+                                                                currentCustomer.isLate
+                                                                    ? 'bg-red-600 hover:bg-red-700'
+                                                                    : 'bg-success hover:bg-success-active'
+                                                            }`}
+                                                        >
+                                                            {currentCustomer.isLate ? 'Layani' : 'Selesai'}
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* ANTRIAN BERIKUTNYA */}
+                                            <div className="pt-4 mt-4 border-t border-gray-100">
+                                                <h4 className="mb-3 text-xs font-bold text-gray-400 uppercase">Berikutnya</h4>
+                                                <div className="space-y-3">
+                                                    {nextCustomers.map((booking, i) => (
+                                                        <div
+                                                            key={booking.id}
+                                                            className={`flex items-center justify-between p-3 rounded-lg transition-all ${
+                                                                booking.isLate && booking.canBeServed
+                                                                    ? 'bg-red-50 border border-red-200'
+                                                                    : booking.status === 'served'
+                                                                    ? 'bg-primary/10 border border-primary/30'
+                                                                    : 'bg-gray-50'
+                                                            }`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`flex items-center justify-center w-8 h-8 text-xs font-bold rounded-full ${
+                                                                    booking.isLate && booking.canBeServed
+                                                                        ? 'bg-red-600 text-white'
+                                                                        : booking.status === 'served'
+                                                                        ? 'bg-primary text-white'
+                                                                        : 'bg-white border border-gray-200 text-gray-500'
+                                                                }`}>
+                                                                    {i + 2}
+                                                                </div>
+                                                                <div>
+                                                                    <div className="text-sm font-bold text-gray-900">{booking.customer_name}</div>
+                                                                    <div className="text-xs text-gray-500">{booking.service_name}</div>
+                                                                    {booking.isLate && booking.canBeServed && (
+                                                                        <div className="text-xs font-bold text-red-600">Telat {booking.lateBy} menit</div>
+                                                                    )}
+                                                                    {booking.status === 'served' && (
+                                                                        <div className="text-xs font-bold text-primary">Sudah dilayani</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className={`px-3 py-1.5 text-xs font-bold rounded-full ${
+                                                                booking.isLate && booking.canBeServed
+                                                                    ? 'bg-red-600 text-white'
+                                                                    : booking.status === 'served'
+                                                                    ? 'bg-primary text-white'
+                                                                    : 'bg-white border border-gray-200 text-gray-600'
+                                                            }`}>
+                                                                {booking.time_only}
+                                                            </div>
+                                                        </div>
+                                                    ))}
+                                                    {nextCustomers.length === 0 && (
+                                                        <div className="py-3 text-sm text-center text-gray-400">
+                                                            Tidak ada antrian berikutnya
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </>
+                                    );
+                                })()
                             ) : (
                                 <div className="py-12 text-center">
                                     <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
@@ -783,6 +804,7 @@ export default function UmkmDashboard() {
                                 </div>
                             )}
                         </div>
+
                     </div>
                 </div>
             </div>

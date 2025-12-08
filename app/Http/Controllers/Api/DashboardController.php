@@ -41,6 +41,7 @@ class DashboardController extends Controller
             $status = [
                 'confirmed' => $bookings->clone()->where('status', 'confirmed')->count(),
                 'pending'   => $bookings->clone()->where('status', 'pending')->count(),
+                'served'   => $bookings->clone()->where('status', 'served')->count(),
                 'cancelled' => $bookings->clone()->whereIn('status', ['cancelled', 'rejected', 'no_show'])->count(),
             ];
 
@@ -115,6 +116,7 @@ class DashboardController extends Controller
 
             $diterima  = $query->clone()->where('status', 'confirmed')->take(10)->get();
             $pending   = $query->clone()->where('status', 'pending')->take(10)->get();
+            $served   = $query->clone()->where('status', 'served')->take(10)->get();
             $cancelled = $query->clone()->whereIn('status', ['cancelled', 'rejected', 'no_show'])->take(10)->get();
 
             $format = function($b) {
@@ -133,6 +135,7 @@ class DashboardController extends Controller
             return response()->json([
                 'diterima'  => $diterima->map($format),
                 'pending'   => $pending->map($format),
+                'served'    => $served->map($format),
                 'cancelled' => $cancelled->map($format),
             ]);
 
