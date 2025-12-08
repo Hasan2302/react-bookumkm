@@ -210,7 +210,13 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
                 );
 
                 const nama = customerData['Nama Lengkap'] || customerData['Nama'] || 'Pengunjung';
-                const phone = customerData['No. WhatsApp'] || customerData['WhatsApp'] || customerData['Nomor HP'] || '';
+                const phone =
+                customerData['Nomor Telepon'] ||
+                customerData['Nomor HP'] ||
+                customerData['WhatsApp'] ||
+                customerData['Phone'] ||
+                null;
+
                 formData.append('customer_name', nama);
                 formData.append('customer_phone', phone);
 
@@ -267,7 +273,16 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
             formData.append('total_price', totalPrice);
 
             const nama = customerData['Nama Lengkap'] || customerData['Nama'] || 'Pengunjung';
-            const phone = customerData['No. WhatsApp'] || customerData['WhatsApp'] || customerData['Nomor HP'] || '';
+            const phone =
+            customerData['Nomor Telepon'] ||
+            customerData['Nomor HP'] ||
+            customerData['WhatsApp'] ||
+            customerData['Phone'] ||
+            null;
+
+            console.log(customerData);
+            console.log("Phone extracted:", phone);
+
             const serviceNames = Object.values(selectedServices)
             .flat()
             .map(s => s.label)
@@ -275,7 +290,7 @@ export default function BookingModal({ umkm, isOpen, onClose }) {
 
             formData.append('service_name', serviceNames || 'Layanan Booking');
             formData.append('customer_name', nama);
-            formData.append('customer_phone', phone);
+            formData.append('customer_phone', phone ?? '');
 
             // KIRIM SEBAGAI OBJECT, BUKAN JSON.STRINGIFY!
             Object.keys(customerData).forEach(key => {

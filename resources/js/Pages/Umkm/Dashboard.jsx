@@ -490,11 +490,15 @@ export default function UmkmDashboard() {
                                                                 {activeTab === 'diterima' ? 'Diterima' :
                                                                  activeTab === 'pending' ? 'Pending' : 'Dibatalkan'}
                                                             </span>
-                                                            {(booking.payment_method === 'cash' || booking.payment_method === 'offline') && (
-                                                                <span className="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-bold bg-blue-500 text-white">
-                                                                    Cash
-                                                                </span>
-                                                            )}
+                                                            <span className={`inline-flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold text-white shadow-sm ${
+                                                            ['qris', 'transfer', 'ewallet'].includes(booking.payment_method)
+                                                                ? 'bg-gradient-to-r from-emerald-500 to-teal-600'
+                                                                : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+                                                            }`}>
+                                                            {booking.payment_method === 'qris' && 'QRIS'}
+                                                            {['transfer', 'ewallet'].includes(booking.payment_method) && 'Online'}
+                                                            {(booking.payment_method === 'offline' || booking.payment_method === 'cash') && 'Tunai'}
+                                                            </span>
                                                         </div>
                                                     </td>
                                                     <td className="px-6 py-4 text-right">
@@ -656,73 +660,126 @@ export default function UmkmDashboard() {
                             </div>
                         </div>
 
-                        {/* Queue List */}
+                        {/* Queue List - SUPER CERDAS: Auto Skip Telat 15 Menit */}
                         <div className="p-5 bg-white border border-gray-100 shadow-sm rounded-xl">
                             {loadingQueue ? (
                                 <div className="py-8 text-center text-gray-500">Memuat antrian...</div>
                             ) : queue.length > 0 ? (
                                 <>
-                                    <div className="flex items-center justify-between mb-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="flex items-center justify-center w-10 h-10 text-lg font-bold text-white rounded-full bg-primary">
-                                                1
-                                            </div>
-                                            <div>
-                                                <h3 className="font-bold text-gray-900">{queue[0].customer_name}</h3>
-                                                <p className="text-xs text-gray-500">{queue[0].service_name}</p>
-                                            </div>
-                                        </div>
-                                        <div className="text-right">
-                                            <div className="text-xl font-bold text-primary">{queue[0].time_only}</div>
-                                            {queue[0].status !== 'served' ? (
-                                                <button
-                                                    onClick={() => handleServed(queue[0].id)}
-                                                    className="px-3 py-1 mt-1 text-xs font-bold text-white transition-colors rounded-full bg-success hover:bg-success-active"
-                                                >
-                                                    Selesai
-                                                </button>
-                                            ) : (
-                                                <span className="px-3 py-1 mt-1 text-xs font-bold text-gray-500 bg-gray-100 rounded-full">
-                                                    Dilayani
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
+                                    {(() => {
+                                        const now = new Date();
+                                        const currentMinutes = now.getHours() * 60 + now.getMinutes();
 
-                                    {/* Next Queue */}
-                                    <div className="pt-4 mt-4 border-t border-gray-100">
-                                        <h4 className="mb-3 text-xs font-bold text-gray-400 uppercase">Berikutnya</h4>
-                                        <div className="space-y-3">
-                                            {queue.slice(1).map((booking, i) => (
-                                                <div key={i} className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                                        // Proses semua antrian hari ini
+                                        const processedQueue = queue
+                                            .filter(b => b.status !== 'served')
+                                            .map(b => {
+                                                const [h, m] = b.time_only.split(':').map(Number);
+                                                const bookingMinutes = h * 60 + m;
+                                                const lateBy = currentMinutes - bookingMinutes;
+
+                                                return {
+                                                    ...b,
+                                                    bookingMinutes,
+                                                    lateBy, // berapa menit telat
+                                                    isLate: lateBy > 15, // telat lebih dari 15 menit
+                                                    shouldBeSkipped: lateBy > 15 && b.status !== 'served'
+                                                };
+                                            })
+                                            .sort((a, b) => {
+                                                // Prioritas: yang belum telat > telat tapi masih bisa > telat banget
+                                                if (a.isLate && !b.isLate) return 1;
+                                                if (!a.isLate && b.isLate) return -1;
+                                                return a.bookingMinutes - b.bookingMinutes;
+                                            });
+
+                                        // Ambil yang harus jadi nomor 1 sekarang
+                                        const currentCustomer = processedQueue[0];
+                                        const nextCustomers = processedQueue.slice(1);
+
+                                        return (
+                                            <>
+                                                {/* NOMOR 1 — VERSI KOMPAK & CANTIK */}
+                                                <div className={`flex items-center justify-between p-3 rounded-lg border ${currentCustomer.isLate ? 'bg-red-50 border-red-300' : 'bg-primary/5 border-primary/30'}`}>
                                                     <div className="flex items-center gap-3">
-                                                        <div className="flex items-center justify-center w-8 h-8 text-xs font-bold text-gray-500 bg-white border border-gray-200 rounded-full">
-                                                            {i + 2}
+                                                        {/* Nomor 1 */}
+                                                        <div className={`flex items-center justify-center w-10 h-10 text-xl font-bold text-white rounded-full shadow-md ${currentCustomer.isLate ? 'bg-red-600 animate-pulse' : 'bg-primary'}`}>
+                                                            1
                                                         </div>
+
+                                                        {/* Info Customer */}
                                                         <div>
-                                                            <div className="text-sm font-bold text-gray-900">{booking.customer_name}</div>
-                                                            <div className="text-xs text-gray-500">{booking.service_name}</div>
+                                                            <h3 className="text-base font-bold leading-tight text-gray-900">{currentCustomer.customer_name}</h3>
+                                                            <p className="text-xs leading-tight text-gray-600">{currentCustomer.service_name}</p>
+                                                            {currentCustomer.isLate && (
+                                                                <p className="text-xs font-bold text-red-600 mt-0.5">
+                                                                    Telat {currentCustomer.lateBy} menit
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
-                                                    <div className="px-2 py-1 text-xs font-bold text-gray-600 bg-white border border-gray-200 rounded">
-                                                        {booking.time_only}
+
+                                                    {/* Jam + Tombol */}
+                                                    <div className="text-right">
+                                                        <div className="text-xl font-bold text-primary">{currentCustomer.time_only}</div>
+                                                        {currentCustomer.status !== 'served' && (
+                                                            <button
+                                                                onClick={() => handleServed(currentCustomer.id)}
+                                                                className={`px-4 py-1.5 mt-1 text-xs font-bold text-white rounded-full transition shadow-sm ${
+                                                                    currentCustomer.isLate
+                                                                        ? 'bg-red-600 hover:bg-red-700'
+                                                                        : 'bg-success hover:bg-success-active'
+                                                                }`}
+                                                            >
+                                                                {currentCustomer.isLate ? 'Layani' : 'Selesai'}
+                                                            </button>
+                                                        )}
                                                     </div>
                                                 </div>
-                                            ))}
-                                            {queue.length <= 1 && (
-                                                <div className="py-2 text-sm text-center text-gray-400">
-                                                    Tidak ada antrian berikutnya
+
+                                                {/* ANTRIAN BERIKUTNYA */}
+                                                <div className="pt-4 mt-4 border-t border-gray-100">
+                                                    <h4 className="mb-3 text-xs font-bold text-gray-400 uppercase">Berikutnya</h4>
+                                                    <div className="space-y-3">
+                                                        {nextCustomers.map((booking, i) => (
+                                                            <div
+                                                                key={booking.id}
+                                                                className={`flex items-center justify-between p-3 rounded-lg transition-all ${booking.isLate ? 'bg-red-50 border border-red-200' : 'bg-gray-50'}`}
+                                                            >
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className={`flex items-center justify-center w-8 h-8 text-xs font-bold rounded-full ${booking.isLate ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-500'}`}>
+                                                                        {i + 2}
+                                                                    </div>
+                                                                    <div>
+                                                                        <div className="text-sm font-bold text-gray-900">{booking.customer_name}</div>
+                                                                        <div className="text-xs text-gray-500">{booking.service_name}</div>
+                                                                        {booking.isLate && (
+                                                                            <div className="text-xs font-bold text-red-600">Telat {booking.lateBy} menit</div>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                                <div className={`px-3 py-1.5 text-xs font-bold rounded-full ${booking.isLate ? 'bg-red-600 text-white' : 'bg-white border border-gray-200 text-gray-600'}`}>
+                                                                    {booking.time_only}
+                                                                </div>
+                                                            </div>
+                                                        ))}
+                                                        {nextCustomers.length === 0 && (
+                                                            <div className="py-3 text-sm text-center text-gray-400">
+                                                                Tidak ada antrian berikutnya
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
+                                            </>
+                                        );
+                                    })()}
                                 </>
                             ) : (
-                                <div className="py-8 text-center">
-                                    <div className="inline-flex items-center justify-center w-12 h-12 mb-3 bg-gray-100 rounded-full">
-                                        <CalendarIcon className="w-6 h-6 text-gray-400" />
+                                <div className="py-12 text-center">
+                                    <div className="flex items-center justify-center w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full">
+                                        <CalendarIcon className="w-8 h-8 text-gray-400" />
                                     </div>
-                                    <p className="text-gray-500">Tidak ada antrian pada tanggal ini</p>
+                                    <p className="font-medium text-gray-500">Tidak ada antrian hari ini</p>
                                 </div>
                             )}
                         </div>
