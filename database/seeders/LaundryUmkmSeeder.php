@@ -12,7 +12,7 @@ class LaundryUmkmSeeder extends Seeder
     public function run(): void
     {
         // Check if user already exists
-        $existingUser = DB::table('users')->where('email', 'washstudios@example.com')->first();
+        $existingUser = DB::table('users')->where('email', 'washstudios@gmail.com')->first();
         
         if ($existingUser) {
             $userId = $existingUser->id;
@@ -21,7 +21,7 @@ class LaundryUmkmSeeder extends Seeder
             // Create user for the UMKM owner
             $userId = DB::table('users')->insertGetId([
                 'name' => 'Wash Studios Owner',
-                'email' => 'washstudios@example.com',
+                'email' => 'washstudios@gmail.com',
                 'password' => Hash::make('password123'),
                 'created_at' => now(),
                 'updated_at' => now(),
@@ -32,6 +32,7 @@ class LaundryUmkmSeeder extends Seeder
         $umkmId = DB::table('umkms')->insertGetId([
             'user_id' => $userId,
             'name' => 'Wash Studios Laundry',
+            'subdomain' => 'washstudios',
             'phone' => '021-12345678',
             'address' => 'RUKO SERPONG GRAND PARK BLOK A1 NO. 5, Muncul, Kec. Setu, Kota Tangerang Selatan, Banten 15314',
             'category' => 'Laundry',
