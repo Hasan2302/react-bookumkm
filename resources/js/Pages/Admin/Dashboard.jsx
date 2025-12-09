@@ -144,32 +144,32 @@ export default function Dashboard() {
         <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
 
           {/* PAGE HEADER */}
-          <div className="flex flex-col gap-6 mb-8 sm:flex-row sm:items-end sm:justify-between">
+          <div className="flex flex-col gap-4 mb-6 sm:gap-6 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Overview</h1>
-              <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+              <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl dark:text-white">Overview</h1>
+              <p className="mt-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">
                 Snapshot performa UMKM dalam {filter.startDate ? 'periode terpilih' : '30 hari terakhir'}
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 sm:gap-3">
               <button
                 onClick={() => setShowFilter(true)}
-                className="inline-flex items-center gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-4 py-2.5 text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
+                className="inline-flex items-center gap-1.5 sm:gap-2 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 sm:px-4 py-2 sm:py-2.5 text-xs sm:text-sm font-medium hover:bg-gray-50 dark:hover:bg-gray-700 transition"
               >
-                <Filter className="w-4 h-4" />
+                <Filter className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                 Filter
               </button>
             </div>
           </div>
 
           {/* KPI CARDS */}
-          <section className="grid grid-cols-1 gap-4 mb-8 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="grid grid-cols-2 gap-2 mb-6 sm:gap-3 lg:gap-4 sm:mb-8 lg:grid-cols-4">
             {loading ? (
               Array(4).fill().map((_, i) => (
-                <div key={i} className="p-6 bg-white border rounded-xl dark:bg-gray-800 animate-pulse">
-                  <div className="w-24 h-4 mb-4 bg-gray-200 rounded dark:bg-gray-700"></div>
-                  <div className="w-32 h-8 bg-gray-300 rounded dark:bg-gray-600"></div>
+                <div key={i} className="p-3 sm:p-4 lg:p-6 bg-white border rounded-xl dark:bg-gray-800 animate-pulse">
+                  <div className="w-16 h-3 mb-3 bg-gray-200 rounded sm:w-24 sm:h-4 sm:mb-4 dark:bg-gray-700"></div>
+                  <div className="w-20 h-6 bg-gray-300 rounded sm:w-32 sm:h-8 dark:bg-gray-600"></div>
                 </div>
               ))
             ) : (
@@ -183,19 +183,19 @@ export default function Dashboard() {
           </section>
 
           {/* CHART + SEARCH */}
-          <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <section className="grid grid-cols-1 gap-4 sm:gap-6 lg:grid-cols-3">
             {/* CHART DENGAN TAB SWITCHER */}
-            <div className="p-6 bg-white border lg:col-span-2 rounded-xl dark:bg-gray-800">
-                <div className="flex flex-col gap-4 mb-6 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="font-semibold text-gray-900 dark:text-white">Pertumbuhan UMKM & Revenue</p>
+            <div className="p-3 bg-white border sm:p-4 lg:p-6 lg:col-span-2 rounded-xl dark:bg-gray-800">
+                <div className="flex flex-col gap-3 mb-4 sm:gap-4 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm font-semibold text-gray-900 sm:text-base dark:text-white">Pertumbuhan UMKM & Revenue</p>
 
                     {/* TAB BUTTON GROUP */}
-                    <div className="inline-flex p-1 border border-gray-300 rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                    <div className="inline-flex p-0.5 sm:p-1 border border-gray-300 rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-900 overflow-x-auto">
                     {['line', 'bar', 'pie', 'area'].map((type) => (
                         <button
                         key={type}
                         onClick={() => setChartType(type)}
-                        className={`px-4 py-2 text-xs font-medium rounded-md transition-all capitalize
+                        className={`px-2.5 sm:px-4 py-1.5 sm:py-2 text-[10px] sm:text-xs font-medium rounded-md transition-all capitalize whitespace-nowrap
                             ${chartType === type
                             ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                             : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -207,23 +207,33 @@ export default function Dashboard() {
                     </div>
                 </div>
 
-                <ResponsiveContainer width="100%" height={380}>
+                <ResponsiveContainer width="100%" height={window.innerWidth < 640 ? 250 : 380}>
                     {chartType === 'line' && (
-                    <LineChart data={chartData}>
+                    <LineChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
-                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
-                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} tick={{ fontSize: 11 }} />
+                        <YAxis 
+                            stroke={isDark ? '#9ca3af' : '#6b7280'} 
+                            width={45}
+                            tick={{ fontSize: 10 }}
+                            tickFormatter={(value) => value >= 1000000 ? `${(value / 1000000).toFixed(0)}jt` : value >= 1000 ? `${(value / 1000).toFixed(0)}rb` : value}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
-                        <Line type="monotone" dataKey="umkm" stroke="#8b5cf6" strokeWidth={3} name="UMKM Baru" dot={{ r: 5 }} />
-                        <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} name="Revenue (Rp)" dot={{ r: 5 }} />
+                        <Line type="monotone" dataKey="umkm" stroke="#8b5cf6" strokeWidth={3} name="UMKM Baru" dot={{ r: 4 }} />
+                        <Line type="monotone" dataKey="revenue" stroke="#10b981" strokeWidth={3} name="Revenue (Rp)" dot={{ r: 4 }} />
                     </LineChart>
                     )}
 
                     {chartType === 'bar' && (
-                    <BarChart data={chartData}>
+                    <BarChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
-                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
-                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} tick={{ fontSize: 11 }} />
+                        <YAxis 
+                            stroke={isDark ? '#9ca3af' : '#6b7280'} 
+                            width={45}
+                            tick={{ fontSize: 10 }}
+                            tickFormatter={(value) => value >= 1000000 ? `${(value / 1000000).toFixed(0)}jt` : value >= 1000 ? `${(value / 1000).toFixed(0)}rb` : value}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
                         <Bar dataKey="umkm" fill="#8b5cf6" radius={[8, 8, 0, 0]} name="UMKM Baru" />
                         <Bar dataKey="revenue" fill="#10b981" radius={[8, 8, 0, 0]} name="Revenue" />
@@ -251,10 +261,15 @@ export default function Dashboard() {
                     )}
 
                     {chartType === 'area' && (
-                    <AreaChart data={chartData}>
+                    <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                         <CartesianGrid strokeDasharray="3 3" stroke={isDark ? '#374151' : '#e5e7eb'} />
-                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} />
-                        <YAxis stroke={isDark ? '#9ca3af' : '#6b7280'} />
+                        <XAxis dataKey="name" stroke={isDark ? '#9ca3af' : '#6b7280'} tick={{ fontSize: 11 }} />
+                        <YAxis 
+                            stroke={isDark ? '#9ca3af' : '#6b7280'} 
+                            width={45}
+                            tick={{ fontSize: 10 }}
+                            tickFormatter={(value) => value >= 1000000 ? `${(value / 1000000).toFixed(0)}jt` : value >= 1000 ? `${(value / 1000).toFixed(0)}rb` : value}
+                        />
                         <Tooltip contentStyle={tooltipStyle} />
                         <Area type="monotone" dataKey="umkm" stackId="1" stroke="#8b5cf6" fill="#8b5cf6" fillOpacity={0.6} name="UMKM Baru" />
                         <Area type="monotone" dataKey="revenue" stackId="1" stroke="#10b981" fill="#10b981" fillOpacity={0.6} name="Revenue" />
@@ -264,8 +279,8 @@ export default function Dashboard() {
             </div>
 
             {/* SEARCH CARD */}
-            <div className="p-6 bg-white border rounded-xl dark:bg-gray-800">
-              <p className="mb-4 font-semibold text-gray-900 dark:text-white">Cari UMKM</p>
+            <div className="p-3 bg-white border sm:p-4 lg:p-6 rounded-xl dark:bg-gray-800">
+              <p className="mb-3 text-sm font-semibold text-gray-900 sm:mb-4 sm:text-base dark:text-white">Cari UMKM</p>
               <div className="relative" ref={dropdownRef}>
                 <div className="relative">
                   <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
@@ -313,7 +328,7 @@ export default function Dashboard() {
               animate={{ x: 0 }}
               exit={{ x: '100%' }}
               transition={{ type: "spring", damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 z-50 h-full p-8 overflow-y-auto bg-white border-l border-gray-200 shadow-2xl w-96 dark:bg-gray-900 dark:border-gray-800"
+              className="fixed top-0 right-0 z-50 h-full w-[85vw] sm:w-96 p-4 sm:p-6 lg:p-8 overflow-y-auto bg-white border-l border-gray-200 shadow-2xl dark:bg-gray-900 dark:border-gray-800"
             >
               <div className="flex items-center justify-between mb-8">
                 <h2 className="text-2xl font-bold">Filter</h2>
@@ -360,14 +375,14 @@ export default function Dashboard() {
 // KPI Card Component
 function KPICard({ title, value, icon: Icon, change, positive = true }) {
   return (
-    <div className="p-6 bg-white border shadow-sm rounded-xl dark:bg-gray-800">
+    <div className="p-3 bg-white border shadow-sm sm:p-4 lg:p-6 rounded-xl dark:bg-gray-800">
       <div className="flex items-center justify-between">
-        <p className="text-sm text-gray-600 dark:text-gray-400">{title}</p>
-        <Icon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
+        <p className="text-[10px] sm:text-xs lg:text-sm text-gray-600 dark:text-gray-400">{title}</p>
+        <Icon className="w-4 h-4 text-gray-500 sm:w-5 sm:h-5 dark:text-gray-400" />
       </div>
-      <p className="mt-3 text-3xl font-bold text-gray-900 dark:text-white">{value}</p>
+      <p className="mt-2 text-lg font-bold text-gray-900 sm:mt-3 sm:text-2xl lg:text-3xl dark:text-white">{value}</p>
       {change && (
-        <p className={`mt-2 text-sm font-medium ${positive ? 'text-green-600' : 'text-red-600'}`}>
+        <p className={`mt-1 sm:mt-2 text-[10px] sm:text-xs lg:text-sm font-medium ${positive ? 'text-green-600' : 'text-red-600'}`}>
           {positive ? 'Up' : 'Down'} {change}
         </p>
       )}

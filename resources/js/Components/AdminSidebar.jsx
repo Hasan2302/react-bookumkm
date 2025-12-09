@@ -157,7 +157,7 @@ export default function AdminSidebar() {
       {isMobile && !mobileOpen && (
         <button
           onClick={() => setMobileOpen(true)}
-          className="fixed z-50 p-3 bg-white border shadow-lg top-4 left-4 dark:bg-gray-800 border-primary-500/50 dark:border-gray-700 rounded-2xl"
+          className="fixed z-50 p-3 bg-white border shadow-lg top-4 right-4 dark:bg-gray-800 border-primary-500/50 dark:border-gray-700 rounded-2xl"
         >
           <Menu className="w-6 h-6" />
         </button>

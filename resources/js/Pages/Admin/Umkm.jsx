@@ -178,39 +178,37 @@ export default function Umkm() {
       <main style={{ marginLeft: window.innerWidth < 1024 ? 0 : collapsed ? '80px' : '320px' }} className="min-h-screen transition-all duration-500">
         <div className="px-4 py-8 mx-auto max-w-7xl sm:px-6 lg:px-8">
             {/* HEADER */}
-            <div className="flex flex-col gap-6 mb-8 sm:flex-row sm:items-end sm:justify-between">
+            <div className="flex flex-col gap-4 mb-6 sm:gap-6 sm:mb-8 sm:flex-row sm:items-end sm:justify-between">
                 <div>
-                <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Manajemen UMKM</h1>
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">Total {umkms.length} UMKM terdaftar • Revenue bulan ini</p>
+                <h1 className="text-xl font-bold text-gray-900 sm:text-2xl lg:text-3xl dark:text-white">Manajemen UMKM</h1>
+                <p className="mt-1 text-xs text-gray-600 sm:text-sm dark:text-gray-400">Total {umkms.length} UMKM terdaftar</p>
                 </div>
             </div>
-            <div className='p-6 bg-white border lg:col-span-2 rounded-xl dark:bg-gray-800'>
+            <div className='p-3 bg-white border sm:p-4 lg:p-6 lg:col-span-2 rounded-xl dark:bg-gray-800'>
 
-                <div className='flex flex-col mb-4 card-header sm:flex-row sm:items-center sm:justify-between'>
-                    <div className="flex items-center gap-3 pb-4 float-end">
-                        <div className="relative">
-                        </div>
-                        <button onClick={openCreateModal} className="inline-flex items-center gap-2 px-5 py-3 text-sm font-bold text-white rounded-lg bg-primary-500 dark:bg-white dark:text-black hover:opacity-90">
-                        <Plus className="w-5 h-5" /> Tambah UMKM
+                <div className='flex flex-col gap-3 mb-4 card-header sm:flex-row sm:items-center sm:justify-between'>
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        <button onClick={openCreateModal} className="inline-flex items-center gap-1.5 sm:gap-2 px-3 sm:px-5 py-2 sm:py-3 text-xs sm:text-sm font-bold text-white rounded-lg bg-primary-500 dark:bg-white dark:text-black hover:opacity-90">
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" /> <span className="hidden sm:inline">Tambah</span> UMKM
                         </button>
                     </div>
-                    <div className="flex items-center gap-3 pb-4">
-                        <div className="relative">
-                        <Search className="absolute w-5 h-5 text-gray-400 -translate-y-1/2 left-3 top-1/2" />
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                        <div className="relative flex-1 min-w-0 sm:flex-none">
+                        <Search className="absolute w-4 h-4 text-gray-400 -translate-y-1/2 sm:w-5 sm:h-5 left-3 top-1/2" />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Cari nama UMKM..."
-                            className="py-3 pl-10 pr-4 bg-white border border-gray-300 rounded-lg w-80 dark:border-gray-700 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
+                            placeholder="Cari UMKM..."
+                            className="w-full py-2 pl-9 pr-3 text-sm bg-white border border-gray-300 rounded-lg sm:py-3 sm:pl-10 sm:pr-4 sm:w-60 lg:w-80 dark:border-gray-700 dark:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
                         />
                         </div>
-                        <div className="inline-flex p-1 border border-gray-300 rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
+                        <div className="inline-flex p-0.5 sm:p-1 border border-gray-300 rounded-lg dark:border-gray-700 bg-gray-50 dark:bg-gray-900">
                         {['table', 'grid'].map((mode) => (
                             <button
                             key={mode}
                             onClick={() => setViewMode(mode)}
-                            className={`px-5 py-2.5 text-sm font-medium rounded-md transition-all capitalize
+                            className={`px-3 sm:px-5 py-2 sm:py-2.5 text-xs sm:text-sm font-medium rounded-md transition-all capitalize
                                 ${viewMode === mode
                                 ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm'
                                 : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'
@@ -225,14 +223,14 @@ export default function Umkm() {
 
                 {/* LOADING SKELETON */}
                 {loading ? (
-                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {Array(6).fill().map((_, i) => (
-                        <div key={i} className="p-6 bg-white border shadow-sm rounded-xl dark:bg-gray-800 animate-pulse">
-                        <div className="flex items-center gap-4">
-                            <div className="w-16 h-16 bg-gray-300 rounded-xl dark:bg-gray-700" />
+                        <div key={i} className="p-4 bg-white border shadow-sm sm:p-6 rounded-xl dark:bg-gray-800 animate-pulse">
+                        <div className="flex items-center gap-3 sm:gap-4">
+                            <div className="w-12 h-12 bg-gray-300 sm:w-16 sm:h-16 rounded-xl dark:bg-gray-700" />
                             <div>
-                            <div className="w-32 h-4 bg-gray-300 rounded dark:bg-gray-700" />
-                            <div className="w-24 h-3 mt-2 bg-gray-200 rounded dark:bg-gray-600" />
+                            <div className="w-24 h-3 bg-gray-300 rounded sm:w-32 sm:h-4 dark:bg-gray-700" />
+                            <div className="w-16 h-2 mt-2 bg-gray-200 rounded sm:w-24 sm:h-3 dark:bg-gray-600" />
                             </div>
                         </div>
                         </div>
@@ -245,13 +243,12 @@ export default function Umkm() {
                     </div>
                 ) : (
                     <>
-                        {/* GRID VIEW — DENGAN NOMOR URUT & PAGINATION */}
                         {viewMode === 'grid' && (
                         <>
                             <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
-                            className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
+                            className="grid grid-cols-1 gap-3 sm:gap-4 lg:gap-6 sm:grid-cols-2 lg:grid-cols-3"
                             >
                             {paginatedUmkms.map((umkm, index) => {
                                 const globalIndex = (currentPage - 1) * itemsPerPage + index;
@@ -351,8 +348,8 @@ export default function Umkm() {
 
                         {/* TABLE VIEW — SUDAH SAMA PAGINATION & URUTAN */}
                         {viewMode === 'table' && (
-                        <div className="overflow-hidden bg-white border rounded-xl dark:bg-gray-800">
-                            <table className="w-full text-sm">
+                        <div className="overflow-x-auto bg-white border rounded-xl dark:bg-gray-800">
+                            <table className="w-full text-sm min-w-[600px]">
                             <thead className="bg-gray-50 dark:bg-gray-900">
                                 <tr>
                                 <th className="w-20 px-6 py-4 text-xs font-medium tracking-wider text-left text-gray-500 uppercase">No</th>
@@ -418,18 +415,17 @@ export default function Umkm() {
                     </>
                 )}
 
-                {/* MODAL CRUD */}
                 <AnimatePresence>
                     {showModal && (
                     <>
                         <motion.div key={`backdrop-${modalKey}`} initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowModal(false)} className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm" />
-                        <motion.div key={`modal-${modalKey}`} initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-                        <div className="w-full max-w-4xl bg-white shadow-2xl rounded-2xl dark:bg-gray-900">
-                            <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
-                            <h2 className="text-2xl font-bold">{modalMode === 'create' ? 'Tambah UMKM Baru' : 'Edit UMKM'}</h2>
-                            <button onClick={() => setShowModal(false)} className="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"><X className="w-6 h-6" /></button>
+                        <motion.div key={`modal-${modalKey}`} initial={{ scale: 0.9 }} animate={{ scale: 1 }} className="fixed inset-0 z-50 flex items-start justify-center p-3 overflow-y-auto sm:p-4 sm:items-center">
+                        <div className="w-full max-w-4xl my-4 bg-white shadow-2xl sm:my-0 rounded-xl sm:rounded-2xl dark:bg-gray-900">
+                            <div className="flex items-center justify-between p-4 border-b border-gray-200 sm:p-6 dark:border-gray-800">
+                            <h2 className="text-lg font-bold sm:text-xl lg:text-2xl">{modalMode === 'create' ? 'Tambah UMKM Baru' : 'Edit UMKM'}</h2>
+                            <button onClick={() => setShowModal(false)} className="p-1.5 sm:p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"><X className="w-5 h-5 sm:w-6 sm:h-6" /></button>
                             </div>
-                            <form onSubmit={handleSubmit} className="p-6 space-y-6">
+                            <form onSubmit={handleSubmit} className="p-4 space-y-4 sm:p-6 sm:space-y-6">
                             <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
                                 <div>
                                 <label className="block mb-2 text-sm font-medium">Nama UMKM *</label>
